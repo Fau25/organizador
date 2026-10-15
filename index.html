@@ -295,6 +295,11 @@ nav svg{width:20px;height:20px}
 .dgroup.today .dh h4{font-weight:300!important;color:#111}
 .topr{margin-left:auto}
 @media (max-height:700px){.dots button{width:46px!important;height:46px!important}.dots{padding-top:10px!important}}
+
+/* v9: sin número del día */
+#v-hoy .home-top{display:flow-root}
+#v-hoy .top{float:right;margin:2px 0 4px 12px;display:block}
+#v-hoy .brief{margin-top:0!important}
 </style>
 </head>
 <body>
@@ -304,7 +309,7 @@ nav svg{width:20px;height:20px}
   <section class="view on" id="v-hoy">
     <div class="home-top">
       <div class="top">
-        <div class="daynum"><span id="dNum">09</span><i></i></div>
+        <span id="dNum" hidden></span>
         <div class="topr"><div><span id="dMon" hidden></span><span id="dDay" hidden></span><div class="sync" id="syncInd" hidden><i></i><span></span></div></div><button class="tset" data-go="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button></div>
       </div>
       <p class="brief" id="brief"></p>
@@ -533,27 +538,40 @@ const IC={
 };
 const plural=(n,a,b)=>`${n} ${n===1?a:b}`;
 function briefText(tt,late,evToday,bdToday){
-  const hr=new Date().getHours();
+  const now=new Date(),hr=now.getHours(),nowM=hr*60+now.getMinutes();
   const sal=hr<13?"Buenos días":hr<20?"Buenas tardes":"Buenas noches";
   const face=db.photo?`<img src="${db.photo}" alt="">`:esc((db.name||"?")[0].toUpperCase());
   const who=`, <button class="av" data-photo aria-label="Cambiar foto">${face}</button>${db.name?`<b>${esc(db.name)}</b>`:""}`;
+  // de 00:00 a 15:59 se resume HOY; de 16:00 a 23:59 se resume MAÑANA
+  const tom=hr>=16;
+  let tasks=tt,evs=evToday,bds=bdToday;
+  if(tom){
+    const m=new Date(today);m.setDate(m.getDate()+1);const k=iso(m);
+    tasks=db.tasks.filter(x=>x.d===k);
+    evs=db.events.filter(e=>e.d===k);
+    bds=db.bdays.filter(b=>nextBday(b.d).days===1);
+  }
+  const when=tom?"mañana":"hoy";
   const parts=[];
-  const pend=tt.filter(x=>!x.done).length;
+  const pend=tasks.filter(x=>!x.done).length;
   if(pend)parts.push(`<b><span class="ic">${IC.task}</span>${plural(pend,"tarea","tareas")}</b>`);
-  if(evToday.length)parts.push(`<b><span class="ic">${IC.cal}</span>${plural(evToday.length,"evento","eventos")}</b>`);
-  if(bdToday.length)parts.push(`<b><span class="ic">${IC.cake}</span>${plural(bdToday.length,"cumpleaños","cumpleaños")}</b>`);
+  if(evs.length)parts.push(`<b><span class="ic">${IC.cal}</span>${plural(evs.length,"evento","eventos")}</b>`);
+  if(bds.length)parts.push(`<b><span class="ic">${IC.cake}</span>${plural(bds.length,"cumpleaños","cumpleaños")}</b>`);
   let s=`${sal}${who}.<br>`;
   if(parts.length){
     const list=parts.length>1?parts.slice(0,-1).join(", ")+" y "+parts[parts.length-1]:parts[0];
-    s+=`Tienes ${list} hoy.`;
-  }else s+=`No tienes nada pendiente hoy.`;
-  // ¿cuándo quedas libre?
-  const timed=evToday.filter(e=>e.h).map(e=>{const[H,M]=e.h.split(":").map(Number);return H*60+M+60});
-  const nowM=new Date().getHours()*60+new Date().getMinutes();
-  if(timed.length){
-    const end=Math.max(...timed);
-    s+= end>nowM?` Estás <b>libre</b> a partir de las <b>${pad(Math.floor(end/60)%24)}:${pad(end%60)}</b>.`:` Ya estás <b>libre</b> el resto del día.`;
-  }else if(!pend)s+=` Día <b>libre</b> por delante.`;
+    s+=tom?`Mañana tienes ${list}.`:`Tienes ${list} hoy.`;
+  }else s+=`No tienes nada pendiente ${when}.`;
+  const mins=evs.filter(e=>e.h).map(e=>{const[H,M]=e.h.split(":").map(Number);return H*60+M});
+  if(tom){
+    if(mins.length){const f=Math.min(...mins);s+=` Lo primero, a las <b>${pad(Math.floor(f/60))}:${pad(f%60)}</b>.`}
+    else if(!parts.length)s+=` Día <b>libre</b> por delante.`;
+  }else{
+    if(mins.length){
+      const end=Math.max(...mins)+60;
+      s+= end>nowM?` Estás <b>libre</b> a partir de las <b>${pad(Math.floor(end/60)%24)}:${pad(end%60)}</b>.`:` Ya estás <b>libre</b> el resto del día.`;
+    }else if(!pend)s+=` Día <b>libre</b> por delante.`;
+  }
   if(late.length)s+=` Te ${late.length===1?"queda":"quedan"} <b>${plural(late.length,"atrasada","atrasadas")}</b>.`;
   return s;
 }
