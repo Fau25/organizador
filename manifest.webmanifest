@@ -1,0 +1,17 @@
+{
+  "name": "Mi Día",
+  "short_name": "Mi Día",
+  "description": "Tareas, cumpleaños, eventos y listas, conectado con Google Calendar.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ececee",
+  "theme_color": "#ececee",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
