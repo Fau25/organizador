@@ -351,6 +351,21 @@ body.light{background:#f5f5f6!important}
 .card2 .addbtn{background:#111}
 @media (max-height:700px){.c2h b{font-size:28px!important}.c2nav button{width:30px!important;height:30px!important}.track{padding-top:14px!important}}
 @media (max-width:370px){.c2h b{font-size:28px!important}.c2nav{gap:3px}.c2nav button{width:30px!important;height:30px!important}}
+
+/* ================= v11: filas tipo lista limpia ================= */
+.prow2{display:flex;align-items:center;gap:14px;padding:9px 2px;min-width:0;transition:opacity .35s,transform .35s,max-height .35s;max-height:240px}
+.prow2 .pt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.prow2 b{font-size:15.5px;font-weight:600;letter-spacing:-.2px;line-height:1.3;word-break:break-word}
+.prow2 small{font-size:12.5px;font-weight:400;opacity:.62;line-height:1.3}
+.pchk{flex:none;width:28px;height:28px;border-radius:50%;border:1.6px solid color-mix(in srgb,currentColor 55%,transparent);display:grid;place-items:center;transition:background .2s,border-color .2s,transform .15s}
+.pchk::after{content:"";width:6px;height:11px;border:solid transparent;border-width:0 2.2px 2.2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.pchk:active{transform:scale(.9)}
+.prow2.checking .pchk{background:#111;border-color:#111}
+.prow2.checking .pchk::after{border-color:#fff}
+.prow2.checking{opacity:0;transform:translateX(24px)}
+.dgroup .prow2:first-of-type{margin-top:2px}
+.toast button{margin-left:10px;font-weight:600;text-decoration:underline;color:inherit}
+.toast{display:flex;align-items:center}
 </style>
 </head>
 <body>
@@ -455,7 +470,8 @@ let db;
 try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!db)db={name:"",tasks:[],bdays:[],events:[],lists:[]};
 db.cfg=db.cfg||{url:"",key:""};
-db.lists=db.lists||[];
+db.lists=(db.lists||[]).filter(x=>!x.done);
+db.tasks=(db.tasks||[]).filter(x=>!x.done);
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
 const linked=()=>!!(db.cfg.url&&db.cfg.key);
 
@@ -672,50 +688,45 @@ function renderHoy(){
 
   const build=k=>{
     let chip="", rows="";
+    // fila: título + subtítulo pequeño y botón redondo de completar a la derecha
+    const R=(kind,id,title,sub="")=>`<div class="prow2" data-row="${kind}:${id}"><div class="pt"><b>${esc(title)}</b>${sub?`<small>${sub}</small>`:""}</div><button class="pchk" data-done="${kind}:${id}" aria-label="Completar"></button></div>`;
+    const fd=d=>`${d.getDate()} ${MESES[d.getMonth()]}`;
     if(k==="tareas"){
-      const done=tt.filter(x=>x.done).length;
-      chip=tt.length?`${done} de ${tt.length} hechas hoy`:"";
-      const row=x=>`<div class="prow ${x.done?"done":""}"><button class="pbx" data-tog="${x.id}" aria-label="Marcar"></button><span class="t">${esc(x.t)}</span><button class="px" data-del="${x.id}" aria-label="Borrar">×</button></div>`;
-      const sortT=a=>a.filter(x=>!x.done).concat(a.filter(x=>x.done));
-      const group=(cls,title,sub,key,items,emptyMsg)=>`<div class="dgroup ${cls} ${key===targetDay&&key!==t?"target":""}">
+      const open=x=>!x.done;
+      const group=(cls,title,sub,key,items,emptyMsg,subFn)=>`<div class="dgroup ${cls} ${key===targetDay&&key!==t?"target":""}">
         <button class="dh" ${key?`data-day="${key}"`:""}><h4>${title}</h4><span>${sub}</span></button>
-        ${items.length?items.map(row).join(""):emptyMsg?`<p class="dempty">${emptyMsg}</p>`:""}</div>`;
-      if(late.length)rows+=group("late","Atrasadas",`${late.length}`,"",late,"");
-      rows+=group("today","Hoy",`${DIAS[today.getDay()]} ${today.getDate()} ${MESES[today.getMonth()]}`,t,sortT(tt),"Nada pendiente hoy 🙌");
+        ${items.length?items.map(x=>R("t",x.id,x.t,subFn?subFn(x):"")).join(""):emptyMsg?`<p class="dempty">${emptyMsg}</p>`:""}</div>`;
+      if(late.length)rows+=group("late","Atrasadas",`${late.length}`,"",late,"",x=>`Era para el ${DIAS[parse(x.d).getDay()].toLowerCase()} ${fd(parse(x.d))}`);
+      rows+=group("today","Hoy",`${DIAS[today.getDay()]} ${fd(today)}`,t,tt.filter(open),"Nada pendiente hoy 🙌");
       for(let n=1;n<=5;n++){
         const d=new Date(today);d.setDate(d.getDate()+n);const kk=iso(d);
-        const items=sortT(db.tasks.filter(x=>x.d===kk)), pend=items.filter(x=>!x.done).length;
-        const open=openDays.has(kk);
-        rows+=`<div class="dgroup fold ${open?"open":""} ${kk===targetDay?"target":""}">
-          <button class="dh" data-day="${kk}"><h4>${n===1?"Mañana":DIAS[d.getDay()]}</h4><span>${pend?`<b class="dcount">${pend}</b>`:""}${d.getDate()} ${MESES[d.getMonth()]}<i class="chev"></i></span></button>
-          ${open?(items.length?items.map(row).join(""):`<p class="dempty">Sin tareas. Escribe abajo para añadir.</p>`):""}</div>`;
+        const items=db.tasks.filter(x=>x.d===kk&&open(x));
+        const isOpen=openDays.has(kk);
+        rows+=`<div class="dgroup fold ${isOpen?"open":""} ${kk===targetDay?"target":""}">
+          <button class="dh" data-day="${kk}"><h4>${n===1?"Mañana":DIAS[d.getDay()]}</h4><span>${items.length?`<b class="dcount">${items.length}</b>`:""}${fd(d)}<i class="chev"></i></span></button>
+          ${isOpen?(items.length?items.map(x=>R("t",x.id,x.t)).join(""):`<p class="dempty">Sin tareas. Escribe abajo para añadir.</p>`):""}</div>`;
       }
       const lim=new Date(today);lim.setDate(lim.getDate()+5);
-      const later=db.tasks.filter(x=>x.d>iso(lim)).sort((a,b)=>a.d.localeCompare(b.d));
+      const later=db.tasks.filter(x=>x.d>iso(lim)&&open(x)).sort((a,b)=>a.d.localeCompare(b.d));
       if(later.length||targetDay>iso(lim)){
-        const open=openDays.has("later"), lp=later.filter(x=>!x.done).length;
-        rows+=`<div class="dgroup fold ${open?"open":""} ${targetDay>iso(lim)?"target":""}">
-          <button class="dh" data-day="later"><h4>Más adelante</h4><span>${lp?`<b class="dcount">${lp}</b>`:""}<i class="chev"></i></span></button>
-          ${open?later.map(x=>row(x).replace('<span class="t">',`<span class="t"><span class="ldate">${parse(x.d).getDate()} ${MESES[parse(x.d).getMonth()]}</span> `)).join("")||`<p class="dempty">Elige el día en la etiqueta de abajo</p>`:""}</div>`;
+        const isOpen=openDays.has("later");
+        rows+=`<div class="dgroup fold ${isOpen?"open":""} ${targetDay>iso(lim)?"target":""}">
+          <button class="dh" data-day="later"><h4>Más adelante</h4><span>${later.length?`<b class="dcount">${later.length}</b>`:""}<i class="chev"></i></span></button>
+          ${isOpen?later.map(x=>R("t",x.id,x.t,`${DIAS[parse(x.d).getDay()]} ${fd(parse(x.d))}`)).join("")||`<p class="dempty">Elige el día en la etiqueta de abajo</p>`:""}</div>`;
       }
     }
     if(k==="cumple"){
-      chip=bdToday.length?`🎂 hoy: ${bdToday.map(b=>esc(b.t)).join(" y ")}`:(bds.length?`${bds.length} en total`:"");
-      rows=bds.slice(0,30).map(b=>`<div class="prow"><span class="pdot">🎂</span><span class="t">${esc(b.t)}${b.age?` <span style="color:#8e8e93">· ${b.age}</span>`:""}</span><span class="meta">${b.days<=6?inDays(b.days):`${b.date.getDate()} ${MESES[b.date.getMonth()]}`}</span><button class="px" data-delb="${b.id}" aria-label="Borrar">×</button></div>`).join("")
+      rows=bds.slice(0,30).map(b=>R("b",b.id,b.t,[b.age?`Cumple ${b.age}`:"",fd(b.date),b.days<=6?inDays(b.days):""].filter(Boolean).join(" · "))).join("")
         ||`<p class="pempty">Aún no hay cumpleaños. Escribe un nombre abajo.</p>`;
     }
     if(k==="eventos"){
-      chip=evToday.length?`${evToday.length} hoy`:(evs.length?`${evs.length} próximos`:"");
       rows=evs.slice(0,30).map(e=>{const d=parse(e.d),n=Math.round((d-today)/864e5);
-        return `<div class="prow"><span class="pdot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18"/></svg></span><span class="t">${esc(e.t)}</span><span class="meta">${n<=6?inDays(n):`${d.getDate()} ${MESES[d.getMonth()]}`}${e.h?" · "+e.h:""}</span><button class="px" data-dele="${e.id}" aria-label="Borrar">×</button></div>`}).join("")
+        return R("e",e.id,e.t,[n<=1?inDays(n):`${DIAS[d.getDay()]} ${fd(d)}`,e.h||"Todo el día",n>1&&n<=6?inDays(n):""].filter(Boolean).join(" · "))}).join("")
         ||`<p class="pempty">Nada a la vista. Escribe abajo para añadir uno.</p>`;
     }
     if(k==="listas"){
-      const l=db.lists.filter(x=>!x.done).concat(db.lists.filter(x=>x.done));
-      const nd=db.lists.filter(x=>x.done).length; chip=db.lists.length?`${nd} de ${db.lists.length} tachadas`:"";
-      rows=l.map(x=>`<div class="prow ${x.done?"done":""}"><button class="pbx" data-ltog="${x.id}" aria-label="Marcar"></button><span class="t">${esc(x.t)}</span><button class="px" data-ldel="${x.id}" aria-label="Borrar">×</button></div>`).join("")
+      rows=db.lists.filter(x=>!x.done).map(x=>R("l",x.id,x.t)).join("")
         ||`<p class="pempty">Cosas sin fecha: la compra, ideas, pendientes… Escribe abajo.</p>`;
-      if(nd)rows+=`<button class="pempty" data-lclear style="text-decoration:underline;margin-top:10px">Quitar las tachadas</button>`;
     }
     return {chip,rows};
   };
@@ -804,7 +815,8 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;const ds=b.dataset;
   if(ds.go)go(ds.go);
   if(ds.open){openDay=openDay===ds.open?"":ds.open;renderSemana()}
-  if(ds.tog){const x=db.tasks.find(t=>t.id===ds.tog);x.done=!x.done;render()}
+  if(ds.done)completeItem(ds.done,b.closest(".prow2"));
+  if("undo" in ds)undoLast();
   if(ds.del){db.tasks=db.tasks.filter(t=>t.id!==ds.del);render()}
   if(ds.ltog){const x=db.lists.find(t=>t.id===ds.ltog);x.done=!x.done;render()}
   if(ds.ldel){db.lists=db.lists.filter(t=>t.id!==ds.ldel);render()}
@@ -873,7 +885,31 @@ function saveSheet(){
 }
 $("#form").addEventListener("submit",e=>{e.preventDefault();saveSheet()});
 $("#saveBtn").addEventListener("click",e=>{e.preventDefault();saveSheet()});
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),2200)}
+function toast(m,undo){const t=$("#toast");t.innerHTML=esc(m)+(undo?' <button data-undo>Deshacer</button>':"");t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),undo?4500:2200)}
+/* ---- completar: el elemento desaparece; se puede deshacer unos segundos ---- */
+const LISTNAME={t:"tasks",l:"lists",b:"bdays",e:"events"};
+const DONEMSG={t:"Tarea hecha ✓",l:"Tachado ✓",b:"Cumpleaños quitado",e:"Evento quitado"};
+let lastDone=null;
+function completeItem(ref,rowEl){
+  const [kind,id]=ref.split(":"),name=LISTNAME[kind],arr=db[name],i=arr.findIndex(x=>x.id===id);if(i<0)return;
+  const it=arr[i];
+  if(it.src==="contactos"){toast("Viene de tus Contactos: bórralo allí");return}
+  if(lastDone)finalizeDone();
+  if(rowEl)rowEl.classList.add("checking");
+  setTimeout(()=>{
+    db[name]=db[name].filter(x=>x.id!==id);
+    lastDone={name,it,i,timer:setTimeout(finalizeDone,4600)};
+    render();toast(DONEMSG[kind],true);
+  },rowEl?420:0);
+}
+function finalizeDone(){ // pasado el margen para deshacer, se borra también en Google
+  if(!lastDone)return;const {it,timer}=lastDone;clearTimeout(timer);lastDone=null;
+  if(it.gid&&linked())apiPost({action:"delete",gid:it.gid}).catch(()=>{});
+}
+function undoLast(){
+  if(!lastDone)return;const {name,it,i,timer}=lastDone;clearTimeout(timer);lastDone=null;
+  db[name].splice(Math.min(i,db[name].length),0,it);render();toast("Recuperado");
+}
 
 /* ---- arranque ---- */
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render()}},600)}
