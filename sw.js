@@ -1,14 +1,14 @@
 /* Mi Día · service worker
  * Guarda la app en el móvil para que abra al instante y funcione sin conexión.
  * Cuando subas cambios, sube también este número para que el móvil se actualice. */
-const VERSION = 'mi-dia-v1';
+const VERSION = 'mi-dia-v3';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', e => {
