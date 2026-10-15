@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="favicon-32.png">
 <title>Mi Día</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0b0b0b; --fg:#f4f4f2; --mute:#6f6f6c; --line:#262626;
@@ -279,6 +279,22 @@ nav svg{width:20px;height:20px}
 .dots button{width:8px;height:8px;border-radius:99px;background:var(--c);opacity:.55;transition:width .25s,opacity .25s;padding:0}
 .dots button.on{width:22px;opacity:1;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
 @media (max-height:700px){.track{margin-top:10px}.card2{padding:14px 14px 10px}.dots{padding-top:8px}}
+
+/* ---------- v8: botones redondos, sin deslizamiento, días en light ---------- */
+.track{overflow:hidden!important;scroll-snap-type:none!important;margin:16px 0 0!important;padding:0!important;display:block!important}
+.track::after{display:none}
+.card2{display:none!important;max-width:none!important;width:100%;height:100%}
+.card2.on{display:flex!important;animation:in .25s ease}
+.dots{gap:14px!important;padding:14px 0 4px!important}
+.dots button{width:54px!important;height:54px!important;border-radius:50%;background:var(--c)!important;opacity:1!important;display:grid;place-items:center;color:#111;
+  border:2px solid transparent;box-shadow:none!important;transition:transform .15s,border-color .2s}
+.dots button svg{width:22px;height:22px}
+.dots button.on{border-color:#111;transform:scale(1.06)}
+.dots button:active{transform:scale(.94)}
+.dh h4{font-weight:300!important;letter-spacing:.2px}
+.dgroup.today .dh h4{font-weight:300!important;color:#111}
+.topr{margin-left:auto}
+@media (max-height:700px){.dots button{width:46px!important;height:46px!important}.dots{padding-top:10px!important}}
 </style>
 </head>
 <body>
@@ -289,7 +305,7 @@ nav svg{width:20px;height:20px}
     <div class="home-top">
       <div class="top">
         <div class="daynum"><span id="dNum">09</span><i></i></div>
-        <div class="topr"><div><div class="month"><b id="dMon">Oct'26</b><br><span id="dDay">Jueves</span></div><div class="sync" id="syncInd" hidden><i></i><span></span></div></div><button class="tset" data-go="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button></div>
+        <div class="topr"><div><span id="dMon" hidden></span><span id="dDay" hidden></span><div class="sync" id="syncInd" hidden><i></i><span></span></div></div><button class="tset" data-go="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button></div>
       </div>
       <p class="brief" id="brief"></p>
     </div>
@@ -558,17 +574,13 @@ const KEYS=Object.keys(BLK);
       <input data-q autocomplete="off" enterkeyhint="send" placeholder="${BLK[k].ph}" aria-label="${BLK[k].ph}">
       <button type="button" class="addbtn" data-addq aria-label="Añadir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
     </form></section>`).join("");
-  $("#dots").innerHTML=KEYS.map(k=>`<button data-dot="${k}" style="--c:var(${BLK[k].c})" aria-label="${BLK[k].title}"></button>`).join("");
+  $("#dots").innerHTML=KEYS.map(k=>`<button data-dot="${k}" style="--c:var(${BLK[k].c})" aria-label="${BLK[k].title}">${ICONS[k]}</button>`).join("");
 })();
 const card=k=>$(`.card2[data-blk="${k}"]`);
 const cardX=el=>el.offsetLeft-$(".card2").offsetLeft;
-function goCard(k,smooth=true){blk=k;$("#track").scrollTo({left:cardX(card(k)),behavior:smooth?"smooth":"auto"});markDots()}
+function goCard(k){blk=k;$$(".card2").forEach(c=>c.classList.toggle("on",c.dataset.blk===k));markDots()}
 function markDots(){$$("#dots button").forEach(d=>d.classList.toggle("on",d.dataset.dot===blk))}
-$("#track").addEventListener("scroll",()=>{
-  const tr=$("#track"),cards=$$(".card2");let best=0,bd=1e9;
-  cards.forEach((c,i)=>{const d=Math.abs(cardX(c)-tr.scrollLeft);if(d<bd){bd=d;best=i}});
-  if(blk!==KEYS[best]){blk=KEYS[best];markDots()}
-},{passive:true});
+
 $("#dots").onclick=e=>{const d=e.target.closest("[data-dot]");if(d)goCard(d.dataset.dot)};
 
 function renderHoy(){
@@ -791,7 +803,7 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clea
 
 /* ---- arranque ---- */
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render()}},600)}
-go("hoy");render();goCard("tareas",false);setSync("ok");sync(true);
+go("hoy");render();goCard("tareas");setSync("ok");sync(true);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)sync()});
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
   addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
