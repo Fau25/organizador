@@ -306,6 +306,7 @@ input{font:inherit;color:inherit}
    fondo negro liso para que se funda con la portada; la app no sale de la zona visible */
 html,body{background:#0c0c0c!important}
 
+.diag{font:12.5px/1.6 ui-monospace,Menlo,monospace;background:#f4f4f6;border-radius:14px;padding:12px 14px;white-space:pre-wrap;color:#222}
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 .dsheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:#fff;color:#111;border-radius:30px 30px 0 0;padding:14px 20px calc(var(--safe-b) + 20px);
@@ -424,6 +425,11 @@ html,body{background:#0c0c0c!important}
         <div class="f"><label>Clave secreta</label><input id="sKey" type="password" autocomplete="off"></div>
         <div class="btns"><button class="btn" id="sSave">Guardar y probar</button><button class="btn ghost" id="sSync">Sincronizar</button></div>
         <div class="status" id="sStatus"><i></i><span>Sin conectar</span></div>
+      </div>
+      <div class="scard">
+        <h3>Diagnóstico de pantalla</h3>
+        <p class="help">Haz una captura de esta tarjeta y mándasela a Claude para ajustar la app a tu iPhone.</p>
+        <pre class="diag" id="diag"></pre>
       </div>
     </div>
   </div>
@@ -966,7 +972,36 @@ document.addEventListener("click",e=>{
 });
 
 /* ---------------- ajustes ---------------- */
-function fillSettings(){paintPhoto();$("#sName").value=db.name||"";$("#sUrl").value=db.cfg.url;$("#sKey").value=db.cfg.key}
+/* iOS 26/27 con la app instalada: la franja de arriba la pinta el sistema y la zona segura
+   de abajo llega como 0, así que la barra de añadir quedaría bajo la rayita de inicio. */
+function fixSafeArea(){
+  const pr=document.createElement("div");pr.style.cssText="position:fixed;top:0;left:0;width:1px;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)";
+  document.body.appendChild(pr);const sb=parseFloat(getComputedStyle(pr).paddingBottom)||0;pr.remove();
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),standalone=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
+  const bug=ios&&standalone&&sb===0&&screen.height-innerHeight>30;
+  document.documentElement.style.setProperty("--safe-b",bug?"34px":"env(safe-area-inset-bottom)");
+  document.documentElement.classList.toggle("iosgap",bug);
+}
+fixSafeArea();addEventListener("resize",fixSafeArea);
+function diag(){
+  const pr=document.createElement("div");pr.style.cssText="position:fixed;left:0;top:0;width:1px;visibility:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)";document.body.appendChild(pr);
+  const cs=getComputedStyle(pr),probe=u=>{const d=document.createElement("div");d.style.cssText=`position:fixed;top:0;height:100${u};width:1px;visibility:hidden`;document.body.appendChild(d);const h=d.getBoundingClientRect().height;d.remove();return Math.round(h)};
+  const out=[
+    `pantalla (screen):   ${screen.width} × ${screen.height}`,
+    `ventana (inner):     ${innerWidth} × ${innerHeight}`,
+    `documento (client):  ${document.documentElement.clientHeight}`,
+    `visualViewport:      ${window.visualViewport?Math.round(visualViewport.height)+" (top "+Math.round(visualViewport.offsetTop)+")":"-"}`,
+    `100vh / dvh / lvh / svh: ${probe("vh")} / ${probe("dvh")} / ${probe("lvh")} / ${probe("svh")}`,
+    `zona segura arriba:  ${cs.paddingTop}`,
+    `zona segura abajo:   ${cs.paddingBottom}`,
+    `densidad (dpr):      ${devicePixelRatio}`,
+    `instalada:           ${navigator.standalone||matchMedia("(display-mode: standalone)").matches?"sí":"no"}`,
+    `ajuste iOS aplicado: ${document.documentElement.classList.contains("iosgap")?"sí (34px abajo)":"no"}`,
+    `iOS:                 ${(navigator.userAgent.match(/OS (\d+[_\d]*)/)||[,"?"])[1].replace(/_/g,".")}`,
+  ];
+  pr.remove();$("#diag").textContent=out.join("\n");
+}
+function fillSettings(){diag();paintPhoto();$("#sName").value=db.name||"";$("#sUrl").value=db.cfg.url;$("#sKey").value=db.cfg.key}
 $("#sName").onchange=e=>{db.name=e.target.value.trim();render();lastBrief=""};
 document.addEventListener("click",e=>{if(e.target.closest("[data-photo]"))$("#photoIn").click()});
 $("#photoIn").onchange=e=>{
