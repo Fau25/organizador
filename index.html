@@ -302,10 +302,9 @@ input{font:inherit;color:inherit}
 .pill.home.on{box-shadow:0 0 0 2px rgba(217,240,90,.35)}
 
 
-/* ===== fondo en dos mitades: tapa cualquier hueco que deje iOS arriba o abajo ===== */
-html{background:linear-gradient(var(--bgTop,#0c0c0c) 50%,var(--bgBot,#f7f7f7) 50%)!important}
-body{background:transparent!important}
-.sheet{height:calc(100% - var(--topE) + 2px)!important}
+/* iOS 26 pinta la franja del sistema con el color de fondo de la página al abrir la app:
+   fondo negro liso para que se funda con la portada; la app no sale de la zona visible */
+html,body{background:#0c0c0c!important}
 
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
@@ -670,7 +669,7 @@ function layout(){
   $("#sparks").style.height=collapsedTop+"px";
   apply(expanded?0:maxTy);
 }
-function setBg(t,b){const r=document.documentElement.style;r.setProperty("--bgTop",t);r.setProperty("--bgBot",b)}
+function setBg(){}
 function apply(y){
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
