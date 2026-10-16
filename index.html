@@ -302,12 +302,10 @@ input{font:inherit;color:inherit}
 .pill.home.on{box-shadow:0 0 0 2px rgba(217,240,90,.35)}
 
 
-/* ===== altura completa en iPhone (también bajo la barra de inicio) ===== */
-html,body{height:100%;min-height:100vh;min-height:100lvh;min-height:-webkit-fill-available}
-#home,.page{top:0;bottom:auto;height:100vh;height:100lvh}
-@supports (height:100lvh){#home,.page{height:max(100%,100lvh)}}
+/* ===== fondo en dos mitades: tapa cualquier hueco que deje iOS arriba o abajo ===== */
+html{background:linear-gradient(var(--bgTop,#0c0c0c) 50%,var(--bgBot,#f7f7f7) 50%)!important}
+body{background:transparent!important}
 .sheet{height:calc(100% - var(--topE) + 2px)!important}
-.evsheet{margin-bottom:0}
 
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
@@ -672,6 +670,7 @@ function layout(){
   $("#sparks").style.height=collapsedTop+"px";
   apply(expanded?0:maxTy);
 }
+function setBg(t,b){const r=document.documentElement.style;r.setProperty("--bgTop",t);r.setProperty("--bgBot",b)}
 function apply(y){
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
@@ -681,7 +680,7 @@ function apply(y){
   const q=clamp((p-.42)/.58);
   xhead.style.opacity=q;xhead.style.filter=q<.99?`blur(${(1-q)*8}px)`:"";xhead.style.transform=`translateY(${(1-q)*16}px)`;
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
-  const dk=p<.5;if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f7f7f7";document.documentElement.style.background=document.body.style.background="#f7f7f7"}
+  const dk=p<.5;if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f7f7f7";setBg(dk?"#0c0c0c":"#f7f7f7","#f7f7f7")}
 }
 function animateTo(target,dur=520){
   cancelAnimationFrame(tween);const from=ty,t0=performance.now();
@@ -799,7 +798,7 @@ function openPage(p){
   if(p!=="ajustes")renderPage(p);else fillSettings();
   if(p==="eventos")requestAnimationFrame(()=>scrollToWeek(evSel,false));
   $(PAGE[p]).classList.add("on");home.classList.add("away");
-  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":"#f2f2f4";$('meta[name="theme-color"]').content=p==="eventos"?"#2c5a64":c;document.documentElement.style.background=document.body.style.background=p==="eventos"?"#f2efe9":c}themeDark=null;
+  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":"#f2f2f4";$('meta[name="theme-color"]').content=p==="eventos"?"#2c5a64":c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
   try{history.pushState({p},"")}catch(e){}
 }
 function closePage(silent){
