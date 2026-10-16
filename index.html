@@ -268,6 +268,26 @@ input{font:inherit;color:inherit}
 .ftype button span{font-size:18px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .ftype button.on{background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
+
+/* ===== v17: tarjetas de evento compactas y títulos de sección en texto ===== */
+.sech{display:block!important;margin:18px 6px 10px!important;padding:0!important;background:none!important;border-radius:0!important;
+  font-size:23px;font-weight:600;letter-spacing:-.6px;color:#111;line-height:1.1}
+.evsheet .pbody>.sech:first-child{margin-top:8px!important}
+.evc{align-items:center!important;gap:12px!important;padding:11px 16px 11px 13px!important;margin-bottom:6px!important;border-radius:18px!important}
+.evc::before{display:none!important}
+.evck{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--bar)!important;display:grid;place-items:center;margin:0!important;background:transparent}
+.evck.off{opacity:.35}
+.evc.checking .evck{background:var(--bar)!important;border-color:var(--bar)!important}
+.evc.checking .evck::after{border-color:#fff!important}
+.evl{gap:1px!important}
+.evl b{font-size:17px!important;line-height:1.25!important;letter-spacing:-.35px!important;display:flex;align-items:center;gap:6px}
+.evl span{font-size:12.5px!important}
+.evl .cake{flex:none;width:auto;height:auto;background:none!important;font-size:18px;line-height:1;border-radius:0;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.evr{gap:0!important;justify-content:center;max-width:42%}
+.evr b{font-size:15px!important;font-weight:600;white-space:nowrap}
+.evr small{font-size:12.5px!important;white-space:nowrap}
+.evday{margin:14px 6px 6px!important}
+
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 .dsheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:#fff;color:#111;border-radius:30px 30px 0 0;padding:14px 20px calc(var(--safe-b) + 20px);
@@ -833,32 +853,33 @@ function evItems(from,to){
 const addDays=(k,n)=>{const d=parse(k);d.setDate(d.getDate()+n);return iso(d)};
 function evCard(e,showDate){
   const d=parse(e.d),k=daysFrom(e.d);
-  const when=[k<=1&&k>=0?inDays(k):`${DIAS[d.getDay()]} ${fd(d)}`,k>1&&k<=6?inDays(k).toLowerCase():""].filter(Boolean).join(" · ");
+  const dateTxt=k===0?"Hoy":k===1?"Mañana":`${DIAS[d.getDay()].slice(0,3)} ${d.getDate()}${d.getMonth()!==today.getMonth()?" "+MESES[d.getMonth()]:""}`;
+  const chk=(kind)=>e.src==="contactos"?`<span class="evck off"></span>`:`<button class="evck rchk" data-done="${kind}:${e.id}" aria-label="Quitar"></button>`;
   if(e.kind==="b"){
-    const sub=[e.age?`Cumple ${e.age}`:"",showDate?when:""].filter(Boolean).join(" · ");
-    return `<div class="evc prow bday"><span class="cake">🎂</span><div class="evl"><b>Cumpleaños de ${esc(e.t)}</b>${sub?`<span>${sub}</span>`:""}</div><div class="evr">${e.src==="contactos"?"":`<button class="rchk" data-done="b:${e.id}" aria-label="Quitar"></button>`}</div></div>`;
+    return `<div class="evc prow bday" style="--bar:#f5a623">${chk("b")}<div class="evl"><b><span class="cake">🎂</span>${esc(e.t)}</b>${e.age?`<span>Cumple ${e.age}</span>`:""}</div><div class="evr">${showDate?`<b>${dateTxt}</b>`:`<small>Todo el día</small>`}</div></div>`;
   }
-  const sub=showDate?when:(e.src&&GSRC.includes(e.src)?"Google Calendar":"");
-  return `<div class="evc prow" style="--bar:${barOf(e.id)}"><div class="evl"><b>${esc(e.t)}</b>${sub?`<span>${sub}</span>`:""}</div><div class="evr"><b>${e.h||"Todo"}</b><small>${e.h?"":"el día"}</small>${e.src==="contactos"?"":`<button class="rchk" data-done="e:${e.id}" aria-label="Quitar"></button>`}</div></div>`;
+  const sub=!showDate&&e.src&&GSRC.includes(e.src)?"Google Calendar":"";
+  const right=showDate?`<b>${dateTxt}</b><small>${e.h||"Todo el día"}</small>`:`<b>${e.h||"Todo el día"}</b>`;
+  return `<div class="evc prow" style="--bar:${barOf(e.id)}">${chk("e")}<div class="evl"><b>${esc(e.t)}</b>${sub?`<span>${sub}</span>`:""}</div><div class="evr">${right}</div></div>`;
 }
-const sech=(title,n)=>`<div class="sech"><b>${title}</b><span>${n==null?"":n?(n===1?"1 evento":n+" eventos"):"Sin eventos"}</span></div>`;
+const sech=(title)=>`<h3 class="sech">${title}</h3>`;
 function renderEventsBody(anim){
   const body=$("#pEventos [data-body]"),t=iso(today);let h="";
   if(evQuery){
     const r=evItems(t,addDays(t,366)).concat(db.events.filter(e=>e.d<t).map(e=>({...e,kind:"e"}))).filter(e=>e.t.toLowerCase().includes(evQuery));
-    h=sech("Resultados",r.length)+(r.map(e=>evCard(e,true)).join("")||`<p class="evempty">No hay nada con “${esc(evQuery)}”.</p>`);
+    h=sech("Resultados")+(r.map(e=>evCard(e,true)).join("")||`<p class="evempty">No hay nada con “${esc(evQuery)}”.</p>`);
   }else if(evMode==="all"){
     const up=evItems(t,addDays(t,90));
-    h=sech("Próximos 3 meses",up.length);
+    h=sech("Próximos 3 meses");
     let cur="";for(const e of up){if(e.d!==cur){cur=e.d;const d=parse(e.d),k=daysFrom(e.d);h+=`<p class="evday">${k<=1?inDays(k):DIAS[d.getDay()]} · ${fd(d)}</p>`}h+=evCard(e,false)}
     if(!up.length)h+=`<p class="evempty">No tienes nada a la vista. Añade un evento abajo.</p>`;
   }else{
     const d=parse(evSel),k=daysFrom(evSel);
     const day=evItems(evSel,evSel);
-    h=sech(k===0?"Hoy":k===1?"Mañana":k===-1?"Ayer":`${DIAS[d.getDay()]} ${fd(d)}`,day.length);
+    h=sech(k===0?"Hoy":k===1?"Mañana":k===-1?"Ayer":`${DIAS[d.getDay()]} ${fd(d)}`);
     h+=day.map(e=>evCard(e,false)).join("")||`<button class="evempty addhere" id="addHere">Nada este día · <u>Añadir evento</u></button>`;
     const from=addDays(evSel<t?t:evSel,evSel<t?0:1),next=evItems(from,addDays(from,60)).slice(0,8);
-    if(next.length)h+=sech("Próximos",null)+next.map(e=>evCard(e,true)).join("");
+    if(next.length)h+=sech("Próximos")+next.map(e=>evCard(e,true)).join("");
   }
   body.innerHTML=h;
   $("#evDayTxt").textContent=dayChip(evSel<iso(today)?iso(today):evSel);
