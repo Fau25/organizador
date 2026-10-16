@@ -192,7 +192,7 @@ input{font:inherit;color:inherit}
 
 /* ================= EVENTOS · cabecera calendario ================= */
 .page[data-p=eventos]{background:#14161b;color:#111;padding-top:0}
-.calh{position:relative;flex:none;color:#fff;padding:calc(var(--safe-t) + 14px) 0 16px;border-radius:0 0 36px 36px;overflow:hidden;
+.calh{position:relative;flex:none;color:#fff;padding:calc(var(--safe-t) + 26px) 0 36px;border-radius:0 0 36px 36px;overflow:hidden;
   background:
     radial-gradient(120% 90% at 0% 0%,#2f6b78 0%,transparent 60%),
     radial-gradient(90% 80% at 100% 0%,#3b8a8f 0%,transparent 55%),
@@ -211,8 +211,8 @@ input{font:inherit;color:inherit}
 .calic button svg{width:24px;height:24px}
 .calic button.on{background:rgba(255,255,255,.22)}
 .wkl,.wk{display:grid;grid-template-columns:repeat(7,1fr);padding:0 12px}
-.wkl{position:relative;z-index:1;margin-top:18px;font-size:12px;font-weight:600;letter-spacing:.3px;color:rgba(255,255,255,.62);text-align:center}
-.weeks{position:relative;z-index:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-top:8px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.wkl{position:relative;z-index:1;margin-top:34px;font-size:12px;font-weight:600;letter-spacing:.3px;color:rgba(255,255,255,.62);text-align:center}
+.weeks{position:relative;z-index:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-top:12px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .weeks::-webkit-scrollbar{display:none}
 .wk{flex:0 0 100%;scroll-snap-align:start}
 .dd{position:relative;justify-self:center;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:500;color:#fff;font-variant-numeric:tabular-nums;transition:background .25s,color .25s,transform .15s}
@@ -247,6 +247,11 @@ input{font:inherit;color:inherit}
 .evempty{display:block;width:100%;text-align:left;padding:18px 16px;border-radius:18px;background:rgba(255,255,255,.55);font-size:15px;color:#7d776e;margin-bottom:8px}
 .evempty u{color:#111;text-decoration-thickness:1.5px;text-underline-offset:3px}
 .swap{animation:swap .4s var(--ease)}
+
+.evsheet{position:relative}
+.evsheet .pbody{padding-bottom:110px!important}
+.evbar{opacity:1!important;pointer-events:auto!important;transform:none!important;background:#e6e1d8}
+.evbar .qday{background:#fff}
 @media (max-width:370px){.dd{width:40px;height:40px;font-size:16px}.mon{font-size:26px}}
 
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
@@ -319,7 +324,6 @@ input{font:inherit;color:inherit}
       <div class="calic">
         <button id="calAll" aria-label="Ver todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="7" rx="3.5"/><rect x="4" y="13" width="16" height="7" rx="3.5"/></svg></button>
         <button id="calSearch" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>
-        <button id="calAdd" aria-label="Nuevo evento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></button>
       </div>
     </div>
     <div class="wkl"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
@@ -329,6 +333,11 @@ input{font:inherit;color:inherit}
     <div class="evgrab"></div>
     <div class="evsearch" id="evSearch" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="evQ" placeholder="Buscar evento…" autocomplete="off"><button id="evQx" aria-label="Cerrar búsqueda">✕</button></div>
     <div class="pbody" data-body></div>
+    <form class="addbar evbar" id="evbar" autocomplete="off">
+      <button type="button" class="qday" id="evDay"><span id="evDayTxt">Hoy</span></button>
+      <input id="evText" enterkeyhint="next" placeholder="Nuevo evento…" aria-label="Nuevo evento">
+      <button type="button" class="addbtn" id="evAdd" aria-label="Añadir evento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    </form>
   </div>
 </section>
 <section class="page" data-p="cumple" id="pCumple">
@@ -791,7 +800,7 @@ $("#calAll").onclick=()=>{evMode=evMode==="all"?"day":"all";$("#calAll").classLi
 $("#calSearch").onclick=()=>{const s=$("#evSearch");s.hidden=!s.hidden;if(!s.hidden)setTimeout(()=>$("#evQ").focus(),50);else{evQuery="";$("#evQ").value="";renderEventsBody(true)}};
 $("#evQx").onclick=()=>{$("#evSearch").hidden=true;evQuery="";$("#evQ").value="";renderEventsBody(true)};
 $("#evQ").addEventListener("input",e=>{evQuery=e.target.value.trim().toLowerCase();renderEventsBody()});
-$("#calAdd").onclick=()=>openDateSheet("evento","",evSel);
+
 
 function evCard(e,showDate){
   const d=parse(e.d),k=daysFrom(e.d);
@@ -818,11 +827,17 @@ function renderEventsBody(anim){
     if(next.length)h+=sech("Próximos",0).replace("Sin eventos","")+next.map(e=>evCard(e,true)).join("");
   }
   body.innerHTML=h;
+  $("#evDayTxt").textContent=dayChip(evSel<iso(today)?iso(today):evSel);
   if(anim){body.classList.remove("swap");void body.offsetWidth;body.classList.add("swap")}
   const ah=$("#addHere");if(ah)ah.onclick=()=>openDateSheet("evento","",evSel);
   const n=up.length;
 }
 function renderEvents(){buildWeeks();renderEventsBody()}
+function evAdd(){const i=$("#evText");openDateSheet("evento",i.value.trim(),evSel);i.value="";i.blur()}
+$("#evbar").addEventListener("submit",e=>{e.preventDefault();evAdd()});
+$("#evAdd").addEventListener("click",e=>{e.preventDefault();evAdd()});
+$("#evText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();evAdd()}});
+$("#evDay").onclick=()=>scrollToWeek(evSel,true);
 function pageAdd(form){
   const inp=form.querySelector("[data-q]");openDateSheet(form.dataset.kind==="cumple"?"cumple":"evento",inp.value.trim());inp.value="";inp.blur();
 }
