@@ -238,7 +238,9 @@ input{font:inherit;color:inherit}
 .evl{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
 .evl b{font-size:19px;line-height:1.25;font-weight:500;letter-spacing:-.5px;word-break:break-word}
 .evl span{font-size:13.5px;color:#8a857d}
-.evr{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+.evr{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;max-width:40%}
+.evc{min-width:0;max-width:100%;overflow:hidden}
+.evsheet,.evsheet .pbody{min-width:0;max-width:100%;overflow-x:hidden}
 .evr b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 .evr small{font-size:13px;color:#9b958c;min-height:0}
 .evr .rchk{width:26px;height:26px;margin-top:8px;border-color:#cfc9bf;color:#111}
@@ -273,7 +275,13 @@ input{font:inherit;color:inherit}
 .show .sheet-bg{opacity:1;pointer-events:auto}.show .dsheet{transform:none;visibility:visible}
 .dgrab{width:40px;height:5px;border-radius:9px;background:#e1e1e1;margin:0 auto 16px}
 .dsheet h4{font-size:24px;font-weight:600;letter-spacing:-.6px;margin-bottom:16px}
-.two{display:flex;gap:10px}.two .f{flex:1}
+.two{display:flex;gap:10px}.two .f{flex:1 1 0;min-width:0}
+/* iPhone: los campos de fecha y hora tienen un ancho mínimo propio y se salen de la pantalla */
+.f input[type=date],.f input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;width:100%;line-height:50px;text-align:left;font-variant-numeric:tabular-nums}
+.f input::-webkit-date-and-time-value{text-align:left;margin:0;min-height:1.2em}
+.f input::-webkit-calendar-picker-indicator{margin-left:auto}
+.dsheet{overflow:hidden}
+.dsheet .f,.dsheet .two{max-width:100%}
 .chk{display:flex;align-items:center;gap:10px;font-size:14px;margin:4px 0 16px;color:#444}
 .chk input{width:20px;height:20px;accent-color:#111}
 .save{width:100%;height:54px;border-radius:99px;background:#111;color:#fff;font-weight:600;font-size:16px}
