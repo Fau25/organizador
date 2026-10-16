@@ -47,7 +47,7 @@ const TAG = 'midia';
 function doGet(e) {
   return guard_(e && e.parameter, p => {
     if ((p.action || 'sync') === 'ping') return { ok: true, user: Session.getActiveUser().getEmail() };
-    return { ok: true, bdays: readBirthdays_(), events: readEvents_(), at: new Date().toISOString() };
+    return { ok: true, bdays: readBirthdays_(), events: readEvents_(), store: readStore_(), at: new Date().toISOString() };
   });
 }
 
@@ -59,6 +59,7 @@ function doPost(e) {
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
+      case 'syncStore': return { ok: true, store: syncStore_(b.store) };
       default:         return { ok: false, error: 'Acción desconocida' };
     }
   });
@@ -186,6 +187,50 @@ function deleteById_(gid) {
   return false; // p.ej. cumpleaños de Contactos: se borran desde Contactos
 }
 
+/* ------------- TAREAS Y LISTAS (iPhone ⇄ iPad) ------------- */
+// Se guardan en el almacén del propio script (no hace falta ningún permiso extra).
+// Cada elemento lleva su fecha de cambio (u) y los borrados dejan una "lápida" (tomb),
+// así se pueden mezclar los cambios de varios dispositivos sin perder nada.
+const STORE_KEY = 'midia_store';
+function emptyStore_() { return { tasks: {}, lists: {}, tomb: {} }; }
+function readStore_() {
+  const p = PropertiesService.getScriptProperties();
+  const n = Number(p.getProperty(STORE_KEY + '_n') || 0);
+  if (!n) return emptyStore_();
+  let txt = '';
+  for (let i = 0; i < n; i++) txt += p.getProperty(STORE_KEY + '_' + i) || '';
+  try { return Object.assign(emptyStore_(), JSON.parse(txt)); } catch (e) { return emptyStore_(); }
+}
+function writeStore_(st) {
+  const p = PropertiesService.getScriptProperties();
+  const txt = JSON.stringify(st), size = 8000, parts = {};
+  const n = Math.ceil(txt.length / size) || 1;
+  for (let i = 0; i < n; i++) parts[STORE_KEY + '_' + i] = txt.slice(i * size, (i + 1) * size);
+  parts[STORE_KEY + '_n'] = String(n);
+  p.setProperties(parts, false);
+}
+function mergeStore_(a, b) {
+  const out = emptyStore_();
+  const tomb = Object.assign({}, a.tomb || {});
+  Object.keys(b.tomb || {}).forEach(id => { tomb[id] = Math.max(tomb[id] || 0, b.tomb[id]); });
+  ['tasks', 'lists'].forEach(c => {
+    const A = a[c] || {}, B = b[c] || {};
+    new Set(Object.keys(A).concat(Object.keys(B))).forEach(id => {
+      const x = A[id], y = B[id];
+      const best = !x ? y : !y ? x : ((y.u || 0) > (x.u || 0) ? y : x);
+      if (best && !(tomb[id] && tomb[id] >= (best.u || 0))) out[c][id] = best;
+    });
+  });
+  const old = Date.now() - 60 * 864e5;            // las lápidas de más de 60 días se olvidan
+  Object.keys(tomb).forEach(id => { if (tomb[id] > old) out.tomb[id] = tomb[id]; });
+  return out;
+}
+function syncStore_(incoming) {
+  const merged = mergeStore_(readStore_(), incoming || {});
+  writeStore_(merged);
+  return merged;
+}
+
 /* ------------------------ AYUDAS --------------------------- */
 
 let TZ_CACHE = null;
@@ -224,4 +269,6 @@ function startOfToday_() { const d = new Date(); d.setHours(0, 0, 0, 0); return 
 function probar() {
   Logger.log('Cumpleaños encontrados: ' + JSON.stringify(readBirthdays_(), null, 1));
   Logger.log('Eventos próximos: ' + JSON.stringify(readEvents_(), null, 1));
+  const st = readStore_();
+  Logger.log('Tareas guardadas: ' + Object.keys(st.tasks).length + ' · Listas: ' + Object.keys(st.lists).length);
 }

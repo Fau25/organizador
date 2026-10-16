@@ -77,3 +77,9 @@ Ve a **Implementar**, luego **Gestionar implementaciones**, pulsa el lápiz, eli
 - **"Clave incorrecta":** la clave de la app no coincide exactamente con la de `SECRET`.
 - **"No conecta":** revisa que la URL termine en `/exec` (no en `/dev`) y que el acceso esté en "Cualquier usuario".
 - **No salen los cumpleaños de Contactos:** en Google Calendar (web), activa el calendario "Cumpleaños" de la lista "Otros calendarios".
+
+## Tareas y listas en varios dispositivos (iPhone, iPad…)
+
+El script también guarda tus **tareas y listas** en su propio almacén de Google, así que todos los dispositivos donde pongas la misma URL y clave en **Ajustes** ven lo mismo. Se sincroniza al abrir la app, al volver a ella y cada vez que cambias algo. Si dos dispositivos cambian cosas a la vez, se mezclan sin perder nada.
+
+**Para actualizar el script sin cambiar la URL:** pega el código nuevo, guarda y ve a **Implementar → Gestionar implementaciones → ✏️ (editar) → Versión: Nueva versión → Implementar**.

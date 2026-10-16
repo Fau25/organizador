@@ -480,6 +480,35 @@ db.tasks=(db.tasks||[]).filter(x=>!x.done);
 db.lists=(db.lists||[]).filter(x=>!x.done);
 db.bdays=db.bdays||[];db.events=db.events||[];
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+db.tomb=db.tomb||{};
+/* ---------- tareas y listas sincronizadas entre dispositivos (vía el script de Google) ---------- */
+const nowU=()=>Date.now();
+function toStore(){const m=a=>Object.fromEntries(a.map(x=>[x.id,{...x,u:x.u||0}]));return {tasks:m(db.tasks),lists:m(db.lists),tomb:{...db.tomb}}}
+function mergeStore(a,b){
+  const out={tasks:{},lists:{},tomb:{}},tomb={...(a.tomb||{})};
+  for(const id in (b.tomb||{}))tomb[id]=Math.max(tomb[id]||0,b.tomb[id]);
+  for(const c of ["tasks","lists"]){const A=a[c]||{},B=b[c]||{};
+    for(const id of new Set([...Object.keys(A),...Object.keys(B)])){const x=A[id],y=B[id];const best=!x?y:!y?x:((y.u||0)>(x.u||0)?y:x);
+      if(best&&!(tomb[id]&&tomb[id]>=(best.u||0)))out[c][id]=best}}
+  const old=Date.now()-60*864e5;for(const id in tomb)if(tomb[id]>old)out.tomb[id]=tomb[id];
+  return out;
+}
+const sortByOld=(arr,prev)=>{const pos=new Map(prev.map((x,i)=>[x.id,i]));return arr.sort((a,b)=>(pos.has(a.id)?pos.get(a.id):1e9+(a.u||0))-(pos.has(b.id)?pos.get(b.id):1e9+(b.u||0)))};
+function applyStore(st){db.tasks=sortByOld(Object.values(st.tasks),db.tasks);db.lists=sortByOld(Object.values(st.lists),db.lists);db.tomb=st.tomb||{}}
+const storeSig=()=>JSON.stringify(toStore());
+let pushedSig=null,pushT=null,storeWarned=false;
+async function pushStore(remote){
+  if(!linked())return;
+  try{
+    const local=toStore(),base=remote?mergeStore(local,remote):local;
+    const j=await apiPost({action:"syncStore",store:base});
+    const changedMeanwhile=storeSig()!==JSON.stringify(local);
+    applyStore(changedMeanwhile?mergeStore(toStore(),j.store):j.store);
+    pushedSig=storeSig();save();try{renderHome()}catch(e){}
+    if(changedMeanwhile)schedulePush();
+  }catch(e){if(/desconocida/i.test(e.message)&&!storeWarned){storeWarned=true;toast("Actualiza el script de Google para sincronizar tareas")}}
+}
+function schedulePush(){if(!linked())return;clearTimeout(pushT);pushT=setTimeout(()=>{if(storeSig()!==pushedSig)pushStore()},1200)}
 const linked=()=>!!(db.cfg.url&&db.cfg.key);
 
 /* ---------------- Google (Apps Script) ---------------- */
@@ -518,6 +547,7 @@ async function sync(force){
     const j=await apiGet("sync");
     db.bdays=merge(db.bdays,j.bdays,x=>x.t.trim().toLowerCase()+"|"+md(x.d));
     db.events=merge(db.events,j.events.map(e=>({...e,src:"google"})),x=>x.t.trim().toLowerCase()+"|"+x.d+"|"+(x.h||""));
+    if(j.store)await pushStore(j.store);
     db.lastSync=Date.now();render();setSync("ok");
   }catch(e){setSync("err","Sin conexión con Google");console.warn(e)}
   syncing=false;
@@ -651,7 +681,7 @@ function renderList(){
   $("#list").innerHTML=h;
 }
 function renderHome(){renderBrief();renderPills();renderXhead();renderList()}
-function render(){save();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage)}
+function render(){save();schedulePush();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage)}
 
 function setMode(m){
   if(m===mode)return;mode=m;
@@ -765,8 +795,8 @@ $("#daypop").addEventListener("click",e=>{const b=e.target.closest("[data-pick]"
 function quickAdd(){
   const inp=$("#qtext"),v=inp.value.trim();if(!v){inp.focus();return}
   inp.value="";
-  if(mode==="listas"){db.lists.push({id:uid(),t:v});render();return}
-  db.tasks.push({id:uid(),t:v,d:selDay});render();
+  if(mode==="listas"){db.lists.push({id:uid(),t:v,u:nowU()});render();return}
+  db.tasks.push({id:uid(),t:v,d:selDay,u:nowU()});render();
   if(selDay!==iso(today))toast("Añadida a "+dayChip(selDay).toLowerCase()+" ✓");
 }
 $("#addbar").addEventListener("submit",e=>{e.preventDefault();quickAdd()});
@@ -785,13 +815,13 @@ function completeItem(ref,rowEl){
   if(lastDone)finalizeDone();
   if(rowEl)rowEl.classList.add("checking");
   setTimeout(()=>{
-    db[name]=db[name].filter(x=>x.id!==id);
+    db[name]=db[name].filter(x=>x.id!==id);if(kind==="t"||kind==="l")db.tomb[id]=nowU();
     lastDone={name,it,i,timer:setTimeout(finalizeDone,4600)};
     render();toast(DONEMSG[kind],true);
   },rowEl?600:0);
 }
 function finalizeDone(){if(!lastDone)return;const {it,timer}=lastDone;clearTimeout(timer);lastDone=null;if(it.gid&&linked())apiPost({action:"delete",gid:it.gid}).catch(()=>{})}
-function undoLast(){if(!lastDone)return;const {name,it,i,timer}=lastDone;clearTimeout(timer);lastDone=null;db[name].splice(Math.min(i,db[name].length),0,it);render();toast("Recuperado")}
+function undoLast(){if(!lastDone)return;const {name,it,i,timer}=lastDone;clearTimeout(timer);lastDone=null;delete db.tomb[it.id];if(name==="tasks"||name==="lists")it.u=nowU();db[name].splice(Math.min(i,db[name].length),0,it);render();toast("Recuperado")}
 function toast(m,undo){const t=$("#toast");t.innerHTML=`<span>${esc(m)}</span>`+(undo?'<button data-undo>Deshacer</button>':"");t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),undo?4500:2200)}
 
 /* ---------------- páginas ---------------- */
