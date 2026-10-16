@@ -97,6 +97,7 @@ input{font:inherit;color:inherit}
 .row .t{flex:1;min-width:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-.35px;color:var(--ink);word-break:break-word}
 .row .m{flex:none;font-size:15.5px;line-height:1.5;font-weight:500;color:var(--mute);font-variant-numeric:tabular-nums;letter-spacing:-.2px}
 .row .m.late{color:var(--red);opacity:.85}
+.row .m.sel{color:var(--ink)}
 .row.checking .ck{background:var(--ink);border-color:var(--ink)}
 .row.checking .ck::after{border-color:#fff}
 .row.checking .t{color:#bbb;text-decoration:line-through;text-decoration-thickness:1.5px}
@@ -489,12 +490,14 @@ function renderList(){
   if(mode==="listas"){
     h=db.lists.map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
   }else{
-    const k=selDay,isToday=k===iso(today);
-    if(isToday)h+=db.tasks.filter(x=>x.d<k).sort((a,b)=>a.d.localeCompare(b.d)).map(x=>row("t",x.id,x.t,daysFrom(x.d)===-1?"Ayer":fd(parse(x.d)),"late")).join("");
-    h+=db.bdays.filter(b=>nextBday(b.d).days===daysFrom(k)).map(b=>{const n=nextBday(b.d);return irow(IC.cakeRow,`Cumple de ${b.t}`,n.age?n.age+" años":"")}).join("");
-    h+=db.events.filter(e=>e.d===k).sort((a,b)=>(a.h||"99").localeCompare(b.h||"99")).map(e=>irow(IC.evRow,e.t,e.h||"")).join("");
-    h+=db.tasks.filter(x=>x.d===k).map(x=>row("t",x.id,x.t)).join("");
-    if(!h)h=`<p class="empty">${isToday?"Nada pendiente hoy 🙌":"Nada para "+dayChip(k).toLowerCase()}</p>`;
+    // todas las tareas a la vez: atrasadas, lo de hoy y lo de los próximos días (con su día a la derecha)
+    const t=iso(today);
+    h+=db.tasks.filter(x=>x.d<t).sort((a,b)=>a.d.localeCompare(b.d)).map(x=>row("t",x.id,x.t,daysFrom(x.d)===-1?"Ayer":fd(parse(x.d)),"late")).join("");
+    h+=db.bdays.filter(b=>nextBday(b.d).days===0).map(b=>{const n=nextBday(b.d);return irow(IC.cakeRow,`Cumple de ${b.t}`,n.age?n.age+" años":"")}).join("");
+    h+=db.events.filter(e=>e.d===t).sort((a,b)=>(a.h||"99").localeCompare(b.h||"99")).map(e=>irow(IC.evRow,e.t,e.h||"")).join("");
+    h+=db.tasks.filter(x=>x.d===t).map(x=>row("t",x.id,x.t)).join("");
+    h+=db.tasks.filter(x=>x.d>t).sort((a,b)=>a.d.localeCompare(b.d)).map(x=>row("t",x.id,x.t,dayChip(x.d),x.d===selDay?"sel":"")).join("");
+    if(!h)h=`<p class="empty">Nada pendiente 🙌</p>`;
   }
   $("#list").innerHTML=h;
 }
@@ -508,7 +511,6 @@ function setMode(m){
 }
 function setDay(k){
   selDay=k<iso(today)?iso(today):k;
-  const l=$("#list");l.classList.remove("swap");void l.offsetWidth;l.classList.add("swap");l.scrollTop=0;
   renderXhead();renderList();
 }
 
