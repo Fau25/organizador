@@ -290,6 +290,12 @@ input{font:inherit;color:inherit}
 .bcake{flex:none;width:36px;height:36px;margin:-5px -5px -5px -5px;border-radius:12px;background:#fff1d6;display:grid;place-items:center;font-size:22px;line-height:1;
   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 
+
+/* círculos de check en la ficha principal (como en Eventos) */
+.ck{width:26px!important;height:26px!important;margin-top:-1px!important;border-radius:50%!important;border:2px solid var(--bar,#cfcfcf)!important;background:transparent!important}
+.row.checking .ck{background:var(--bar,#111)!important;border-color:var(--bar,#111)!important}
+.row .ico{width:26px!important}
+
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 .dsheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:#fff;color:#111;border-radius:30px 30px 0 0;padding:14px 20px calc(var(--safe-b) + 20px);
@@ -609,7 +615,7 @@ function renderXhead(){
   $("#qdayTxt").textContent=dayChip(selDay);
   $("#qtext").placeholder=mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
 }
-const row=(kind,id,title,meta="",metaCls="")=>`<div class="row"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
+const row=(kind,id,title,meta="",metaCls="")=>`<div class="row" style="--bar:${metaCls==="late"?"#ff3b30":barOf(id)}"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
 const irow=(icon,title,meta="")=>`<div class="row"><span class="ico">${icon}</span><div class="t">${esc(title)}</div>${meta?`<div class="m">${meta}</div>`:""}</div>`;
 function renderList(){
   let h="";
