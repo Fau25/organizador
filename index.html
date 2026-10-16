@@ -287,6 +287,8 @@ input{font:inherit;color:inherit}
 .evr b{font-size:15px!important;font-weight:600;white-space:nowrap}
 .evr small{font-size:12.5px!important;white-space:nowrap}
 .evday{margin:14px 6px 6px!important}
+.bcake{flex:none;width:36px;height:36px;margin:-5px -5px -5px -5px;border-radius:12px;background:#fff1d6;display:grid;place-items:center;font-size:22px;line-height:1;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
@@ -856,7 +858,7 @@ function evCard(e,showDate){
   const dateTxt=k===0?"Hoy":k===1?"Mañana":`${DIAS[d.getDay()].slice(0,3)} ${d.getDate()}${d.getMonth()!==today.getMonth()?" "+MESES[d.getMonth()]:""}`;
   const chk=(kind)=>e.src==="contactos"?`<span class="evck off"></span>`:`<button class="evck rchk" data-done="${kind}:${e.id}" aria-label="Quitar"></button>`;
   if(e.kind==="b"){
-    return `<div class="evc prow bday" style="--bar:#f5a623">${chk("b")}<div class="evl"><b><span class="cake">🎂</span>${esc(e.t)}</b>${e.age?`<span>Cumple ${e.age}</span>`:""}</div><div class="evr">${showDate?`<b>${dateTxt}</b>`:`<small>Todo el día</small>`}</div></div>`;
+    return `<div class="evc prow bday" style="--bar:#f5a623"><span class="bcake">🎂</span><div class="evl"><b>${esc(e.t)}</b>${e.age?`<span>Cumple ${e.age}</span>`:""}</div><div class="evr">${showDate?`<b>${dateTxt}</b>`:`<small>Todo el día</small>`}</div></div>`;
   }
   const sub=!showDate&&e.src&&GSRC.includes(e.src)?"Google Calendar":"";
   const right=showDate?`<b>${dateTxt}</b><small>${e.h||"Todo el día"}</small>`:`<b>${e.h||"Todo el día"}</b>`;
