@@ -24,14 +24,14 @@
   --ease:cubic-bezier(.2,.9,.25,1);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--ink);
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--dark);color:var(--ink);
   font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 input{font:inherit;color:inherit}
 [hidden]{display:none!important}
 
 /* ======================= PORTADA ======================= */
-#home{position:fixed;inset:0;max-width:520px;margin:0 auto;overflow:hidden;background:var(--dark);transition:transform .45s var(--ease),filter .45s}
+#home{position:fixed;inset:0;max-width:520px;margin:0 auto;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;background:var(--dark);transition:transform .45s var(--ease),filter .45s}
 #home.away{transform:scale(.94) translateX(-6%);filter:brightness(.6)}
 
 /* --- estado plegado (oscuro) --- */
@@ -83,6 +83,7 @@ input{font:inherit;color:inherit}
 .grab{flex:none;height:18px}
 .list{flex:1;min-height:0;overflow:hidden;padding:0 var(--pad) 120px;touch-action:none;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 #home.open .list{overflow-y:auto;touch-action:pan-y}
+.addbar,.daypop{touch-action:manipulation;-webkit-user-select:text;user-select:text}
 .list.swap{animation:swap .45s var(--ease)}
 @keyframes swap{from{opacity:0;filter:blur(8px);transform:translateY(10px)}to{opacity:1;filter:none;transform:none}}
 
@@ -526,13 +527,12 @@ function layout(){
 function apply(y){
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
-  dark.style.opacity=clamp(1-p*1.3);dark.style.filter=p>.01?`blur(${p*10}px)`:"";dark.style.transform=`translateY(${-p*26}px) scale(${1-p*.03})`;
+  dark.style.opacity=clamp(1-p*1.3);dark.style.filter=p>.02?`blur(${p*7}px)`:"";dark.style.transform=`translateY(${-p*26}px) scale(${1-p*.03})`;
   $("#sparks").style.opacity=1-p;$(".tset").style.opacity=clamp(1-p*2);$(".tset").style.pointerEvents=p>.5?"none":"";
   lightbg.style.opacity=p;
   const q=clamp((p-.42)/.58);
   xhead.style.opacity=q;xhead.style.filter=q<.99?`blur(${(1-q)*8}px)`:"";xhead.style.transform=`translateY(${(1-q)*16}px)`;
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
-  const mid=Math.sin(p*Math.PI);list.style.filter=mid>.05?`blur(${mid*2.2}px)`:"";
   const dk=p<.5;if(dk!==themeDark){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f7f7f7"}
 }
 function animateTo(target,dur=520){
@@ -548,43 +548,51 @@ function settle(isOpen){
 const expand=()=>animateTo(0),collapse=()=>animateTo(maxTy);
 
 let drag=null,suppress=false;
+/* Gesto: se decide en el PRIMER movimiento si arrastramos la hoja o dejamos que la lista haga scroll,
+   para que el móvil no empiece su propio desplazamiento y "se quede" con el gesto. */
 function dStart(y,target){
-  if(target.closest("input,.daypop,.addbar"))return;
+  if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset"))return;
   cancelAnimationFrame(tween);
-  drag={y0:y,ty0:ty,last:y,lt:performance.now(),v:0,active:false,fromList:!!target.closest("#list")};
+  drag={y0:y,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
 }
 function dMove(y,e){
-  if(!drag)return;const dy=y-drag.y0;
-  if(!drag.active){
-    if(Math.abs(dy)<7)return;
-    if(expanded&&drag.fromList&&(dy<0||list.scrollTop>0)){drag=null;return}   // dejar que la lista haga scroll
-    drag.active=true;drag.y0=y;drag.ty0=ty;
+  if(!drag)return;
+  const dy=y-drag.y0;
+  if(drag.state==="pending"){
+    if(dy===0)return;
+    if(expanded&&drag.fromList&&(dy<0||list.scrollTop>1)){drag=null;return}  // la lista hace scroll normal
+    drag.state="drag";
   }
   if(e.cancelable)e.preventDefault();
-  let n=drag.ty0+(y-drag.y0);
+  let n=drag.ty0+dy;
   if(n<0)n=-Math.pow(-n,.7);if(n>maxTy)n=maxTy+Math.pow(n-maxTy,.7);
-  const now=performance.now();drag.v=(y-drag.last)/Math.max(1,now-drag.lt);drag.last=y;drag.lt=now;
+  const now=performance.now(),dt=now-drag.lt;
+  if(dt>0){drag.v=.7*((y-drag.last)/dt)+.3*drag.v;drag.last=y;drag.lt=now}
+  if(Math.abs(dy)>6)drag.moved=true;
   apply(n);
 }
 function dEnd(){
   if(!drag)return;const d=drag;drag=null;
-  if(!d.active){if(!expanded&&d.fromList===false)return;return}
-  suppress=true;setTimeout(()=>suppress=false,60);
-  const open=d.v<-.3?true:d.v>.3?false:ty<maxTy/2;
-  animateTo(open?0:maxTy,open?480:560);
+  if(d.state!=="drag")return;
+  if(!d.moved){animateTo(expanded?0:maxTy,250);return}
+  suppress=true;setTimeout(()=>suppress=false,80);
+  const open=d.v<-.25?true:d.v>.25?false:ty<maxTy/2;
+  animateTo(open?0:maxTy,open?460:540);
 }
-sheet.addEventListener("touchstart",e=>dStart(e.touches[0].clientY,e.target),{passive:true});
-sheet.addEventListener("touchmove",e=>dMove(e.touches[0].clientY,e),{passive:false});
-sheet.addEventListener("touchend",dEnd);sheet.addEventListener("touchcancel",dEnd);
-sheet.addEventListener("mousedown",e=>{dStart(e.clientY,e.target);const mm=ev=>dMove(ev.clientY,ev),mu=()=>{dEnd();removeEventListener("mousemove",mm);removeEventListener("mouseup",mu)};addEventListener("mousemove",mm);addEventListener("mouseup",mu)});
+home.addEventListener("touchstart",e=>{if(e.touches.length===1)dStart(e.touches[0].clientY,e.target);else drag=null},{passive:true});
+home.addEventListener("touchmove",e=>dMove(e.touches[0].clientY,e),{passive:false});
+home.addEventListener("touchend",dEnd);home.addEventListener("touchcancel",dEnd);
+home.addEventListener("mousedown",e=>{
+  if(e.sourceCapabilities&&e.sourceCapabilities.firesTouchEvents)return;   // ratón simulado tras un toque
+  dStart(e.clientY,e.target);
+  const mm=ev=>dMove(ev.clientY,ev),mu=()=>{dEnd();removeEventListener("mousemove",mm);removeEventListener("mouseup",mu)};
+  addEventListener("mousemove",mm);addEventListener("mouseup",mu);
+});
 home.addEventListener("wheel",e=>{
   if(curPage)return;
   if(!expanded&&e.deltaY>12)expand();
   else if(expanded&&e.deltaY<-12&&list.scrollTop<=0)collapse();
 },{passive:true});
-// deslizar hacia arriba en la zona oscura también despliega
-dark.addEventListener("touchstart",e=>{dark._y=e.touches[0].clientY},{passive:true});
-dark.addEventListener("touchend",e=>{if(dark._y-e.changedTouches[0].clientY>40)expand()});
 $("#grab").addEventListener("click",()=>expanded?collapse():expand());
 document.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.preventDefault()}},true);
 
