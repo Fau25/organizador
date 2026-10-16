@@ -517,7 +517,7 @@ function gcalUrl({t,d,h,yearly}){
   if(h){const [H,M]=h.split(":").map(Number);const s=parse(d);s.setHours(H,M);const e=new Date(s.getTime()+36e5);
     const f=x=>`${x.getFullYear()}${pad(x.getMonth()+1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;dates=`${f(s)}/${f(e)}`;}
   else{const e=parse(d);e.setDate(e.getDate()+1);dates=`${d.replace(/-/g,"")}/${iso(e).replace(/-/g,"")}`}
-  const p=new URLSearchParams({action:"TEMPLATE",text:t,dates,ctz:"Europe/Madrid"});
+  const p=new URLSearchParams({action:"TEMPLATE",text:t,dates,ctz:(Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Madrid")});
   if(yearly)p.set("recur","RRULE:FREQ=YEARLY");
   return "https://calendar.google.com/calendar/render?"+p.toString();
 }

@@ -58,7 +58,9 @@ El script busca cumpleaños en tres sitios a la vez:
 
 Los cumpleaños que crees desde la app se guardan como evento anual en el calendario "Cumpleaños", con el año de nacimiento en la descripción. Así la app puede mostrar la edad.
 
-Los **eventos** que trae son los de tu calendario principal de los próximos **60 días**. Se puede cambiar en `EVENT_DAYS`.
+Los **eventos** que trae son los de tu calendario principal y los de **Deporte**, de los próximos **120 días**. Se cambia en `EXTRA_EVENT_CALENDARS` y `EVENT_DAYS`.
+
+La **zona horaria** es la de tu calendario principal (la tuya es la de Canarias). Si quieres forzar otra, ponla en `TZ`, por ejemplo `'Europe/Madrid'`.
 
 ## Cuándo se sincroniza
 

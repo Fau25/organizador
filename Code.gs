@@ -24,11 +24,14 @@ const CONFIG = {
   // (eventos que empiecen por "Cumpleaños de…", "Cumple de…" o lleven 🎂)
   SCAN_MAIN_CALENDAR: true,
 
-  // Cuántos días hacia delante se leen los eventos del calendario principal.
-  EVENT_DAYS: 60,
+  // Cuántos días hacia delante se leen los eventos.
+  EVENT_DAYS: 120,
 
-  // Zona horaria de tus eventos.
-  TZ: 'Europe/Madrid',
+  // Calendarios de los que se leen eventos, además del principal (por nombre).
+  EXTRA_EVENT_CALENDARS: ['Deporte'],
+
+  // Zona horaria: vacío = la de tu calendario principal (la tuya es Atlantic/Canary).
+  TZ: '',
 };
 // ===========================================================
 
@@ -88,7 +91,7 @@ function readBirthdays_() {
     const name = cleanName_(ev.getTitle());
     if (!name) return;
     const d = ev.isAllDayEvent() ? ev.getAllDayStartDate() : ev.getStartTime();
-    const md = Utilities.formatDate(d, CONFIG.TZ, 'MM-dd');
+    const md = Utilities.formatDate(d, tz_(), 'MM-dd');
     const k = name.toLowerCase() + '|' + md;
     if (out[k]) return;
     const year = (String(ev.getDescription() || '').match(/Nacimiento:\s*(\d{4})/) || [])[1];
@@ -111,19 +114,27 @@ function readBirthdays_() {
   return Object.keys(out).map(k => out[k]);
 }
 
+function eventCalendars_() {
+  const cals = [CalendarApp.getDefaultCalendar()];
+  (CONFIG.EXTRA_EVENT_CALENDARS || []).forEach(n => CalendarApp.getCalendarsByName(n).forEach(c => cals.push(c)));
+  return cals;
+}
+
 function readEvents_() {
   const start = startOfToday_();
   const end = new Date(start.getTime() + CONFIG.EVENT_DAYS * 864e5);
-  return CalendarApp.getDefaultCalendar().getEvents(start, end)
+  const seen = {};
+  return [].concat(...eventCalendars_().map(c => c.getEvents(start, end)))
     .filter(ev => !isBdayTitle_(ev.getTitle()))
+    .filter(ev => { const id = ev.getId() + '|' + ev.getStartTime().getTime(); if (seen[id]) return false; seen[id] = 1; return true; })
     .map(ev => {
       const all = ev.isAllDayEvent();
       const s = all ? ev.getAllDayStartDate() : ev.getStartTime();
       return {
         gid: ev.getId(),
         t: ev.getTitle() || '(sin título)',
-        d: Utilities.formatDate(s, CONFIG.TZ, 'yyyy-MM-dd'),
-        h: all ? '' : Utilities.formatDate(s, CONFIG.TZ, 'HH:mm'),
+        d: Utilities.formatDate(s, tz_(), 'yyyy-MM-dd'),
+        h: all ? '' : Utilities.formatDate(s, tz_(), 'HH:mm'),
         app: ev.getTag(TAG) || null,
       };
     });
@@ -154,8 +165,8 @@ function addEvent_(b) {
   const [y, m, d] = String(b.d).split('-').map(Number);
   let ev;
   if (b.h) {
-    const [H, M] = String(b.h).split(':').map(Number);
-    const s = new Date(y, m - 1, d, H, M);
+    // la hora se interpreta en la zona horaria de tu calendario
+    const s = Utilities.parseDate(b.d + ' ' + b.h, tz_(), 'yyyy-MM-dd HH:mm');
     ev = cal.createEvent(b.t, s, new Date(s.getTime() + 60 * 60 * 1000));
   } else {
     ev = cal.createAllDayEvent(b.t, new Date(y, m - 1, d));
@@ -167,7 +178,7 @@ function addEvent_(b) {
 
 function deleteById_(gid) {
   if (!gid) return false;
-  const cals = [CalendarApp.getDefaultCalendar()].concat(CalendarApp.getCalendarsByName(CONFIG.BDAY_CALENDAR));
+  const cals = eventCalendars_().concat(CalendarApp.getCalendarsByName(CONFIG.BDAY_CALENDAR));
   for (const cal of cals) {
     try { const s = cal.getEventSeriesById(gid); if (s) { s.deleteEventSeries(); return true; } } catch (e) {}
     try { const ev = cal.getEventById(gid); if (ev) { ev.deleteEvent(); return true; } } catch (e) {}
@@ -176,6 +187,9 @@ function deleteById_(gid) {
 }
 
 /* ------------------------ AYUDAS --------------------------- */
+
+let TZ_CACHE = null;
+function tz_() { return TZ_CACHE || (TZ_CACHE = CONFIG.TZ || CalendarApp.getDefaultCalendar().getTimeZone() || Session.getScriptTimeZone()); }
 
 function getBdayCalendars_() {
   const list = CalendarApp.getCalendarsByName(CONFIG.BDAY_CALENDAR).map(cal => ({ cal, src: 'calendario' }));
@@ -190,7 +204,7 @@ function getBdayCalendars_() {
 function getOrCreateBdayCalendar_() {
   const found = CalendarApp.getCalendarsByName(CONFIG.BDAY_CALENDAR);
   if (found.length) return found[0];
-  return CalendarApp.createCalendar(CONFIG.BDAY_CALENDAR, { color: CalendarApp.Color.YELLOW, timeZone: CONFIG.TZ });
+  return CalendarApp.createCalendar(CONFIG.BDAY_CALENDAR, { color: CalendarApp.Color.YELLOW, timeZone: tz_() });
 }
 
 function isBdayTitle_(t) { return BDAY_RE.test(t || '') || /🎂/.test(t || ''); }
