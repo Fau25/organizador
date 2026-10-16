@@ -254,6 +254,18 @@ input{font:inherit;color:inherit}
 .evbar .qday{background:#fff}
 @media (max-width:370px){.dd{width:40px;height:40px;font-size:16px}.mon{font-size:26px}}
 
+
+.calh{margin:calc(var(--safe-t) + 6px) 6px 0;border-radius:36px!important;padding-top:22px!important}
+.evc.bday{align-items:center}
+.evc.bday::before{display:none}
+.evc .cake{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:28px;line-height:1;background:#fff4e0;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.evc.bday .evr .rchk{margin-top:0}
+.ftype{display:flex;gap:6px;padding:4px;margin:-4px 0 16px;border-radius:16px;background:#f1f1f1}
+.ftype button{flex:1;height:44px;border-radius:12px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;color:#666;transition:background .2s,color .2s}
+.ftype button span{font-size:18px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.ftype button.on{background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 .dsheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:#fff;color:#111;border-radius:30px 30px 0 0;padding:14px 20px calc(var(--safe-b) + 20px);
@@ -376,6 +388,7 @@ input{font:inherit;color:inherit}
   <form class="dsheet" id="form">
     <div class="dgrab"></div>
     <h4 id="fHead">Nuevo evento</h4>
+    <div class="ftype" id="fType" hidden><button type="button" data-ft="evento" class="on"><span>🗓️</span>Evento</button><button type="button" data-ft="cumple"><span>🎂</span>Cumpleaños</button></div>
     <div class="f"><label id="lblTitle">Qué evento es</label><input id="fTitle" autocomplete="off"></div>
     <div class="two">
       <div class="f"><label id="lblDate">Fecha</label><input type="date" id="fDate"></div>
@@ -478,7 +491,7 @@ async function toGoogle(kind,item){
     if(kind==="bday")openGcal({t:"🎂 Cumpleaños de "+item.t,d:iso(nextBday(item.d).date),yearly:true});else openGcal(item);
     return;
   }
-  try{const j=await apiPost({action:kind==="bday"?"addBday":"addEvent",t:item.t,d:item.d,h:item.h||"",id:item.id});item.gid=j.gid;delete item.pend;toast("Guardado en Google ✓")}
+  try{const dd=item.d.length===5?`${nextBday(item.d).date.getFullYear()}-${item.d}`:item.d;const j=await apiPost({action:kind==="bday"?"addBday":"addEvent",t:item.t,d:dd,h:item.h||"",id:item.id});item.gid=j.gid;delete item.pend;toast("Guardado en Google ✓")}
   catch(e){item.pend=true;toast("Guardado. Se subirá a Google al reconectar")}
   render();
 }
@@ -776,11 +789,11 @@ const mondayOf=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()
 const WK_BEFORE=8,WK_AFTER=60;
 function buildWeeks(){
   const start=mondayOf(today);start.setDate(start.getDate()-WK_BEFORE*7);
-  const has=new Set(db.events.map(e=>e.d)),t=iso(today);let h="";
+  const has=new Set(db.events.map(e=>e.d)),bmd=new Set(db.bdays.map(b=>md(b.d))),t=iso(today);let h="";
   for(let w=0;w<WK_BEFORE+WK_AFTER;w++){
     h+=`<div class="wk">`;
     for(let i=0;i<7;i++){const d=new Date(start);d.setDate(d.getDate()+w*7+i);const k=iso(d);
-      h+=`<button class="dd${k===evSel?" on":""}${k===t?" today":""}${has.has(k)?" has":""}" data-cal="${k}">${d.getDate()}</button>`}
+      h+=`<button class="dd${k===evSel?" on":""}${k===t?" today":""}${has.has(k)||bmd.has(k.slice(5))?" has":""}" data-cal="${k}">${d.getDate()}</button>`}
     h+=`</div>`;
   }
   $("#weeks").innerHTML=h;
@@ -802,38 +815,50 @@ $("#evQx").onclick=()=>{$("#evSearch").hidden=true;evQuery="";$("#evQ").value=""
 $("#evQ").addEventListener("input",e=>{evQuery=e.target.value.trim().toLowerCase();renderEventsBody()});
 
 
+/* cumpleaños dentro de eventos: se muestran el día que tocan, con la tarta 🎂 */
+function bOcc(b,from){const [m,d]=md(b.d).split("-").map(Number),f=parse(from);let o=new Date(f.getFullYear(),m-1,d);if(o<f)o.setFullYear(o.getFullYear()+1);return iso(o)}
+function evItems(from,to){
+  const ev=db.events.filter(e=>e.d>=from&&e.d<=to).map(e=>({...e,kind:"e"}));
+  const bd=db.bdays.map(b=>{const d=bOcc(b,from),y=b.d.length>5?Number(b.d.slice(0,4)):null;return {...b,d,h:"",kind:"b",age:y?parse(d).getFullYear()-y:null}}).filter(b=>b.d<=to);
+  return ev.concat(bd).sort((a,b)=>(a.d+(a.kind==="b"?"00":a.h||"99")).localeCompare(b.d+(b.kind==="b"?"00":b.h||"99")));
+}
+const addDays=(k,n)=>{const d=parse(k);d.setDate(d.getDate()+n);return iso(d)};
 function evCard(e,showDate){
   const d=parse(e.d),k=daysFrom(e.d);
-  const sub=showDate?[k<=1&&k>=0?inDays(k):`${DIAS[d.getDay()]} ${fd(d)}`,k>1&&k<=6?inDays(k).toLowerCase():""].filter(Boolean).join(" · "):(e.src&&e.src!=="local"?"Google Calendar":"");
+  const when=[k<=1&&k>=0?inDays(k):`${DIAS[d.getDay()]} ${fd(d)}`,k>1&&k<=6?inDays(k).toLowerCase():""].filter(Boolean).join(" · ");
+  if(e.kind==="b"){
+    const sub=[e.age?`Cumple ${e.age}`:"",showDate?when:""].filter(Boolean).join(" · ");
+    return `<div class="evc prow bday"><span class="cake">🎂</span><div class="evl"><b>Cumpleaños de ${esc(e.t)}</b>${sub?`<span>${sub}</span>`:""}</div><div class="evr">${e.src==="contactos"?"":`<button class="rchk" data-done="b:${e.id}" aria-label="Quitar"></button>`}</div></div>`;
+  }
+  const sub=showDate?when:(e.src&&GSRC.includes(e.src)?"Google Calendar":"");
   return `<div class="evc prow" style="--bar:${barOf(e.id)}"><div class="evl"><b>${esc(e.t)}</b>${sub?`<span>${sub}</span>`:""}</div><div class="evr"><b>${e.h||"Todo"}</b><small>${e.h?"":"el día"}</small>${e.src==="contactos"?"":`<button class="rchk" data-done="e:${e.id}" aria-label="Quitar"></button>`}</div></div>`;
 }
-const sech=(title,n)=>`<div class="sech"><b>${title}</b><span>${n?plural(n,"evento","eventos").replace(/<[^>]+>/g,""):"Sin eventos"}</span></div>`;
+const sech=(title,n)=>`<div class="sech"><b>${title}</b><span>${n==null?"":n?(n===1?"1 evento":n+" eventos"):"Sin eventos"}</span></div>`;
 function renderEventsBody(anim){
   const body=$("#pEventos [data-body]"),t=iso(today);let h="";
-  const up=db.events.filter(e=>e.d>=t).sort((a,b)=>(a.d+(a.h||"")).localeCompare(b.d+(b.h||"")));
   if(evQuery){
-    const r=db.events.filter(e=>e.t.toLowerCase().includes(evQuery)).sort((a,b)=>(a.d+(a.h||"")).localeCompare(b.d+(b.h||"")));
-    h=sech(`Resultados`,r.length)+(r.map(e=>evCard(e,true)).join("")||`<p class="evempty">No hay eventos con “${esc(evQuery)}”.</p>`);
+    const r=evItems(t,addDays(t,366)).concat(db.events.filter(e=>e.d<t).map(e=>({...e,kind:"e"}))).filter(e=>e.t.toLowerCase().includes(evQuery));
+    h=sech("Resultados",r.length)+(r.map(e=>evCard(e,true)).join("")||`<p class="evempty">No hay nada con “${esc(evQuery)}”.</p>`);
   }else if(evMode==="all"){
-    h=sech("Todos los próximos",up.length);
+    const up=evItems(t,addDays(t,90));
+    h=sech("Próximos 3 meses",up.length);
     let cur="";for(const e of up){if(e.d!==cur){cur=e.d;const d=parse(e.d),k=daysFrom(e.d);h+=`<p class="evday">${k<=1?inDays(k):DIAS[d.getDay()]} · ${fd(d)}</p>`}h+=evCard(e,false)}
-    if(!up.length)h+=`<p class="evempty">No tienes eventos a la vista. Pulsa + arriba para añadir uno.</p>`;
+    if(!up.length)h+=`<p class="evempty">No tienes nada a la vista. Añade un evento abajo.</p>`;
   }else{
     const d=parse(evSel),k=daysFrom(evSel);
-    const day=db.events.filter(e=>e.d===evSel).sort((a,b)=>(a.h||"99").localeCompare(b.h||"99"));
+    const day=evItems(evSel,evSel);
     h=sech(k===0?"Hoy":k===1?"Mañana":k===-1?"Ayer":`${DIAS[d.getDay()]} ${fd(d)}`,day.length);
     h+=day.map(e=>evCard(e,false)).join("")||`<button class="evempty addhere" id="addHere">Nada este día · <u>Añadir evento</u></button>`;
-    const next=up.filter(e=>e.d>evSel).slice(0,8);
-    if(next.length)h+=sech("Próximos",0).replace("Sin eventos","")+next.map(e=>evCard(e,true)).join("");
+    const from=addDays(evSel<t?t:evSel,evSel<t?0:1),next=evItems(from,addDays(from,60)).slice(0,8);
+    if(next.length)h+=sech("Próximos",null)+next.map(e=>evCard(e,true)).join("");
   }
   body.innerHTML=h;
   $("#evDayTxt").textContent=dayChip(evSel<iso(today)?iso(today):evSel);
   if(anim){body.classList.remove("swap");void body.offsetWidth;body.classList.add("swap")}
-  const ah=$("#addHere");if(ah)ah.onclick=()=>openDateSheet("evento","",evSel);
-  const n=up.length;
+  const ah=$("#addHere");if(ah)ah.onclick=()=>openDateSheet("evento","",evSel,true);
 }
 function renderEvents(){buildWeeks();renderEventsBody()}
-function evAdd(){const i=$("#evText");openDateSheet("evento",i.value.trim(),evSel);i.value="";i.blur()}
+function evAdd(){const i=$("#evText");openDateSheet("evento",i.value.trim(),evSel,true);i.value="";i.blur()}
 $("#evbar").addEventListener("submit",e=>{e.preventDefault();evAdd()});
 $("#evAdd").addEventListener("click",e=>{e.preventDefault();evAdd()});
 $("#evText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();evAdd()}});
@@ -848,16 +873,26 @@ $$(".pbar").forEach(f=>{
 
 /* ---------------- hoja de fecha (evento / cumpleaños) ---------------- */
 let type="evento";
-function openDateSheet(t,title,preDate){
-  type=t;$("#form").reset();
+let sheetPre=null;
+function setSheetType(t){
+  type=t;
+  $$("#fType [data-ft]").forEach(b=>b.classList.toggle("on",b.dataset.ft===t));
   $("#fHead").textContent=t==="cumple"?"Nuevo cumpleaños":"Nuevo evento";
   $("#lblTitle").textContent=t==="cumple"?"De quién es":"Qué evento es";
-  $("#lblDate").textContent=t==="cumple"?"Fecha de nacimiento":"Fecha";
+  $("#lblDate").textContent=t==="cumple"?"Fecha (pon el año en que nació para ver su edad)":"Fecha";
   $("#fTimeBox").style.display=t==="evento"?"":"none";
+}
+function openDateSheet(t,title,preDate,choose){
+  $("#form").reset();sheetPre=preDate||null;
+  $("#fType").hidden=!choose;
+  setSheetType(t);
   $("#gcLbl").textContent=linked()?"Guardar también en Google Calendar":"Añadir también a Google Calendar (se abrirá)";
-  $("#fTitle").value=title||"";$("#fDate").value=t==="cumple"?"":(preDate&&preDate>=iso(today)?preDate:iso(today));$("#fGc").checked=true;
+  $("#fTitle").value=title||"";
+  $("#fDate").value=t==="cumple"&&!preDate?"":(preDate&&preDate>=iso(today)?preDate:iso(today));
+  $("#fGc").checked=true;
   $("#sheetWrap").classList.add("show");if(!title)setTimeout(()=>$("#fTitle").focus(),350);
 }
+$("#fType").addEventListener("click",e=>{const b=e.target.closest("[data-ft]");if(b)setSheetType(b.dataset.ft)});
 const closeSheet=()=>$("#sheetWrap").classList.remove("show");
 $("#sheetBg").onclick=closeSheet;
 function saveSheet(){
@@ -865,7 +900,7 @@ function saveSheet(){
   if(!t){$("#fTitle").focus();toast("Escribe un nombre");return}
   if(!d){toast("Elige una fecha");try{$("#fDate").showPicker()}catch(e){$("#fDate").focus()}return}
   const gc=$("#fGc").checked;
-  if(type==="cumple"){const it={id:uid(),t,d};db.bdays.push(it);if(gc)toGoogle("bday",it)}
+  if(type==="cumple"){const it={id:uid(),t,d:Number(d.slice(0,4))>=today.getFullYear()?d.slice(5):d};db.bdays.push(it);if(gc)toGoogle("bday",it)}
   else{const it={id:uid(),t,d,h};db.events.push(it);if(gc)toGoogle("event",it)}
   closeSheet();render();if(!gc||!linked())toast("Guardado ✓");
 }
