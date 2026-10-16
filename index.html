@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0c0c0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Mi Día">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
@@ -304,7 +304,7 @@ input{font:inherit;color:inherit}
 
 /* iOS 26 pinta la franja del sistema con el color de fondo de la página al abrir la app:
    fondo negro liso para que se funda con la portada; la app no sale de la zona visible */
-html,body{background:#0c0c0c!important}
+html,body{background:var(--pagebg,#0c0c0c)!important}
 
 .diag{font:12.5px/1.6 ui-monospace,Menlo,monospace;background:#f4f4f6;border-radius:14px;padding:12px 14px;white-space:pre-wrap;color:#222}
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
@@ -675,7 +675,7 @@ function layout(){
   $("#sparks").style.height=collapsedTop+"px";
   apply(expanded?0:maxTy);
 }
-function setBg(){}
+function setBg(t){document.documentElement.style.setProperty("--pagebg",t)}
 function apply(y){
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
@@ -803,7 +803,7 @@ function openPage(p){
   if(p!=="ajustes")renderPage(p);else fillSettings();
   if(p==="eventos")requestAnimationFrame(()=>scrollToWeek(evSel,false));
   $(PAGE[p]).classList.add("on");home.classList.add("away");
-  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":"#f2f2f4";$('meta[name="theme-color"]').content=p==="eventos"?"#2c5a64":c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
+  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":"#f2f2f4";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
   try{history.pushState({p},"")}catch(e){}
 }
 function closePage(silent){
