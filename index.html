@@ -296,6 +296,11 @@ input{font:inherit;color:inherit}
 .row.checking .ck{background:var(--bar,#111)!important;border-color:var(--bar,#111)!important}
 .row .ico{width:26px!important}
 
+
+.pill.home{width:35px;padding:0!important;justify-content:center;background:var(--i-cumple)!important;border-color:var(--i-cumple)!important;color:#111}
+.pill.home svg{width:17px;height:17px}
+.pill.home.on{box-shadow:0 0 0 2px rgba(217,240,90,.35)}
+
 /* ======================= HOJA DE FECHA (cumple / evento) ======================= */
 .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 .dsheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:#fff;color:#111;border-radius:30px 30px 0 0;padding:14px 20px calc(var(--safe-b) + 20px);
@@ -339,9 +344,9 @@ input{font:inherit;color:inherit}
   <div class="dark" id="dark">
     <p class="brief" id="brief"></p>
     <div class="pills" id="pills">
+      <button class="pill home" data-pill="tareas" aria-label="Inicio: tareas"><svg viewBox="0 0 24 24" fill="#111"><path d="M12 3.2 2.8 11a1 1 0 0 0 1.3 1.5l.9-.8V19a2 2 0 0 0 2 2h3.2v-5.2h3.6V21H17a2 2 0 0 0 2-2v-7.3l.9.8a1 1 0 0 0 1.3-1.5Z"/></svg></button>
       <button class="pill" data-pill="eventos"><svg viewBox="0 0 24 24" fill="none" stroke="var(--i-eventos)" stroke-width="2.2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Eventos <span class="n" id="nEv"></span></button>
       <button class="pill" data-pill="listas"><svg viewBox="0 0 24 24" fill="none" stroke="var(--i-listas)" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill="var(--i-listas)"/><circle cx="4.5" cy="12" r="1.3" fill="var(--i-listas)"/><circle cx="4.5" cy="18" r="1.3" fill="var(--i-listas)"/></svg>Listas <span class="n" id="nLi"></span></button>
-      <button class="pill" data-pill="cumple"><svg viewBox="0 0 24 24" fill="none" stroke="var(--i-cumple)" stroke-width="2.2"><path d="M4 21V12h16v9M2 21h20M7 12V9h10v3M12 9V6"/><path d="M12 2.5c.8.8.8 2 0 2.6-.8-.6-.8-1.8 0-2.6z" fill="var(--i-cumple)"/></svg>Cumpleaños <span class="n" id="nBd"></span></button>
     </div>
   </div>
   <button class="tset" data-page="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sync" id="syncInd" hidden><i></i><span></span></span></button>
@@ -600,7 +605,7 @@ function renderPills(){
   const t=iso(today);
   const ev=db.events.filter(e=>e.d>=t&&daysFrom(e.d)<=7).length;
   const bd=db.bdays.filter(b=>nextBday(b.d).days<=30).length;
-  $("#nEv").textContent=ev||"";$("#nLi").textContent=db.lists.length||"";$("#nBd").textContent=bd||"";
+  $("#nEv").textContent=ev||"";$("#nLi").textContent=db.lists.length||"";
   $$("[data-pill]").forEach(p=>p.classList.toggle("on",p.dataset.pill===mode));
 }
 let lastX="";
@@ -951,7 +956,7 @@ document.addEventListener("click",e=>{
   if(ds.done)completeItem(ds.done,b.closest(".row,.prow"));
   if("undo" in ds)undoLast();
   if(ds.page)openPage(ds.page);
-  if(ds.pill){if(ds.pill==="listas")setMode(mode==="listas"?"tareas":"listas");else openPage(ds.pill)}
+  if(ds.pill){if(ds.pill==="tareas")setMode("tareas");else if(ds.pill==="listas")setMode(mode==="listas"?"tareas":"listas");else openPage(ds.pill)}
 });
 
 /* ---------------- ajustes ---------------- */
