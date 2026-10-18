@@ -369,6 +369,31 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .pvadd{background:#1c1c1e!important;opacity:1!important;pointer-events:auto!important;transform:none!important;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .pvadd input{color:#fff}.pvadd input::placeholder{color:#7a7a7a}
 .pvadd .addbtn{background:#ff5c7a;color:#111}
+
+.pveye{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#1c1c1e;color:#bdbdbd;transition:color .2s,background .2s}
+.pveye svg{width:21px;height:21px}
+.pveye.on{color:#111;background:#ff5c7a}
+#pPelis>*:not(.pvbg){position:relative;z-index:1}
+#pPelis>.addbar{position:absolute;z-index:2}
+.pvbg{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .5s}
+#pPelis.cards .pvbg{opacity:1}
+.pvbg i{position:absolute;inset:-60px;background-size:cover;background-position:center;filter:blur(38px) saturate(1.3) brightness(.55);transform:scale(1.15);opacity:0;transition:opacity .6s}
+.pvbg i.on{opacity:1}
+.pvbg::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(12,12,12,.35),rgba(12,12,12,.15) 40%,rgba(12,12,12,.7))}
+#pPelis.cards .pvbody{overflow:hidden;display:flex;padding:14px 0 calc(var(--safe-b) + 96px)}
+#pPelis.cards .pvgrid{flex:1;display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:0 7vw;scrollbar-width:none;align-items:stretch}
+#pPelis.cards .pvgrid::-webkit-scrollbar{display:none}
+#pPelis.cards .pv{flex:none;height:100%;aspect-ratio:2/3;max-width:86vw;scroll-snap-align:center;border-radius:30px;box-shadow:0 24px 50px rgba(0,0,0,.55)}
+#pPelis.cards .pv::after{height:38%}
+#pPelis.cards .pv .pvi{left:18px;right:84px;bottom:20px}
+#pPelis.cards .pv .pvi b{font-size:22px;letter-spacing:-.4px}
+#pPelis.cards .pv .pvi small{font-size:14px}
+#pPelis.cards .pv .seen{display:none}
+.pvseen{display:none}
+#pPelis.cards .pvseen{display:grid;place-items:center;position:absolute;right:16px;bottom:16px;z-index:2;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-size:24px;font-weight:700;border:1.5px solid rgba(255,255,255,.35)}
+#pPelis.cards .pvseen.on{background:#d9f05a;color:#111;border-color:#d9f05a}
+#pPelis.cards .pvseen:active{transform:scale(.9)}
+#pPelis.cards .pvempty{flex:1;align-self:center}
 .pvsheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s}
 .pvsheet.on{opacity:1;pointer-events:auto}
 .pvsheet .box{width:100%;max-width:520px;background:#1c1c1e;color:#fff;border-radius:28px 28px 0 0;padding:20px 18px calc(var(--safe-b) + 18px);transform:translateY(100%);transition:transform .35s var(--ease)}
@@ -448,7 +473,8 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 
 <!-- PELIS Y SERIES -->
 <section class="page" data-p="pelis" id="pPelis">
-  <div class="pvbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button></div>
+  <div class="pvbg" id="pvBg"><i></i><i></i></div>
+  <div class="pvbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><button class="pveye" id="pvEye" aria-label="Cambiar vista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
   <h1 class="pvt">Pelis y series</h1>
   <div class="pvtabs" id="pvTabs"><button data-pv="todo" class="on">Por ver</button><button data-pv="movie">Pelis</button><button data-pv="tv">Series</button><button data-pv="seen">Vistas</button></div>
   <div class="pvbody"><div class="pvgrid" id="pvGrid"></div></div>
@@ -1058,8 +1084,9 @@ function renderPelis(){
   const items=pvList().slice().reverse();
   g.innerHTML=items.map(x=>{
     const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
-    return `<button class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}${x.w?'<span class="seen">✓</span>':""}<div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div></button>`}).join("")
+    return `<button class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}${x.w?'<span class="seen">✓</span>':""}<span class="pvseen${x.w?" on":""}" data-seen="${x.id}" role="button" aria-label="${x.w?"Quitar de vistas":"Marcar como vista"}">${x.w?"↩︎":"✓"}</span><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div></button>`}).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
+  pvSyncBg();
   if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
   for(const x of db.lists.filter(x=>x.p&&!x.img&&!x.nf))pvLookup(x);
 }
@@ -1084,8 +1111,29 @@ function pvOpen(id){
     <button class="op del" data-op="del">Eliminar</button>`;
   $("#pvSheet").classList.add("on");
 }
+
+/* vista de la galería: cuadrícula ⇄ fichas grandes con fondo desenfocado */
+let pvView=(()=>{try{return localStorage.getItem("midia-pvview")||"grid"}catch(e){return "grid"}})();
+function setPvView(v){pvView=v;try{localStorage.setItem("midia-pvview",v)}catch(e){}
+  $("#pPelis").classList.toggle("cards",v==="cards");$("#pvEye").classList.toggle("on",v==="cards");
+  $("#pvGrid").scrollLeft=0;$("#pvGrid").parentNode.scrollTop=0;pvSyncBg()}
+let pvBgCur="",pvBgK=0;
+function pvSyncBg(){
+  if(pvView!=="cards")return;
+  const g=$("#pvGrid"),cards=[...g.querySelectorAll(".pv")];if(!cards.length)return;
+  const mid=g.scrollLeft+g.clientWidth/2;let best=cards[0],bd=1e9;
+  for(const c of cards){const d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);if(d<bd){bd=d;best=c}}
+  const im=best.querySelector("img"),u=im?im.src:"";if(u===pvBgCur)return;pvBgCur=u;
+  const L=$$("#pvBg i");pvBgK^=1;L[pvBgK].style.backgroundImage=u?`url("${u}")`:"none";L[pvBgK].classList.add("on");L[pvBgK^1].classList.remove("on");
+}
+$("#pvEye").onclick=()=>setPvView(pvView==="cards"?"grid":"cards");
+$("#pvGrid").addEventListener("scroll",()=>{cancelAnimationFrame(pvSyncBg.r);pvSyncBg.r=requestAnimationFrame(pvSyncBg)},{passive:true});
+setPvView(pvView);
 const pvClose=()=>$("#pvSheet").classList.remove("on");
-$("#pvGrid").addEventListener("click",e=>{const c=e.target.closest("[data-pv-id]");if(c)pvOpen(c.dataset.pvId)});
+$("#pvGrid").addEventListener("click",e=>{
+  const sb=e.target.closest("[data-seen]");
+  if(sb){e.stopPropagation();const x=db.lists.find(y=>y.id===sb.dataset.seen);if(!x)return;if(x.w)delete x.w;else x.w=1;x.u=nowU();render();toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");return}
+  const c=e.target.closest("[data-pv-id]");if(c)pvOpen(c.dataset.pvId)});
 $("#pvSheet").addEventListener("click",e=>{
   const op=e.target.closest("[data-op]");if(!op){if(e.target.id==="pvSheet")pvClose();return}
   const x=pvCur;pvClose();if(!x)return;
