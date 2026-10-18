@@ -951,7 +951,8 @@ function dStart(y,target,x){
 function hMove(dx){
   const i=MODES.indexOf(mode),toPelis=dx<0&&mode==="eventos",edge=(dx>0&&i===0)||(dx<0&&i===MODES.length-1&&!toPelis);
   const pp=$("#pPelis");
-  if(toPelis){pp.style.transition="none";pp.style.transform=`translateX(${home.clientWidth+dx}px)`}else if(pp.style.transform){pp.style.transform=""}
+  if(toPelis){pp.style.transition="none";pp.style.transform=`translateX(${home.clientWidth+dx}px)`;$("#list").style.transform="";$("#list").style.opacity="";return}   // Pelis entra por encima: la ficha no se mueve
+  if(pp.style.transform){pp.style.transform=""}
   const k=edge?dx*.25:dx*.6;$("#list").style.transform=`translateX(${k}px)`;$("#list").style.opacity=String(1-Math.min(.5,Math.abs(k)/400));
   const W=home.clientWidth;
   if(mode==="eventos"&&dx>0)setTop(1-dx/W,false);
