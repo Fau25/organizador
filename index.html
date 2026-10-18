@@ -1561,6 +1561,8 @@ function resetHome(){
   const pp=$("#pPelis");if(pp.style.transform){pp.style.transition="";pp.style.transform=""}
   setTop(mode==="eventos"?1:0,false);
   if(expanded||ty!==maxTy){$("#qtext").blur();closeDayPop();apply(maxTy);settle(false)}
+  // repintar la franja de la hora con el color de la portada (iOS a veces se queda con el anterior)
+  if(!curPage){themeDark=null;apply(ty);requestAnimationFrame(()=>{themeDark=null;apply(ty)})}
 }
 document.addEventListener("visibilitychange",()=>{if(document.hidden){flushNow();resetHome()}else{resetHome();checkDay();lastTry=0;sync()}});
 addEventListener("pageshow",e=>{if(e.persisted)resetHome()});
