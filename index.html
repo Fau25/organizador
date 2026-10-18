@@ -1012,8 +1012,24 @@ function pageAdd(form){
 let pvTab="todo";
 const isTv=x=>/^tv(Series|MiniSeries)$/.test(x.k||"");
 const pvImg=u=>u?u.replace(/\._V1_.*?\.jpg$/,"._V1_QL75_UX400_.jpg"):"";
+const pvNorm=q=>q.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9 ]/g," ").trim().replace(/\s+/g,"_");
+const jsonpWait={};
+function imdbJsonp(q){
+  const k=pvNorm(q);if(!k)return Promise.resolve([]);
+  if(jsonpWait[k])return jsonpWait[k];
+  const cb="imdb$"+k;
+  return jsonpWait[k]=new Promise((res,rej)=>{
+    const sc=document.createElement("script");
+    const end=()=>{clearTimeout(t);sc.remove();delete jsonpWait[k];try{delete window[cb]}catch(e){window[cb]=undefined}};
+    const t=setTimeout(()=>{end();rej(new Error("timeout"))},9000);
+    window[cb]=j=>{end();res((j&&j.d)||[])};
+    sc.onerror=()=>{end();rej(new Error("red"))};
+    sc.src=`https://sg.media-imdb.com/suggests/${k[0]}/${k}.json`;document.head.appendChild(sc);
+  }).then(d=>d.map(x=>({...x,i:Array.isArray(x.i)?{imageUrl:x.i[0]}:x.i})));
+}
 async function imdbSearch(q){
   const ok=r=>(r||[]).filter(x=>x.i&&x.i.imageUrl&&/^(movie|tvSeries|tvMiniSeries|tvMovie)$/.test(x.qid||""));
+  try{return ok(await imdbJsonp(q))}catch(e){}
   const s=q.trim().toLowerCase();
   try{const r=await fetch(`https://v3.sg.media-imdb.com/suggestion/${encodeURIComponent(s[0]||"x")}/${encodeURIComponent(s)}.json`);const j=await r.json();return ok(j.d)}
   catch(e){if(!linked())throw e;const j=await apiPost({action:"imdb",q:s});return ok(j.d)}
@@ -1044,6 +1060,7 @@ function renderPelis(){
     const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
     return `<button class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}${x.w?'<span class="seen">✓</span>':""}<div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div></button>`}).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
+  if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
   for(const x of db.lists.filter(x=>x.p&&!x.img&&!x.nf))pvLookup(x);
 }
 function pvAdd(){
