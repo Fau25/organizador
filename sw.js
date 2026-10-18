@@ -1,7 +1,7 @@
 /* Mi Día · service worker
  * Guarda la app en el móvil para que abra al instante y funcione sin conexión.
  * Cuando subas cambios, sube también este número para que el móvil se actualice. */
-const VERSION = 'mi-dia-v52';
+const VERSION = 'mi-dia-v53';
 const SHELL = [
   './',
   './index.html',
@@ -18,7 +18,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== 'mi-dia-posters').map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -37,6 +37,14 @@ self.addEventListener('fetch', e => {
       fetch(req, { cache: 'no-store' })
         .then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; })
         .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Pósters de IMDb: copia guardada primero (se ven aunque no haya conexión)
+  if (url.hostname === 'm.media-amazon.com') {
+    e.respondWith(
+      caches.open('mi-dia-posters').then(c => c.match(req).then(hit => hit || fetch(req).then(res => { if (res.ok || res.type === 'opaque') c.put(req, res.clone()); return res; })))
     );
     return;
   }

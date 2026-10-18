@@ -507,6 +507,13 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 /* v48: pelis en cuadrícula con fondo negro puro */
 .page[data-p=pelis]{background:#000!important}
 #pPelis:not(.cards) .pvbg{display:none}
+/* v53: movimientos afinados (curva tipo iOS, más rápida al empezar y suave al llegar) */
+:root{--spring:cubic-bezier(.32,.72,0,1)}
+.page{transition:transform .48s var(--spring)!important}
+.dsheet{transition:transform .42s var(--spring),visibility .42s!important}
+.sheet-bg{transition:opacity .35s ease!important}
+.pvsheet .box{transition:transform .42s var(--spring)!important}
+.slinL,.slinR{animation-duration:.38s!important;animation-timing-function:var(--spring)!important}
 </style>
 </head>
 <body>
@@ -914,7 +921,7 @@ function layout(){
   pills.style.top=(collapsedTop-14-ph)+"px";
   maxTy=Math.max(80,collapsedTop-topE);
   $("#sparks").style.height=collapsedTop+"px";
-  apply(expanded?0:maxTy);
+  if(!tweening)apply(expanded?0:maxTy);
 }
 function setBg(t){document.documentElement.style.setProperty("--pagebg",t)}
 function apply(y){
@@ -928,10 +935,14 @@ function apply(y){
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
   const dk=p<.5;if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f2efe9";setBg(dk?"#0c0c0c":"#f2efe9")}
 }
-function animateTo(target,dur=520){
-  cancelAnimationFrame(tween);const from=ty,t0=performance.now();
-  const ease=x=>1-Math.pow(1-x,3.2);
-  const step=now=>{const k=clamp((now-t0)/dur);apply(from+(target-from)*ease(k));if(k<1)tween=requestAnimationFrame(step);else settle(target===0)};
+let tweening=false;
+function animateTo(target,dur=520,v=0){
+  cancelAnimationFrame(tween);const open=target===0,from=ty,t0=performance.now();
+  const dist=Math.abs((open?0:maxTy)-from)/Math.max(1,maxTy);
+  dur=Math.round(Math.max(260,dur*(.45+.55*dist))*(Math.abs(v)>.9?.8:1));   // menos recorrido o un gesto rápido = animación más corta
+  const ease=x=>1-Math.pow(1-x,3.4);
+  tweening=true;
+  const step=now=>{const k=clamp((now-t0)/dur),T=open?0:maxTy;apply(from+(T-from)*ease(k));if(k<1)tween=requestAnimationFrame(step);else{tweening=false;settle(open)}};
   tween=requestAnimationFrame(step);
 }
 function settle(isOpen){
@@ -945,7 +956,7 @@ let drag=null,suppress=false;
    para que el móvil no empiece su propio desplazamiento y "se quede" con el gesto. */
 function dStart(y,target,x){
   if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset,.calh,.evsearch"))return;
-  cancelAnimationFrame(tween);
+  cancelAnimationFrame(tween);tweening=false;
   drag={y0:y,x0:x||0,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
 }
 function hMove(dx){
@@ -970,7 +981,7 @@ function hEnd(dx){
 function dMove(y,e,x){
   if(!drag)return;
   const dy=y-drag.y0,dx=(x||0)-drag.x0;
-  if(drag.state==="h"){if(e.cancelable)e.preventDefault();drag.dx=dx;hMove(dx);return}
+  if(drag.state==="h"){if(e.cancelable)e.preventDefault();const now=performance.now(),dt=now-(drag.ht||now);if(dt>0)drag.vx=.7*((dx-(drag.dx||0))/dt)+.3*(drag.vx||0);drag.ht=now;drag.dx=dx;hMove(dx);return}
   if(drag.state==="pending"){
     if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){drag.state="h";drag.dx=dx;suppress=true;if(e.cancelable)e.preventDefault();hMove(dx);return}
     if(Math.abs(dy)<4)return;
@@ -987,12 +998,12 @@ function dMove(y,e,x){
 }
 function dEnd(){
   if(!drag)return;const d=drag;drag=null;
-  if(d.state==="h"){setTimeout(()=>suppress=false,80);hEnd(d.dx||0);return}
+  if(d.state==="h"){setTimeout(()=>suppress=false,80);const dx=d.dx||0,vx=d.vx||0;hEnd(Math.abs(dx)>20&&Math.abs(vx)>.45?Math.sign(dx)*Math.max(Math.abs(dx),60):dx);return}
   if(d.state!=="drag")return;
   if(!d.moved){animateTo(expanded?0:maxTy,250);return}
   suppress=true;setTimeout(()=>suppress=false,80);
   const open=d.v<-.25?true:d.v>.25?false:ty<maxTy/2;
-  animateTo(open?0:maxTy,open?460:540);
+  animateTo(open?0:maxTy,open?480:560,d.v);
 }
 home.addEventListener("touchstart",e=>{if(e.touches.length===1)dStart(e.touches[0].clientY,e.target,e.touches[0].clientX);else drag=null},{passive:true});
 home.addEventListener("touchmove",e=>dMove(e.touches[0].clientY,e,e.touches[0].clientX),{passive:false});
@@ -1016,7 +1027,7 @@ function openDayPop(){
   const pop=$("#daypop");let h="";
   for(let n=0;n<7;n++){const d=new Date(today);d.setDate(d.getDate()+n);const k=iso(d);
     h+=`<button type="button" data-pick="${k}" class="${k===(mode==="eventos"?evSel:selDay)?"on":""}"><small>${n===0?"Hoy":n===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b></button>`}
-  h+=`<button type="button" class="other ${daysFrom(selDay)>6?"on":""}"><small>Otra</small><b>···</b><input type="date" id="otherDate" min="${iso(today)}" aria-label="Otra fecha"></button>`;
+  h+=`<button type="button" class="other ${daysFrom(mode==="eventos"?evSel:selDay)>6?"on":""}"><small>Otra</small><b>···</b><input type="date" id="otherDate" min="${iso(today)}" aria-label="Otra fecha"></button>`;
   pop.innerHTML=h;pop.hidden=false;$("#qday").classList.add("openp");
   $("#otherDate").onchange=e=>{if(e.target.value){setDay(e.target.value);closeDayPop()}};
 }
@@ -1047,6 +1058,7 @@ function completeItem(ref,rowEl){
   const [kind,id]=ref.split(":"),name=LISTNAME[kind],i=db[name].findIndex(x=>x.id===id);if(i<0)return;
   const it=db[name][i];
   if(it.src==="contactos"){toast("Viene de tus Contactos: bórralo allí");return}
+  if(rowEl&&rowEl.classList.contains("checking"))return;
   if(lastDone)finalizeDone();
   if(rowEl)rowEl.classList.add("checking");
   setTimeout(()=>{
@@ -1074,7 +1086,7 @@ function openPage(p){
 function closePage(silent){
   if(!curPage)return;$(PAGE[curPage]).classList.remove("on");home.classList.remove("away");curPage=null;
   $$(".pbar [data-q]").forEach(i=>i.blur());apply(ty);
-  if(!silent)renderBrief(true);
+  if(!silent)renderBrief();
 }
 addEventListener("popstate",()=>{if(curPage)closePage()});
 document.addEventListener("click",e=>{if(e.target.closest("[data-back]")){if(history.state&&history.state.p)history.back();else closePage()}});
@@ -1296,11 +1308,12 @@ function pvDel(x){finalizeDone();const i=db.lists.indexOf(x);if(i<0)return;db.li
 (()=>{const pg=$("#pPelis");let st=null;
   pg.addEventListener("touchstart",e=>{if(e.touches.length!==1||e.target.closest("input,.pvtabs,.pvsheet")||(pvView==="cards"&&e.target.closest("#pvGrid")&&$("#pvGrid").scrollLeft>2)){st=null;return}
     st={x:e.touches[0].clientX,y:e.touches[0].clientY,on:false}},{passive:true});
-  pg.addEventListener("touchmove",e=>{if(!st)return;const dx=e.touches[0].clientX-st.x,dy=e.touches[0].clientY-st.y;
+  pg.addEventListener("touchmove",e=>{if(!st)return;const dx=e.touches[0].clientX-st.x,dy=e.touches[0].clientY-st.y,now=performance.now();
+    if(st.t){st.v=.7*((dx-(st.dx||0))/Math.max(1,now-st.t))+.3*(st.v||0)}st.t=now;
     if(!st.on){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(dx>0&&dx>Math.abs(dy)*1.2)st.on=true;else{st=null;return}}
     e.preventDefault();st.dx=dx;pg.style.transition="none";pg.style.transform=`translateX(${Math.max(0,dx)}px)`},{passive:false});
-  const end=()=>{if(!st||!st.on){st=null;return}const dx=st.dx||0;st=null;pg.style.transition="";pg.style.transform="";
-    if(dx>80){if(history.state&&history.state.p)history.back();else closePage()}};
+  const end=()=>{if(!st||!st.on){st=null;return}const dx=st.dx||0,st0v=st.v;st=null;pg.style.transition="";pg.style.transform="";
+    if(dx>90||(dx>30&&(st0v||0)>.45)){if(history.state&&history.state.p)history.back();else closePage()}};
   pg.addEventListener("touchend",end);pg.addEventListener("touchcancel",end);
 })();
 const pvClose=()=>$("#pvSheet").classList.remove("on");
@@ -1349,6 +1362,13 @@ function openDateSheet(t,title,preDate,choose){
 $("#fType").addEventListener("click",e=>{const b=e.target.closest("[data-ft]");if(b)setSheetType(b.dataset.ft)});
 const closeSheet=()=>$("#sheetWrap").classList.remove("show");
 $("#sheetBg").onclick=closeSheet;
+addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#sheetWrap").classList.contains("show"))closeSheet()});
+(()=>{const f=$("#form");let s=null;
+  f.addEventListener("touchstart",e=>{if(e.target.closest("input,button,label")){s=null;return}s={y:e.touches[0].clientY,t:performance.now(),dy:0}},{passive:true});
+  f.addEventListener("touchmove",e=>{if(!s)return;s.dy=Math.max(0,e.touches[0].clientY-s.y);if(s.dy>0){e.preventDefault();f.style.transition="none";f.style.transform=`translateY(${s.dy}px)`}},{passive:false});
+  const end=()=>{if(!s)return;const v=s.dy/Math.max(1,performance.now()-s.t),dy=s.dy;s=null;f.style.transition="";f.style.transform="";if(dy>110||(dy>30&&v>.5))closeSheet()};
+  f.addEventListener("touchend",end);f.addEventListener("touchcancel",end);
+})();
 function saveSheet(){
   const t=$("#fTitle").value.trim(),d=$("#fDate").value,h=$("#fTime").value;
   if(!t){$("#fTitle").focus();toast("Escribe un nombre");return}
@@ -1430,10 +1450,17 @@ requestAnimationFrame(()=>{try{buildWeeks();scrollToWeek(evSel,false)}catch(e){}
 addEventListener("resize",()=>{cancelAnimationFrame(tween);setTop(topE,false);layout()});
 try{{const ro=new ResizeObserver(()=>{if(!drag)layout()});ro.observe($("#brief"));ro.observe(dark.querySelector(".calh"))}}catch(e){}
 document.fonts&&document.fonts.ready.then(()=>{if(!drag)layout()});
-setInterval(()=>{const n=new Date();n.setHours(0,0,0,0);if(n.getTime()!==today.getTime()){today=n;if(selDay<iso(today))selDay=iso(today)}renderBrief();renderPills()},30000);
+function checkDay(){
+  const n=new Date();n.setHours(0,0,0,0);
+  if(n.getTime()!==today.getTime()){const was=iso(today);today=n;
+    if(selDay<iso(today))selDay=iso(today);if(evSel===was)evSel=iso(today);
+    try{buildWeeks();scrollToWeek(evSel,false)}catch(e){}render();return}
+  renderBrief();renderPills();
+}
+setInterval(checkDay,30000);
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render();renderBrief(true)}},900)}
 setSync("ok");sync(true);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)sync()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){checkDay();sync()}});
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
 </script>
 </body>
