@@ -504,6 +504,9 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 #pPelis.cards .pv .pvi b{font-size:24px}
 #pPelis.cards .pv .pvi small{font-size:14.5px}
 #pPelis.cards .pvpanel .pvseen,#pPelis.cards .pvpanel .pvdel{width:52px!important;height:52px!important;font-size:21px!important}
+/* v48: pelis en cuadrícula con fondo negro puro */
+.page[data-p=pelis]{background:#000!important}
+#pPelis:not(.cards) .pvbg{display:none}
 </style>
 </head>
 <body>
@@ -1059,7 +1062,7 @@ function openPage(p){
   if(p==="pelis"){setPvTab("todo");$("#pvGrid").parentNode.scrollTop=0}else if(p!=="ajustes")renderPage(p);else fillSettings();
   if(p==="eventos")requestAnimationFrame(()=>scrollToWeek(evSel,false));
   $(PAGE[p]).classList.add("on");home.classList.add("away");
-  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":p==="pelis"?"#0c0c0c":"#f2f2f4";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
+  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":p==="pelis"?"#000000":"#f2f2f4";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
   try{history.pushState({p},"")}catch(e){}
 }
 function closePage(silent){
