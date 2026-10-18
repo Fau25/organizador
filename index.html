@@ -1381,7 +1381,7 @@ $("#sSync").onclick=()=>sync(true);
 
 /* ---------------- arranque ---------------- */
 render();renderBrief(true);
-requestAnimationFrame(()=>{setTop(0,false);layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
+requestAnimationFrame(()=>{try{buildWeeks();scrollToWeek(evSel,false)}catch(e){}setTop(0,false);layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
 addEventListener("resize",()=>{cancelAnimationFrame(tween);setTop(topE,false);layout()});
 try{{const ro=new ResizeObserver(()=>{if(!drag)layout()});ro.observe($("#brief"));ro.observe(dark.querySelector(".calh"))}}catch(e){}
 document.fonts&&document.fonts.ready.then(()=>{if(!drag)layout()});
