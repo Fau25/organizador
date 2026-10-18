@@ -464,6 +464,21 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 /* sin sombras dentro de zonas con scroll: el navegador las recorta y se ve un corte */
 .dd.on{box-shadow:none!important}
 #pPelis.cards .pv{box-shadow:none!important}
+
+/* ======================= EVENTOS DENTRO DE LA PORTADA (v41) ======================= */
+.dark .calh{display:none;margin:0 calc(6px - var(--pad)) 0!important}
+.dark.ev .calh{display:block}
+.dark.ev{padding-top:calc(var(--safe-t) + 6px)}
+.dark.ev #brief{display:none}
+.dark .calh .cback{display:none}
+.dark .calh .calbar{padding-left:18px}
+#home.ev .tset{opacity:0!important;pointer-events:none!important}
+.weeks{touch-action:pan-x}
+.sheet .evsearch{margin:0 var(--pad) 6px}
+@keyframes slinL{from{opacity:0;transform:translateX(42px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes slinR{from{opacity:0;transform:translateX(-42px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.slinL{animation:slinL .42s var(--ease)}
+.slinR{animation:slinR .42s var(--ease)}
 </style>
 </head>
 <body>
@@ -471,6 +486,18 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 <main id="home">
   <div id="sparks"></div>
   <div class="dark" id="dark">
+    <header class="calh">
+    <div class="calbar">
+      <button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="mon" id="calMon" aria-label="Ir a hoy"><span id="calMonTxt">Oct</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
+      <div class="calic">
+        <button id="calAll" aria-label="Ver todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="7" rx="3.5"/><rect x="4" y="13" width="16" height="7" rx="3.5"/></svg></button>
+        <button id="calSearch" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>
+      </div>
+    </div>
+    <div class="wkl"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="weeks" id="weeks"></div>
+  </header>
     <p class="brief" id="brief"></p>
     <div class="pills" id="pills">
       <button class="pill ic" data-pill="tareas" aria-label="Tareas"><span class="em" aria-hidden="true">✅</span></button>
@@ -489,6 +516,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 
   <section class="sheet" id="sheet">
     <div class="grab" id="grab"></div>
+    <div class="evsearch" id="evSearch" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="evQ" placeholder="Buscar evento…" autocomplete="off"><button id="evQx" aria-label="Cerrar búsqueda">✕</button></div>
     <div class="list" id="list"></div>
     <div class="daypop" id="daypop" hidden></div>
     <form class="addbar" id="addbar" autocomplete="off">
@@ -501,21 +529,10 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 
 <!-- EVENTOS / CUMPLEAÑOS -->
 <section class="page" data-p="eventos" id="pEventos">
-  <header class="calh">
-    <div class="calbar">
-      <button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button class="mon" id="calMon" aria-label="Ir a hoy"><span id="calMonTxt">Oct</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
-      <div class="calic">
-        <button id="calAll" aria-label="Ver todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="7" rx="3.5"/><rect x="4" y="13" width="16" height="7" rx="3.5"/></svg></button>
-        <button id="calSearch" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>
-      </div>
-    </div>
-    <div class="wkl"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
-    <div class="weeks" id="weeks"></div>
-  </header>
+
   <div class="evsheet">
     <div class="evgrab"></div>
-    <div class="evsearch" id="evSearch" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="evQ" placeholder="Buscar evento…" autocomplete="off"><button id="evQx" aria-label="Cerrar búsqueda">✕</button></div>
+
     <div class="pbody" data-body></div>
     <form class="addbar evbar" id="evbar" autocomplete="off">
       <button type="button" class="qday" id="evDay"><span id="evDayTxt">Hoy</span></button>
@@ -785,25 +802,26 @@ function renderPills(){
   const ev=db.events.filter(e=>e.d>=t&&daysFrom(e.d)<=7).length;
   const bd=db.bdays.filter(b=>nextBday(b.d).days<=30).length;
   $("#nEv").textContent=ev||"";$("#nLi").textContent=db.lists.filter(x=>!x.p).length||"";
-  $$("[data-pill]").forEach(p=>{const on=p.dataset.pill===mode;p.classList.toggle("on",on);if(p.dataset.pill==="tareas"||p.dataset.pill==="listas")p.setAttribute("aria-pressed",on)});
+  $$("[data-pill]").forEach(p=>{const on=p.dataset.pill===mode;p.classList.toggle("on",on);if(MODES.includes(p.dataset.pill))p.setAttribute("aria-pressed",on)});
 }
 let lastX="";
 function renderXhead(){
   let L,R;
   if(mode==="listas"||mode==="pelis"){L=`${mode==="pelis"?"Pelis":"Listas"}<i></i>`;R="";}
-  else{const d=parse(selDay);L=`${N(pad(d.getDate()))}<i></i>`;R=`<b>${DIAS[d.getDay()]}</b>`}
-  const key=mode+selDay;
+  else{const d=parse(mode==="eventos"?evSel:selDay);L=`${N(pad(d.getDate()))}<i></i>`;R=`<b>${DIAS[d.getDay()]}</b>`}
+  const key=mode+(mode==="eventos"?evSel:selDay);
   $("#xnum").classList.toggle("title",mode==="listas"||mode==="pelis");
   if(key!==lastX){lastX=key;$("#xnum").innerHTML=L;rollNums($("#xnum"))}
   $("#xday").innerHTML=R;
   $("#qday").hidden=mode==="listas"||mode==="pelis";
-  $("#qdayTxt").textContent=dayChip(selDay);
-  $("#qtext").placeholder=mode==="pelis"?"Añadir peli o serie…":mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
+  $("#qdayTxt").textContent=mode==="eventos"?dayChip(evSel<iso(today)?iso(today):evSel):dayChip(selDay);
+  $("#qtext").placeholder=mode==="eventos"?"Nuevo evento…":mode==="pelis"?"Añadir peli o serie…":mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
 }
 const row=(kind,id,title,meta="",metaCls="")=>`<div class="row" style="--bar:${metaCls==="late"?"#ff3b30":barOf(id)}"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
 const irow=(icon,title,meta="")=>`<div class="row"><span class="ico">${icon}</span><div class="t">${esc(title)}</div>${meta?`<div class="m">${meta}</div>`:""}</div>`;
 function renderList(){
   let h="";
+  if(mode==="eventos"){buildWeeksKeep();renderEventsBody();return}
   if(mode==="pelis"){
     h=db.lists.filter(x=>x.p).map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Pelis y series que quieres ver 🍿</p>`;
   }else if(mode==="listas"){
@@ -823,12 +841,22 @@ function renderList(){
 function renderHome(){renderBrief();renderPills();renderXhead();renderList()}
 function render(){save();schedulePush();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage);if(curPage==="pelis")renderPelis()}
 
-function setMode(m){
-  if(m===mode)return;mode=m;
-  const l=$("#list");l.classList.remove("swap");void l.offsetWidth;l.classList.add("swap");l.scrollTop=0;
-  closeDayPop();renderHome();layout();
+const MODES=["tareas","listas","eventos"];
+function setMode(m,dir){
+  if(m===mode)return;
+  if(!dir)dir=MODES.indexOf(m)>MODES.indexOf(mode)?1:-1;
+  mode=m;
+  const ev=m==="eventos";dark.classList.toggle("ev",ev);home.classList.toggle("ev",ev);
+  if(!ev){$("#evSearch").hidden=true;evQuery="";$("#evQ").value=""}
+  const l=$("#list");l.style.transform="";l.style.opacity="";
+  const cls=dir>0?"slinL":"slinR";
+  for(const el of [l,dark.querySelector(ev?".calh":"#brief"),xhead]){el.classList.remove("slinL","slinR","swap");void el.offsetWidth;el.classList.add(cls)}
+  l.scrollTop=0;closeDayPop();renderHome();
+  if(ev)requestAnimationFrame(()=>{scrollToWeek(evSel,false)});
+  layout();
 }
 function setDay(k){
+  if(mode==="eventos"){evSel=k;evMode="day";buildWeeks();scrollToWeek(evSel,true);renderXhead();renderEventsBody(true);return}
   selDay=k<iso(today)?iso(today):k;
   renderXhead();renderList();
 }
@@ -874,16 +902,27 @@ const expand=()=>animateTo(0),collapse=()=>animateTo(maxTy);
 let drag=null,suppress=false;
 /* Gesto: se decide en el PRIMER movimiento si arrastramos la hoja o dejamos que la lista haga scroll,
    para que el móvil no empiece su propio desplazamiento y "se quede" con el gesto. */
-function dStart(y,target){
-  if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset"))return;
+function dStart(y,target,x){
+  if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset,.calh,.evsearch"))return;
   cancelAnimationFrame(tween);
-  drag={y0:y,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
+  drag={y0:y,x0:x||0,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
 }
-function dMove(y,e){
+function hMove(dx){
+  const i=MODES.indexOf(mode),edge=(dx>0&&i===0)||(dx<0&&i===MODES.length-1);
+  const k=edge?dx*.25:dx*.6;$("#list").style.transform=`translateX(${k}px)`;$("#list").style.opacity=String(1-Math.min(.5,Math.abs(k)/400));
+}
+function hEnd(dx){
+  const l=$("#list"),i=MODES.indexOf(mode),n=dx<-55?i+1:dx>55?i-1:i;
+  if(n!==i&&n>=0&&n<MODES.length){setMode(MODES[n],n>i?1:-1);return}
+  l.style.transition="transform .3s var(--ease),opacity .3s";l.style.transform="";l.style.opacity="";setTimeout(()=>l.style.transition="",320);
+}
+function dMove(y,e,x){
   if(!drag)return;
-  const dy=y-drag.y0;
+  const dy=y-drag.y0,dx=(x||0)-drag.x0;
+  if(drag.state==="h"){if(e.cancelable)e.preventDefault();drag.dx=dx;hMove(dx);return}
   if(drag.state==="pending"){
-    if(dy===0)return;
+    if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){drag.state="h";drag.dx=dx;suppress=true;if(e.cancelable)e.preventDefault();hMove(dx);return}
+    if(Math.abs(dy)<4)return;
     if(expanded&&drag.fromList&&(dy<0||list.scrollTop>1)){drag=null;return}  // la lista hace scroll normal
     drag.state="drag";
   }
@@ -897,19 +936,20 @@ function dMove(y,e){
 }
 function dEnd(){
   if(!drag)return;const d=drag;drag=null;
+  if(d.state==="h"){setTimeout(()=>suppress=false,80);hEnd(d.dx||0);return}
   if(d.state!=="drag")return;
   if(!d.moved){animateTo(expanded?0:maxTy,250);return}
   suppress=true;setTimeout(()=>suppress=false,80);
   const open=d.v<-.25?true:d.v>.25?false:ty<maxTy/2;
   animateTo(open?0:maxTy,open?460:540);
 }
-home.addEventListener("touchstart",e=>{if(e.touches.length===1)dStart(e.touches[0].clientY,e.target);else drag=null},{passive:true});
-home.addEventListener("touchmove",e=>dMove(e.touches[0].clientY,e),{passive:false});
+home.addEventListener("touchstart",e=>{if(e.touches.length===1)dStart(e.touches[0].clientY,e.target,e.touches[0].clientX);else drag=null},{passive:true});
+home.addEventListener("touchmove",e=>dMove(e.touches[0].clientY,e,e.touches[0].clientX),{passive:false});
 home.addEventListener("touchend",dEnd);home.addEventListener("touchcancel",dEnd);
 home.addEventListener("mousedown",e=>{
   if(e.sourceCapabilities&&e.sourceCapabilities.firesTouchEvents)return;   // ratón simulado tras un toque
-  dStart(e.clientY,e.target);
-  const mm=ev=>dMove(ev.clientY,ev),mu=()=>{dEnd();removeEventListener("mousemove",mm);removeEventListener("mouseup",mu)};
+  dStart(e.clientY,e.target,e.clientX);
+  const mm=ev=>dMove(ev.clientY,ev,ev.clientX),mu=()=>{dEnd();removeEventListener("mousemove",mm);removeEventListener("mouseup",mu)};
   addEventListener("mousemove",mm);addEventListener("mouseup",mu);
 });
 home.addEventListener("wheel",e=>{
@@ -924,7 +964,7 @@ document.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.prevent
 function openDayPop(){
   const pop=$("#daypop");let h="";
   for(let n=0;n<7;n++){const d=new Date(today);d.setDate(d.getDate()+n);const k=iso(d);
-    h+=`<button type="button" data-pick="${k}" class="${k===selDay?"on":""}"><small>${n===0?"Hoy":n===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b></button>`}
+    h+=`<button type="button" data-pick="${k}" class="${k===(mode==="eventos"?evSel:selDay)?"on":""}"><small>${n===0?"Hoy":n===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b></button>`}
   h+=`<button type="button" class="other ${daysFrom(selDay)>6?"on":""}"><small>Otra</small><b>···</b><input type="date" id="otherDate" min="${iso(today)}" aria-label="Otra fecha"></button>`;
   pop.innerHTML=h;pop.hidden=false;$("#qday").classList.add("openp");
   $("#otherDate").onchange=e=>{if(e.target.value){setDay(e.target.value);closeDayPop()}};
@@ -935,7 +975,9 @@ $("#daypop").addEventListener("click",e=>{const b=e.target.closest("[data-pick]"
 
 /* ---------------- añadir ---------------- */
 function quickAdd(){
-  const inp=$("#qtext"),v=inp.value.trim();if(!v){inp.focus();return}
+  const inp=$("#qtext"),v=inp.value.trim();
+  if(mode==="eventos"){inp.value="";inp.blur();openDateSheet("evento",v,evSel<iso(today)?iso(today):evSel,true);return}
+  if(!v){inp.focus();return}
   inp.value="";
   if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,p:1,u:nowU()}:{id:uid(),t:v,u:nowU()});render();return}
   db.tasks.push({id:uid(),t:v,d:selDay,u:nowU()});render();
@@ -1033,10 +1075,10 @@ function updMonth(){
 }
 let monT;$("#weeks").addEventListener("scroll",()=>{clearTimeout(monT);monT=setTimeout(updMonth,60)},{passive:true});
 $("#weeks").addEventListener("click",e=>{const b=e.target.closest("[data-cal]");if(!b)return;
-  evSel=b.dataset.cal;evMode="day";$$("#weeks .dd.on").forEach(x=>x.classList.remove("on"));b.classList.add("on");renderEventsBody(true)});
-$("#calMon").onclick=()=>{evSel=iso(today);evMode="day";buildWeeks();scrollToWeek(evSel,true);renderEventsBody(true)};
+  evSel=b.dataset.cal;evMode="day";$$("#weeks .dd.on").forEach(x=>x.classList.remove("on"));b.classList.add("on");renderEventsBody(true);renderXhead()});
+$("#calMon").onclick=()=>{evSel=iso(today);evMode="day";buildWeeks();scrollToWeek(evSel,true);renderEventsBody(true);renderXhead()};
 $("#calAll").onclick=()=>{evMode=evMode==="all"?"day":"all";$("#calAll").classList.toggle("on",evMode==="all");renderEventsBody(true)};
-$("#calSearch").onclick=()=>{const s=$("#evSearch");s.hidden=!s.hidden;if(!s.hidden)setTimeout(()=>$("#evQ").focus(),50);else{evQuery="";$("#evQ").value="";renderEventsBody(true)}};
+$("#calSearch").onclick=()=>{const s=$("#evSearch");s.hidden=!s.hidden;if(!s.hidden){expand();setTimeout(()=>$("#evQ").focus(),350)}else{evQuery="";$("#evQ").value="";renderEventsBody(true)}};
 $("#evQx").onclick=()=>{$("#evSearch").hidden=true;evQuery="";$("#evQ").value="";renderEventsBody(true)};
 $("#evQ").addEventListener("input",e=>{evQuery=e.target.value.trim().toLowerCase();renderEventsBody()});
 
@@ -1062,7 +1104,7 @@ function evCard(e,showDate){
 }
 const sech=(title)=>`<h3 class="sech">${title}</h3>`;
 function renderEventsBody(anim){
-  const body=$("#pEventos [data-body]"),t=iso(today);let h="";
+  const body=mode==="eventos"?$("#list"):$("#pEventos [data-body]"),t=iso(today);let h="";
   if(evQuery){
     const r=evItems(t,addDays(t,366)).concat(db.events.filter(e=>e.d<t).map(e=>({...e,kind:"e"}))).filter(e=>e.t.toLowerCase().includes(evQuery));
     h=sech("Resultados")+(r.map(e=>evCard(e,true)).join("")||`<p class="evempty">No hay nada con “${esc(evQuery)}”.</p>`);
@@ -1085,6 +1127,7 @@ function renderEventsBody(anim){
   const ah=$("#addHere");if(ah)ah.onclick=()=>openDateSheet("evento","",evSel,true);
 }
 function renderEvents(){buildWeeks();renderEventsBody()}
+function buildWeeksKeep(){const w=$("#weeks"),x=w.scrollLeft;buildWeeks();w.scrollLeft=x}
 function evAdd(){const i=$("#evText");openDateSheet("evento",i.value.trim(),evSel,true);i.value="";i.blur()}
 $("#evbar").addEventListener("submit",e=>{e.preventDefault();evAdd()});
 $("#evAdd").addEventListener("click",e=>{e.preventDefault();evAdd()});
@@ -1254,7 +1297,7 @@ document.addEventListener("click",e=>{
   if(ds.done)completeItem(ds.done,b.closest(".row,.prow"));
   if("undo" in ds)undoLast();
   if(ds.page)openPage(ds.page);
-  if(ds.pill){if(ds.pill==="tareas")setMode("tareas");else if(ds.pill==="listas")setMode(mode==="listas"?"tareas":"listas");else openPage(ds.pill)}
+  if(ds.pill){if(MODES.includes(ds.pill))setMode(ds.pill);else openPage(ds.pill)}
 });
 
 /* ---------------- ajustes ---------------- */
@@ -1315,7 +1358,7 @@ $("#sSync").onclick=()=>sync(true);
 render();renderBrief(true);
 requestAnimationFrame(()=>{layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
 addEventListener("resize",()=>{cancelAnimationFrame(tween);layout()});
-try{new ResizeObserver(()=>{if(!drag)layout()}).observe($("#brief"))}catch(e){}
+try{new ResizeObserver(()=>{if(!drag)layout()}).observe(dark)}catch(e){}
 document.fonts&&document.fonts.ready.then(()=>{if(!drag)layout()});
 setInterval(()=>{const n=new Date();n.setHours(0,0,0,0);if(n.getTime()!==today.getTime()){today=n;if(selDay<iso(today))selDay=iso(today)}renderBrief();renderPills()},30000);
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render();renderBrief(true)}},900)}
