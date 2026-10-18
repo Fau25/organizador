@@ -56,6 +56,7 @@ function doPost(e) {
   try { body = JSON.parse(e.postData.contents || '{}'); } catch (err) { return json_({ ok: false, error: 'JSON no válido' }); }
   return guard_(body, b => {
     switch (b.action) {
+      case 'imdb':     return { ok: true, d: imdb_(b.q) };
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
@@ -271,4 +272,14 @@ function probar() {
   Logger.log('Eventos próximos: ' + JSON.stringify(readEvents_(), null, 1));
   const st = readStore_();
   Logger.log('Tareas guardadas: ' + Object.keys(st.tasks).length + ' · Listas: ' + Object.keys(st.lists).length);
+}
+
+/* Busca pelis y series en IMDb (por si el móvil no puede preguntar directamente). */
+function imdb_(q) {
+  q = String(q || '').trim().toLowerCase();
+  if (!q) return [];
+  const url = 'https://v3.sg.media-imdb.com/suggestion/' + encodeURIComponent(q[0]) + '/' + encodeURIComponent(q) + '.json';
+  const r = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  if (r.getResponseCode() !== 200) return [];
+  return (JSON.parse(r.getContentText()).d || []).slice(0, 8);
 }

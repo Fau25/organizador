@@ -1,7 +1,7 @@
 /* Mi Día · service worker
  * Guarda la app en el móvil para que abra al instante y funcione sin conexión.
  * Cuando subas cambios, sube también este número para que el móvil se actualice. */
-const VERSION = 'mi-dia-v33';
+const VERSION = 'mi-dia-v34';
 const SHELL = [
   './',
   './index.html',
