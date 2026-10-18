@@ -47,6 +47,7 @@ const TAG = 'midia';
 function doGet(e) {
   return guard_(e && e.parameter, p => {
     if ((p.action || 'sync') === 'ping') return { ok: true, user: Session.getActiveUser().getEmail() };
+    if (p.action === 'store') return { ok: true, store: readStore_() };   // consulta rápida: solo tareas, listas y pelis
     return { ok: true, bdays: readBirthdays_(), events: readEvents_(), store: readStore_(), at: new Date().toISOString() };
   });
 }

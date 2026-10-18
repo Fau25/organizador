@@ -767,6 +767,28 @@ async function pushStore(remote){
     if(changedMeanwhile)schedulePush();
   }catch(e){if(/desconocida/i.test(e.message)&&!storeWarned){storeWarned=true;toast("Actualiza el script de Google para sincronizar tareas")}}
 }
+function pullStore(remote){
+  const before=storeSig(),merged=mergeStore(toStore(),remote);
+  applyStore(merged);
+  const now=storeSig();
+  if(JSON.stringify(mergeStore(remote,{}))!==JSON.stringify(mergeStore(merged,{})))schedulePush();else pushedSig=now;
+  if(now!==before){save();try{renderHome()}catch(e){}if(curPage==="pelis")renderPelis()}
+}
+/* subir ya lo pendiente (al cerrar o mandar la app al fondo, iOS congela los temporizadores) */
+function flushNow(){
+  if(!linked())return;
+  if(lastDone)finalizeDone(true);
+  if(storeSig()!==pushedSig){clearTimeout(pushT);apiPost({action:"syncStore",store:toStore()},true).catch(()=>{});pushedSig=storeSig()}
+}
+/* mientras la app está abierta, mira cada poco si hay cambios en los otros dispositivos */
+let pollT=null,pollN=0;
+async function poll(){
+  if(!linked()||document.hidden||syncing)return;
+  pollN++;
+  if(pollN%4===0){sync(true);return}           // cada ~minuto, sincronización completa (calendario incluido)
+  try{const j=await apiGet("store");if(j.store)pullStore(j.store);setSync("ok")}catch(e){}
+}
+function startPoll(){clearInterval(pollT);pollT=setInterval(poll,15000)}
 function schedulePush(){if(!linked())return;clearTimeout(pushT);pushT=setTimeout(()=>{if(storeSig()!==pushedSig)pushStore()},1200)}
 const linked=()=>!!(db.cfg.url&&db.cfg.key);
 
@@ -776,25 +798,26 @@ async function apiGet(action="sync"){
   const r=await fetch(u,{redirect:"follow"});const j=await r.json();
   if(!j.ok)throw new Error(j.error||"Error");return j;
 }
-async function apiPost(body){
+async function apiPost(body,keep){
   const r=await fetch(db.cfg.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify({key:db.cfg.key,...body}),redirect:"follow"});
+    body:JSON.stringify({key:db.cfg.key,...body}),redirect:"follow",keepalive:!!keep});
   const j=await r.json();if(!j.ok)throw new Error(j.error||"Error");return j;
 }
 async function pushPending(){
   for(const b of db.bdays.filter(x=>x.pend)){try{const j=await apiPost({action:"addBday",t:b.t,d:b.d,id:b.id});b.gid=j.gid;delete b.pend}catch(e){}}
   for(const e of db.events.filter(x=>x.pend)){try{const j=await apiPost({action:"addEvent",t:e.t,d:e.d,h:e.h,id:e.id});e.gid=j.gid;delete e.pend}catch(err){}}
 }
-function merge(list,remote,keyFn){
+function merge(list,remote,keyFn,inWindow=()=>true){
   const local=list.filter(x=>!GSRC.includes(x.src));
   const byId=new Map(local.map(x=>[x.id,x])),byGid=new Map(local.filter(x=>x.gid).map(x=>[x.gid,x])),byKey=new Map(local.map(x=>[keyFn(x),x]));
-  const extra=[];
+  const extra=[],seen=new Set();
   for(const r of remote){
     const mine=(r.app&&byId.get(r.app))||byGid.get(r.gid)||byKey.get(keyFn(r));
-    if(mine){if(!mine.gid)mine.gid=r.gid;if(mine.d.length===5&&r.d.length>5)mine.d=r.d;continue}
+    if(mine){seen.add(mine.id);if(!mine.gid)mine.gid=r.gid;if(mine.d.length===5&&r.d.length>5)mine.d=r.d;continue}
     extra.push({id:"g-"+r.gid,t:r.t,d:r.d,h:r.h||"",gid:r.gid,src:r.src||"google"});
   }
-  return local.concat(extra);
+  // si ya estaba en Google y ha desaparecido de allí (se borró en otro dispositivo), aquí también se quita
+  return local.filter(x=>seen.has(x.id)||!x.gid||x.pend||!inWindow(x)).concat(extra);
 }
 let syncing=false,lastTry=0;
 async function sync(force){
@@ -805,8 +828,9 @@ async function sync(force){
     await pushPending();
     const j=await apiGet("sync");
     db.bdays=merge(db.bdays,j.bdays,x=>x.t.trim().toLowerCase()+"|"+md(x.d));
-    db.events=merge(db.events,j.events.map(e=>({...e,src:"google"})),x=>x.t.trim().toLowerCase()+"|"+x.d+"|"+(x.h||""));
-    if(j.store)await pushStore(j.store);
+    const t=iso(today),lim=addDays(t,118);
+    db.events=merge(db.events,j.events.map(e=>({...e,src:"google"})),x=>x.t.trim().toLowerCase()+"|"+x.d+"|"+(x.h||""),x=>x.d>=t&&x.d<=lim);
+    if(j.store)pullStore(j.store);
     db.lastSync=Date.now();render();setSync("ok");
   }catch(e){setSync("err","Sin conexión con Google");console.warn(e)}
   syncing=false;
@@ -1136,7 +1160,7 @@ function completeItem(ref,rowEl){
     render();toast(DONEMSG[kind],true);
   },rowEl?600:0);
 }
-function finalizeDone(){if(!lastDone)return;const {it,timer}=lastDone;clearTimeout(timer);lastDone=null;if(it.gid&&linked())apiPost({action:"delete",gid:it.gid}).catch(()=>{})}
+function finalizeDone(keep){if(!lastDone)return;const {it,timer}=lastDone;clearTimeout(timer);lastDone=null;if(it.gid&&linked())apiPost({action:"delete",gid:it.gid},keep).catch(()=>{})}
 function undoLast(){if(!lastDone)return;const {name,it,i,timer}=lastDone;clearTimeout(timer);lastDone=null;delete db.tomb[it.id];if(name==="tasks"||name==="lists")it.u=nowU();db[name].splice(Math.min(i,db[name].length),0,it);render();toast("Recuperado")}
 function toast(m,undo){const t=$("#toast");t.innerHTML=`<span>${esc(m)}</span>`+(undo?'<button data-undo>Deshacer</button>':"");t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),undo?4500:2200)}
 
@@ -1529,7 +1553,9 @@ function checkDay(){
 setInterval(checkDay,30000);
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render();renderBrief(true)}},900)}
 setSync("ok");sync(true);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden){checkDay();sync()}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){flushNow()}else{checkDay();lastTry=0;sync()}});
+addEventListener("pagehide",flushNow);
+startPoll();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
 </script>
 </body>
