@@ -514,6 +514,75 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .sheet-bg{transition:opacity .35s ease!important}
 .pvsheet .box{transition:transform .42s var(--spring)!important}
 .slinL,.slinR{animation-duration:.38s!important;animation-timing-function:var(--spring)!important}
+
+/* ======================= iPad (v54): pantalla completa, contenido centrado y más grande ======================= */
+@media (min-width:700px){
+  :root{--pad:56px;--col:760px;--side:max(var(--pad),calc((100% - var(--col))/2))}
+  #home,.page{max-width:none}
+  /* portada plegada */
+  #briefWrap{left:var(--side);right:var(--side);top:calc(var(--safe-t) + 110px)}
+  .brief{font-size:46px;line-height:1.22;letter-spacing:-1.1px}
+  .brief .av{width:50px;height:50px;font-size:19px;top:-5px}
+  .brief .ic{width:32px;height:32px;border-radius:8px;vertical-align:-4px}
+  .brief .ic svg{width:18px;height:18px}
+  .dark .calh{left:max(24px,calc((100% - var(--col))/2 - 20px))!important;right:max(24px,calc((100% - var(--col))/2 - 20px))!important;top:calc(var(--safe-t) + 24px)}
+  .dd{width:56px;height:56px;font-size:19px}
+  .wkl{font-size:13.5px}
+  .mon{font-size:36px}
+  #pills{left:var(--side);right:var(--side)}
+  .pill.ic{width:64px;height:64px}.pill.ic .em{font-size:30px}
+  .pills:has(.pill.ic){gap:18px}
+  .tset{right:var(--pad);top:calc(var(--safe-t) + 28px);width:48px;height:48px}
+  /* ficha */
+  .sheet{border-radius:44px 44px 0 0}
+  .list{padding:4px var(--side) 140px}
+  .xhead{padding:calc(var(--safe-t) + 34px) var(--side) 0}
+  .xnum{font-size:84px;letter-spacing:-3.5px}.xnum i{width:14px;height:14px;margin-top:28px}
+  .xnum.title{font-size:58px}
+  .xday{font-size:28px}
+  .row{padding:22px 0 21px;gap:20px}
+  .row .t{font-size:20px}
+  .row .m{font-size:17px}
+  .ck{width:30px!important;height:30px!important}
+  .empty{font-size:19px}
+  .sheet .evsearch{margin:0 var(--side) 8px}
+  .sech{font-size:28px!important}
+  .evc{padding:15px 20px 15px 16px!important;border-radius:22px!important;margin-bottom:8px!important}
+  .evl b{font-size:19px!important}.evr b{font-size:17px!important}
+  .evck{width:30px;height:30px}
+  /* barra de añadir y selector de días */
+  .addbar{left:var(--side);right:var(--side);height:66px;bottom:calc(var(--safe-b) + 24px)}
+  .addbar input{font-size:19px}
+  .addbtn{width:52px;height:52px}
+  .qday{height:50px;font-size:16.5px;padding:0 18px}
+  .daypop{left:var(--side);right:var(--side);bottom:calc(var(--safe-b) + 102px);justify-content:center}
+  .daypop button{min-width:72px;height:74px}
+  /* hoja de "nuevo evento": tarjeta flotante centrada */
+  .dsheet{left:50%;right:auto;width:560px;max-width:calc(100% - 48px);margin:0;bottom:calc(var(--safe-b) + 24px);border-radius:32px;transform:translate(-50%,calc(100% + 60px));padding:22px 28px 28px}
+  .show .dsheet{transform:translate(-50%,0)}
+  .toast{font-size:16px;padding:13px 22px}
+  /* pelis y series */
+  .pvbar{padding:0 calc(var(--pad) - 12px) 0 calc(var(--pad) - 14px)}
+  .pvt{padding:8px var(--pad) 0;font-size:48px}
+  .pvtabs{padding:16px var(--pad) 4px;gap:30px}
+  .pvtabs button{font-size:18px}
+  .pvbody{padding:18px var(--pad) calc(var(--safe-b) + 130px)}
+  .pvgrid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:20px}
+  .pv .pvi b{font-size:17px}
+  .pvadd{left:var(--side)!important;right:var(--side)!important}
+  #pPelis.cards .pvbody{padding:20px 0 calc(var(--safe-b) + 120px)}
+  #pPelis.cards .pvgrid{gap:28px}
+  /* ajustes */
+  .ph{padding:0 var(--pad)}
+  .ptitle{padding:26px var(--side) 0;font-size:56px}
+  #pAjustes .pbody{padding:0 var(--side) 140px}
+}
+/* iPad en horizontal: un poco menos de aire arriba */
+@media (min-width:700px) and (max-height:820px){
+  #briefWrap{top:calc(var(--safe-t) + 70px)}
+  .brief{font-size:38px}
+  .xnum{font-size:70px}
+}
 </style>
 </head>
 <body>
@@ -1365,7 +1434,7 @@ $("#sheetBg").onclick=closeSheet;
 addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#sheetWrap").classList.contains("show"))closeSheet()});
 (()=>{const f=$("#form");let s=null;
   f.addEventListener("touchstart",e=>{if(e.target.closest("input,button,label")){s=null;return}s={y:e.touches[0].clientY,t:performance.now(),dy:0}},{passive:true});
-  f.addEventListener("touchmove",e=>{if(!s)return;s.dy=Math.max(0,e.touches[0].clientY-s.y);if(s.dy>0){e.preventDefault();f.style.transition="none";f.style.transform=`translateY(${s.dy}px)`}},{passive:false});
+  f.addEventListener("touchmove",e=>{if(!s)return;s.dy=Math.max(0,e.touches[0].clientY-s.y);if(s.dy>0){e.preventDefault();f.style.transition="none";f.style.transform=matchMedia("(min-width:700px)").matches?`translate(-50%,${s.dy}px)`:`translateY(${s.dy}px)`}},{passive:false});
   const end=()=>{if(!s)return;const v=s.dy/Math.max(1,performance.now()-s.t),dy=s.dy;s=null;f.style.transition="";f.style.transform="";if(dy>110||(dy>30&&v>.5))closeSheet()};
   f.addEventListener("touchend",end);f.addEventListener("touchcancel",end);
 })();
