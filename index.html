@@ -1047,8 +1047,9 @@ const expand=()=>animateTo(0),collapse=()=>animateTo(maxTy);
 let drag=null,suppress=false;
 /* Gesto: se decide en el PRIMER movimiento si arrastramos la hoja o dejamos que la lista haga scroll,
    para que el móvil no empiece su propio desplazamiento y "se quede" con el gesto. */
-function dStart(y,target,x){
+function dStart(y,target,x,touch){
   if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset,.calh,.evsearch"))return;
+  if(touch&&y>home.clientHeight-44)return;   // franja de la rayita de inicio: ese gesto es del iPhone (salir de la app), no de la ficha
   cancelAnimationFrame(tween);tweening=false;
   drag={y0:y,x0:x||0,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
 }
@@ -1098,7 +1099,7 @@ function dEnd(){
   const open=d.v<-.25?true:d.v>.25?false:ty<maxTy/2;
   animateTo(open?0:maxTy,open?480:560,d.v);
 }
-home.addEventListener("touchstart",e=>{if(e.touches.length===1)dStart(e.touches[0].clientY,e.target,e.touches[0].clientX);else drag=null},{passive:true});
+home.addEventListener("touchstart",e=>{if(e.touches.length===1)dStart(e.touches[0].clientY,e.target,e.touches[0].clientX,true);else drag=null},{passive:true});
 home.addEventListener("touchmove",e=>dMove(e.touches[0].clientY,e,e.touches[0].clientX),{passive:false});
 home.addEventListener("touchend",dEnd);home.addEventListener("touchcancel",dEnd);
 home.addEventListener("mousedown",e=>{
@@ -1553,7 +1554,16 @@ function checkDay(){
 setInterval(checkDay,30000);
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render();renderBrief(true)}},900)}
 setSync("ok");sync(true);
-document.addEventListener("visibilitychange",()=>{if(document.hidden){flushNow()}else{checkDay();lastTry=0;sync()}});
+/* al dejar la app, la ficha vuelve a su sitio: al volver siempre se ve la portada plegada */
+function resetHome(){
+  drag=null;cancelAnimationFrame(tween);tweening=false;
+  const l=$("#list");l.style.transform="";l.style.opacity="";
+  const pp=$("#pPelis");if(pp.style.transform){pp.style.transition="";pp.style.transform=""}
+  setTop(mode==="eventos"?1:0,false);
+  if(expanded||ty!==maxTy){$("#qtext").blur();closeDayPop();apply(maxTy);settle(false)}
+}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){flushNow();resetHome()}else{resetHome();checkDay();lastTry=0;sync()}});
+addEventListener("pageshow",e=>{if(e.persisted)resetHome()});
 addEventListener("pagehide",flushNow);
 startPoll();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
