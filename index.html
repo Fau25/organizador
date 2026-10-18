@@ -480,6 +480,15 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 @keyframes slinR{from{opacity:0;transform:translateX(-42px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 .slinL{animation:slinL .42s var(--ease)}
 .slinR{animation:slinR .42s var(--ease)}
+
+/* ===== v43: pelis sin degradados y barra de añadir oscura con blur ===== */
+.pv{background:#1c1c1f!important}
+.pv::after{display:none!important}
+.pv.loading{animation:pvpulse 1.2s ease-in-out infinite!important}
+@keyframes pvpulse{50%{background-color:#2a2a2e}}
+.pv .pvi b,.pv .pvi small{text-shadow:0 1px 2px rgba(0,0,0,.65),0 2px 14px rgba(0,0,0,.55)}
+.pvbg::after{background:rgba(12,12,12,.45)!important}
+.pvadd{background:rgba(30,30,32,.55)!important;-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.1);box-shadow:none!important}
 </style>
 </head>
 <body>
