@@ -489,6 +489,21 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .pv .pvi b,.pv .pvi small{text-shadow:0 1px 2px rgba(0,0,0,.65),0 2px 14px rgba(0,0,0,.55)}
 .pvbg::after{background:rgba(12,12,12,.45)!important}
 .pvadd{background:rgba(30,30,32,.55)!important;-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.1);box-shadow:none!important}
+
+/* ===== v45: panel de cristal (blur) con título y botones ===== */
+.pvpanel{position:absolute;left:8px;right:8px;bottom:8px;z-index:2;display:flex;flex-direction:column;gap:9px;padding:11px 10px 10px 12px;border-radius:18px;
+  background:rgba(18,18,20,.42);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);border:1px solid rgba(255,255,255,.14)}
+.pv .pvpanel .pvi{position:static!important;left:auto!important;right:auto!important;bottom:auto!important}
+.pv .pvi b,.pv .pvi small{text-shadow:none!important}
+.pv .pvi b{font-size:15px}
+.pv .pvi small{color:rgba(255,255,255,.75)}
+.pvbtns{display:flex;justify-content:space-between}
+.pvpanel .pvseen,.pvpanel .pvdel{position:static!important;width:38px!important;height:38px!important;font-size:16px!important;background:rgba(0,0,0,.32);-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid rgba(255,255,255,.14)}
+.pvpanel .pvseen.on{background:#d9f05a;color:#111;border-color:#d9f05a}
+#pPelis.cards .pvpanel{left:14px;right:14px;bottom:14px;gap:16px;padding:18px 16px 16px 20px;border-radius:26px}
+#pPelis.cards .pv .pvi b{font-size:24px}
+#pPelis.cards .pv .pvi small{font-size:14.5px}
+#pPelis.cards .pvpanel .pvseen,#pPelis.cards .pvpanel .pvdel{width:52px!important;height:52px!important;font-size:21px!important}
 </style>
 </head>
 <body>
@@ -1212,7 +1227,7 @@ function renderPelis(){
   const items=pvList().slice().reverse();
   g.innerHTML=items.map(x=>{
     const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
-    return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}${x.w?'<span class="seen">✓</span>':""}<button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div></article>`}).join("")
+    return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}<div class="pvpanel"><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div><div class="pvbtns"><button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div></div></article>`}).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
   pvSyncBg();
   if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
