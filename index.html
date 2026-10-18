@@ -298,9 +298,8 @@ input{font:inherit;color:inherit}
 
 
 .pill.ic{width:46px;height:46px;padding:0!important;justify-content:center;border:0!important;color:#111;background:var(--c)!important}
-.pill.ic svg{width:23px;height:23px}
+.pill.ic .em{font-size:24px;line-height:1}
 .pill.ic .n{display:none}
-.pill.ic.on{box-shadow:0 0 0 3px #0c0c0c,0 0 0 5px var(--c)}
 .pills:has(.pill.ic){gap:12px}
 
 
@@ -352,9 +351,10 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   <div class="dark" id="dark">
     <p class="brief" id="brief"></p>
     <div class="pills" id="pills">
-      <button class="pill ic" style="--c:var(--i-cumple)" data-pill="tareas" aria-label="Inicio"><svg viewBox="0 0 24 24" fill="#111"><path d="M12 3.2 2.8 11a1 1 0 0 0 1.3 1.5l.9-.8V19a2 2 0 0 0 2 2h3.2v-5.2h3.6V21H17a2 2 0 0 0 2-2v-7.3l.9.8a1 1 0 0 0 1.3-1.5Z"/></svg></button>
-      <button class="pill ic" style="--c:#a685ff" data-pill="eventos" aria-label="Eventos"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="n" id="nEv"></span></button>
-      <button class="pill ic" style="--c:#ff8a3d" data-pill="listas" aria-label="Listas"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="#111" stroke="none"/><circle cx="4.5" cy="12" r="1.4" fill="#111" stroke="none"/><circle cx="4.5" cy="18" r="1.4" fill="#111" stroke="none"/></svg><span class="n" id="nLi"></span></button>
+      <button class="pill ic" style="--c:var(--i-cumple)" data-pill="tareas" aria-label="Tareas"><span class="em">✅</span></button>
+      <button class="pill ic" style="--c:#a685ff" data-pill="eventos" aria-label="Eventos"><span class="em">🗓️</span><span class="n" id="nEv"></span></button>
+      <button class="pill ic" style="--c:#ff8a3d" data-pill="listas" aria-label="Listas"><span class="em">🛍️</span><span class="n" id="nLi"></span></button>
+      <button class="pill ic" style="--c:#ff5c7a" data-pill="pelis" aria-label="Pelis y series"><span class="em">🍿</span></button>
     </div>
   </div>
   <button class="tset" data-page="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sync" id="syncInd" hidden><i></i><span></span></span></button>
@@ -648,28 +648,30 @@ function renderPills(){
   const t=iso(today);
   const ev=db.events.filter(e=>e.d>=t&&daysFrom(e.d)<=7).length;
   const bd=db.bdays.filter(b=>nextBday(b.d).days<=30).length;
-  $("#nEv").textContent=ev||"";$("#nLi").textContent=db.lists.length||"";
+  $("#nEv").textContent=ev||"";$("#nLi").textContent=db.lists.filter(x=>!x.p).length||"";
   $$("[data-pill]").forEach(p=>p.classList.toggle("on",p.dataset.pill===mode));
 }
 let lastX="";
 function renderXhead(){
   let L,R;
-  if(mode==="listas"){L=`Listas<i></i>`;R="";}
+  if(mode==="listas"||mode==="pelis"){L=`${mode==="pelis"?"Pelis":"Listas"}<i></i>`;R="";}
   else{const d=parse(selDay);L=`${N(pad(d.getDate()))}<i></i>`;R=`<b>${DIAS[d.getDay()]}</b>`}
   const key=mode+selDay;
-  $("#xnum").classList.toggle("title",mode==="listas");
+  $("#xnum").classList.toggle("title",mode==="listas"||mode==="pelis");
   if(key!==lastX){lastX=key;$("#xnum").innerHTML=L;rollNums($("#xnum"))}
   $("#xday").innerHTML=R;
-  $("#qday").hidden=mode==="listas";
+  $("#qday").hidden=mode==="listas"||mode==="pelis";
   $("#qdayTxt").textContent=dayChip(selDay);
-  $("#qtext").placeholder=mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
+  $("#qtext").placeholder=mode==="pelis"?"Añadir peli o serie…":mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
 }
 const row=(kind,id,title,meta="",metaCls="")=>`<div class="row" style="--bar:${metaCls==="late"?"#ff3b30":barOf(id)}"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
 const irow=(icon,title,meta="")=>`<div class="row"><span class="ico">${icon}</span><div class="t">${esc(title)}</div>${meta?`<div class="m">${meta}</div>`:""}</div>`;
 function renderList(){
   let h="";
-  if(mode==="listas"){
-    h=db.lists.map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
+  if(mode==="pelis"){
+    h=db.lists.filter(x=>x.p).map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Pelis y series que quieres ver 🍿</p>`;
+  }else if(mode==="listas"){
+    h=db.lists.filter(x=>!x.p).map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
   }else{
     // todas las tareas a la vez: atrasadas, lo de hoy y lo de los próximos días (con su día a la derecha)
     const t=iso(today);
@@ -702,9 +704,11 @@ function layout(){
   const H=home.clientHeight;
   const topE=$("#xnum").offsetTop+$("#xnum").offsetHeight+18;     // la hoja desplegada empieza bajo el número
   home.style.setProperty("--topE",topE+"px");
-  const pills=$("#pills"),collapsedTop=Math.max(dark.offsetTop+pills.offsetTop+pills.offsetHeight+40,H*.42);
+  const pills=$("#pills"),collapsedTop=Math.max(dark.offsetTop+pills.offsetTop+pills.offsetHeight+14,H*.42);
   maxTy=Math.max(80,collapsedTop-topE);
   $("#sparks").style.height=collapsedTop+"px";
+  pills.style.transform="";const pb=pills.getBoundingClientRect().bottom-home.getBoundingClientRect().top;
+  pills.style.transform=`translateY(${Math.max(0,collapsedTop-14-pb)}px)`;
   apply(expanded?0:maxTy);
 }
 function setBg(t){document.documentElement.style.setProperty("--pagebg",t)}
@@ -797,7 +801,7 @@ $("#daypop").addEventListener("click",e=>{const b=e.target.closest("[data-pick]"
 function quickAdd(){
   const inp=$("#qtext"),v=inp.value.trim();if(!v){inp.focus();return}
   inp.value="";
-  if(mode==="listas"){db.lists.push({id:uid(),t:v,u:nowU()});render();return}
+  if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,p:1,u:nowU()}:{id:uid(),t:v,u:nowU()});render();return}
   db.tasks.push({id:uid(),t:v,d:selDay,u:nowU()});render();
   if(selDay!==iso(today))toast("Añadida a "+dayChip(selDay).toLowerCase()+" ✓");
 }
@@ -1000,7 +1004,7 @@ document.addEventListener("click",e=>{
   if(ds.done)completeItem(ds.done,b.closest(".row,.prow"));
   if("undo" in ds)undoLast();
   if(ds.page)openPage(ds.page);
-  if(ds.pill){if(ds.pill==="tareas")setMode("tareas");else if(ds.pill==="listas")setMode(mode==="listas"?"tareas":"listas");else openPage(ds.pill)}
+  if(ds.pill){if(ds.pill==="tareas")setMode("tareas");else if(ds.pill==="listas"||ds.pill==="pelis")setMode(mode===ds.pill?"tareas":ds.pill);else openPage(ds.pill)}
 });
 
 /* ---------------- ajustes ---------------- */
