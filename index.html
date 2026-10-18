@@ -466,13 +466,14 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 #pPelis.cards .pv{box-shadow:none!important}
 
 /* ======================= EVENTOS DENTRO DE LA PORTADA (v41) ======================= */
-.dark .calh{display:none;margin:0 calc(6px - var(--pad)) 0!important}
-.dark.ev .calh{display:block}
-.dark.ev{padding-top:calc(var(--safe-t) + 6px)}
-.dark.ev #brief{display:none}
+/* v42: arriba hay dos paneles (texto y calendario) que se deslizan con el dedo; la ficha y los iconos no se mueven */
+.dark{padding:0!important}
+#briefWrap{position:absolute;left:var(--pad);right:var(--pad);top:calc(var(--safe-t) + 74px);will-change:transform,opacity}
+.dark .calh{position:absolute!important;left:6px;right:6px;top:calc(var(--safe-t) + 6px);margin:0!important;will-change:transform,opacity;opacity:0;pointer-events:none}
+#pills{position:absolute;left:var(--pad);right:var(--pad);margin:0!important}
+@media (max-height:700px){#briefWrap{top:calc(var(--safe-t) + 62px)}}
 .dark .calh .cback{display:none}
 .dark .calh .calbar{padding-left:18px}
-#home.ev .tset{opacity:0!important;pointer-events:none!important}
 .weeks{touch-action:pan-x}
 .sheet .evsearch{margin:0 var(--pad) 6px}
 @keyframes slinL{from{opacity:0;transform:translateX(42px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
@@ -498,7 +499,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <div class="wkl"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
     <div class="weeks" id="weeks"></div>
   </header>
-    <p class="brief" id="brief"></p>
+    <div id="briefWrap"><p class="brief" id="brief"></p></div>
     <div class="pills" id="pills">
       <button class="pill ic" data-pill="tareas" aria-label="Tareas"><span class="em" aria-hidden="true">✅</span></button>
       <button class="pill ic" data-pill="listas" aria-label="Listas"><span class="em" aria-hidden="true">🛍️</span><span class="n" id="nLi"></span></button>
@@ -842,6 +843,15 @@ function renderHome(){renderBrief();renderPills();renderXhead();renderList()}
 function render(){save();schedulePush();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage);if(curPage==="pelis")renderPelis()}
 
 const MODES=["tareas","listas","eventos"];
+let topE=0;   // 0 = texto, 1 = calendario
+function setTop(e,anim){
+  topE=Math.max(0,Math.min(1,e));const W=home.clientWidth,br=$("#briefWrap"),ch=dark.querySelector(".calh");
+  const tr=anim?"transform .45s var(--ease),opacity .45s":"none";
+  br.style.transition=ch.style.transition=tr;
+  br.style.transform=`translateX(${-topE*W}px)`;br.style.opacity=String(1-topE);
+  ch.style.transform=`translateX(${(1-topE)*W}px)`;ch.style.opacity=String(topE);ch.style.pointerEvents=topE>.5?"auto":"none";
+  const ts=$(".tset");ts.style.opacity=String(clamp(1-(1-ty/maxTy)*2)*clamp(1-topE*2.5));ts.style.pointerEvents=topE>.5||ty<maxTy/2?"none":"";
+}
 function setMode(m,dir){
   if(m===mode)return;
   if(!dir)dir=MODES.indexOf(m)>MODES.indexOf(mode)?1:-1;
@@ -850,7 +860,8 @@ function setMode(m,dir){
   if(!ev){$("#evSearch").hidden=true;evQuery="";$("#evQ").value=""}
   const l=$("#list");l.style.transform="";l.style.opacity="";
   const cls=dir>0?"slinL":"slinR";
-  for(const el of [l,dark.querySelector(ev?".calh":"#brief"),xhead]){el.classList.remove("slinL","slinR","swap");void el.offsetWidth;el.classList.add(cls)}
+  for(const el of [l,xhead]){el.classList.remove("slinL","slinR","swap");void el.offsetWidth;el.classList.add(cls)}
+  setTop(ev?1:0,true);
   l.scrollTop=0;closeDayPop();renderHome();
   if(ev)requestAnimationFrame(()=>{scrollToWeek(evSel,false)});
   layout();
@@ -868,11 +879,12 @@ function layout(){
   const H=home.clientHeight;
   const topE=$("#xnum").offsetTop+$("#xnum").offsetHeight+18;     // la hoja desplegada empieza bajo el número
   home.style.setProperty("--topE",topE+"px");
-  const pills=$("#pills"),collapsedTop=Math.max(dark.offsetTop+pills.offsetTop+pills.offsetHeight+14,H*.42);
+  const pills=$("#pills"),br=$("#briefWrap"),ch=dark.querySelector(".calh"),ph=pills.offsetHeight||54;
+  const topB=Math.max(br.offsetTop+br.offsetHeight,ch.offsetTop+ch.offsetHeight);   // lo más alto de los dos paneles
+  const collapsedTop=Math.round(Math.max(topB+24+ph+14,H*.42));
+  pills.style.top=(collapsedTop-14-ph)+"px";
   maxTy=Math.max(80,collapsedTop-topE);
   $("#sparks").style.height=collapsedTop+"px";
-  const pb=dark.offsetTop+pills.offsetTop+pills.offsetHeight;   // offsetTop no se ve afectado por transformaciones
-  pills.style.transform=`translateY(${Math.max(0,collapsedTop-14-pb)}px)`;
   apply(expanded?0:maxTy);
 }
 function setBg(t){document.documentElement.style.setProperty("--pagebg",t)}
@@ -880,7 +892,7 @@ function apply(y){
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
   dark.style.opacity=clamp(1-p*1.3);dark.style.filter=p>.02?`blur(${p*7}px)`:"";dark.style.transform=`translateY(${-p*26}px) scale(${1-p*.03})`;
-  $("#sparks").style.opacity=1-p;$(".tset").style.opacity=clamp(1-p*2);$(".tset").style.pointerEvents=p>.5?"none":"";
+  $("#sparks").style.opacity=1-p;$(".tset").style.opacity=clamp(1-p*2)*clamp(1-topE*2.5);$(".tset").style.pointerEvents=p>.5||topE>.5?"none":"";
   lightbg.style.opacity=p;
   const q=clamp((p-.42)/.58);
   xhead.style.opacity=q;xhead.style.filter=q<.99?`blur(${(1-q)*8}px)`:"";xhead.style.transform=`translateY(${(1-q)*16}px)`;
@@ -910,11 +922,15 @@ function dStart(y,target,x){
 function hMove(dx){
   const i=MODES.indexOf(mode),edge=(dx>0&&i===0)||(dx<0&&i===MODES.length-1);
   const k=edge?dx*.25:dx*.6;$("#list").style.transform=`translateX(${k}px)`;$("#list").style.opacity=String(1-Math.min(.5,Math.abs(k)/400));
+  const W=home.clientWidth;
+  if(mode==="eventos"&&dx>0)setTop(1-dx/W,false);
+  else if(!edge&&MODES[i-Math.sign(dx)]==="eventos")setTop(-dx/W,false);
 }
 function hEnd(dx){
   const l=$("#list"),i=MODES.indexOf(mode),n=dx<-55?i+1:dx>55?i-1:i;
   if(n!==i&&n>=0&&n<MODES.length){setMode(MODES[n],n>i?1:-1);return}
   l.style.transition="transform .3s var(--ease),opacity .3s";l.style.transform="";l.style.opacity="";setTimeout(()=>l.style.transition="",320);
+  setTop(mode==="eventos"?1:0,true);
 }
 function dMove(y,e,x){
   if(!drag)return;
@@ -1356,9 +1372,9 @@ $("#sSync").onclick=()=>sync(true);
 
 /* ---------------- arranque ---------------- */
 render();renderBrief(true);
-requestAnimationFrame(()=>{layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
-addEventListener("resize",()=>{cancelAnimationFrame(tween);layout()});
-try{new ResizeObserver(()=>{if(!drag)layout()}).observe(dark)}catch(e){}
+requestAnimationFrame(()=>{setTop(0,false);layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
+addEventListener("resize",()=>{cancelAnimationFrame(tween);setTop(topE,false);layout()});
+try{{const ro=new ResizeObserver(()=>{if(!drag)layout()});ro.observe($("#brief"));ro.observe(dark.querySelector(".calh"))}}catch(e){}
 document.fonts&&document.fonts.ready.then(()=>{if(!drag)layout()});
 setInterval(()=>{const n=new Date();n.setHours(0,0,0,0);if(n.getTime()!==today.getTime()){today=n;if(selDay<iso(today))selDay=iso(today)}renderBrief();renderPills()},30000);
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render();renderBrief(true)}},900)}
