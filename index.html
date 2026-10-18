@@ -389,10 +389,16 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 #pPelis.cards .pv .pvi b{font-size:22px;letter-spacing:-.4px}
 #pPelis.cards .pv .pvi small{font-size:14px}
 #pPelis.cards .pv .seen{display:none}
-.pvseen{display:none}
-#pPelis.cards .pvseen{display:grid;place-items:center;position:absolute;right:16px;bottom:16px;z-index:2;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-size:24px;font-weight:700;border:1.5px solid rgba(255,255,255,.35)}
-#pPelis.cards .pvseen.on{background:#d9f05a;color:#111;border-color:#d9f05a}
-#pPelis.cards .pvseen:active{transform:scale(.9)}
+.pvseen,.pvdel{display:grid;place-items:center;position:absolute;bottom:10px;z-index:2;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-size:17px;font-weight:700;border:1.5px solid rgba(255,255,255,.35)}
+.pvseen{right:10px}.pvdel{left:10px;font-weight:500}
+.pvseen.on{background:#d9f05a;color:#111;border-color:#d9f05a}
+.pvseen:active,.pvdel:active{transform:scale(.9)}
+.pv .pvi{bottom:58px!important;right:12px!important}
+.pv::after{height:62%!important}
+.pv .seen{display:none}
+#pPelis.cards .pvseen,#pPelis.cards .pvdel{width:54px;height:54px;bottom:16px;font-size:23px}
+#pPelis.cards .pvseen{right:16px}#pPelis.cards .pvdel{left:16px}
+#pPelis.cards .pv .pvi{left:18px!important;right:18px!important;bottom:86px!important}
 #pPelis.cards .pvempty{flex:1;align-self:center}
 .pvsheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s}
 .pvsheet.on{opacity:1;pointer-events:auto}
@@ -1084,7 +1090,7 @@ function renderPelis(){
   const items=pvList().slice().reverse();
   g.innerHTML=items.map(x=>{
     const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
-    return `<button class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}${x.w?'<span class="seen">✓</span>':""}<span class="pvseen${x.w?" on":""}" data-seen="${x.id}" role="button" aria-label="${x.w?"Quitar de vistas":"Marcar como vista"}">${x.w?"↩︎":"✓"}</span><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div></button>`}).join("")
+    return `<button class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}${x.w?'<span class="seen">✓</span>':""}<span class="pvdel" data-del="${x.id}" role="button" aria-label="Eliminar">✕</span><span class="pvseen${x.w?" on":""}" data-seen="${x.id}" role="button" aria-label="${x.w?"Quitar de vistas":"Marcar como vista"}">${x.w?"↩︎":"✓"}</span><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div></button>`}).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
   pvSyncBg();
   if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
@@ -1129,8 +1135,11 @@ function pvSyncBg(){
 $("#pvEye").onclick=()=>setPvView(pvView==="cards"?"grid":"cards");
 $("#pvGrid").addEventListener("scroll",()=>{cancelAnimationFrame(pvSyncBg.r);pvSyncBg.r=requestAnimationFrame(pvSyncBg)},{passive:true});
 setPvView(pvView);
+function pvDel(x){finalizeDone();const i=db.lists.indexOf(x);if(i<0)return;db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderPelis();toast("Eliminada",true)}
 const pvClose=()=>$("#pvSheet").classList.remove("on");
 $("#pvGrid").addEventListener("click",e=>{
+  const xb=e.target.closest("[data-del]");
+  if(xb){e.stopPropagation();const x=db.lists.find(y=>y.id===xb.dataset.del);if(x)pvDel(x);return}
   const sb=e.target.closest("[data-seen]");
   if(sb){e.stopPropagation();const x=db.lists.find(y=>y.id===sb.dataset.seen);if(!x)return;if(x.w)delete x.w;else x.w=1;x.u=nowU();render();toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");return}
   const c=e.target.closest("[data-pv-id]");if(c)pvOpen(c.dataset.pvId)});
@@ -1141,7 +1150,7 @@ $("#pvSheet").addEventListener("click",e=>{
     case "seen":if(x.w)delete x.w;else x.w=1;x.u=nowU();render();renderPelis();toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");break;
     case "other":pvLookup(x,true);break;
     case "imdb":window.open(`https://www.imdb.com/title/${x.imdb}/`,"_blank");break;
-    case "del":{finalizeDone();const i=db.lists.indexOf(x);db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderPelis();toast("Eliminada",true);break}
+    case "del":pvDel(x);break;
   }
 });
 $$(".pbar").forEach(f=>{
