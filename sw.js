@@ -1,7 +1,7 @@
 /* Mi Día · service worker
  * Guarda la app en el móvil para que abra al instante y funcione sin conexión.
  * Cuando subas cambios, sube también este número para que el móvil se actualice. */
-const VERSION = 'mi-dia-v30';
+const VERSION = 'mi-dia-v31';
 const SHELL = [
   './',
   './index.html',
@@ -34,7 +34,7 @@ self.addEventListener('fetch', e => {
   // La propia app: primero la red (para coger cambios), si no hay conexión, la copia guardada
   if (url.origin === location.origin) {
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-store' })
         .then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res; })
         .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
     );
