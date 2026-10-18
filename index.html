@@ -884,7 +884,9 @@ function setMode(m,dir){
   if(!ev){$("#evSearch").hidden=true;evQuery="";$("#evQ").value=""}
   const l=$("#list");l.style.transform="";l.style.opacity="";
   const cls=dir>0?"slinL":"slinR";
-  for(const el of [l,xhead]){el.classList.remove("slinL","slinR","swap");void el.offsetWidth;el.classList.add(cls)}
+  // la cabecera grande solo se anima con la ficha abierta (si no, la animación la hacía aparecer de golpe sobre el fondo negro)
+  for(const el of expanded?[l,xhead]:[l]){el.classList.remove("slinL","slinR","swap");void el.offsetWidth;el.classList.add(cls)}
+  if(!expanded)xhead.classList.remove("slinL","slinR","swap");
   setTop(ev?1:0,true);
   l.scrollTop=0;closeDayPop();renderHome();
   if(ev)requestAnimationFrame(()=>{scrollToWeek(evSel,false)});
