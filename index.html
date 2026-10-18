@@ -933,7 +933,7 @@ function renderEventsBody(anim){
     const d=parse(evSel),k=daysFrom(evSel);
     const day=evItems(evSel,evSel);
     h=sech(k===0?"Hoy":k===1?"Mañana":k===-1?"Ayer":`${DIAS[d.getDay()]} ${fd(d)}`);
-    h+=day.map(e=>evCard(e,false)).join("")||`<button class="evempty addhere" id="addHere">Nada este día · <u>Añadir evento</u></button>`;
+    h+=day.map(e=>evCard(e,false)).join("")||`<p class="evempty">Nada este día</p>`;
     const from=addDays(evSel<t?t:evSel,evSel<t?0:1),next=evItems(from,addDays(from,60)).slice(0,8);
     if(next.length)h+=sech("Próximos")+next.map(e=>evCard(e,true)).join("");
   }
