@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="favicon-32.png">
 <title>Mi Día</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --dark:#0c0c0c; --paper:#f7f7f7; --ink:#111; --gray:#6d6d6d; --mute:#b4b4b4; --dots:#e2e2e2;
@@ -36,11 +36,11 @@ input{font:inherit;color:inherit}
 
 /* --- estado plegado (oscuro) --- */
 .dark{position:absolute;left:0;right:0;top:0;padding:calc(var(--safe-t) + 74px) var(--pad) 0;color:#fff;will-change:opacity,filter,transform;transform-origin:50% 0}
-.brief{font-size:26px;line-height:1.31;font-weight:600;letter-spacing:-.55px;color:var(--gray)}
-.brief b{color:#fff;font-weight:600}
+.brief{font-size:31px;line-height:1.26;font-weight:300;letter-spacing:-.7px;color:var(--gray)}
+.brief b{color:#fff;font-weight:300}
 .brief .ic{display:inline-grid;place-items:center;width:23px;height:23px;border:2px solid #fff;border-radius:6px;vertical-align:-2px;margin-right:6px;color:#fff}
 .brief .ic svg{width:13px;height:13px}
-.brief .av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;overflow:hidden;vertical-align:middle;position:relative;top:-3px;margin:0 6px 0 2px;background:#2a2a2a;color:#fff;font-size:14px;font-weight:600;letter-spacing:0}
+.brief .av{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;overflow:hidden;vertical-align:middle;position:relative;top:-3px;margin:0 6px 0 2px;background:#2a2a2a;color:#fff;font-size:14px;font-weight:600;letter-spacing:0}
 .brief .av img{width:100%;height:100%;object-fit:cover;display:block}
 .num{display:inline-block;white-space:nowrap}
 .num>span{display:inline-block;animation:drop .75s cubic-bezier(.2,.9,.3,1.15) both}
@@ -337,11 +337,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 
 @media (max-height:700px){
   .dark{padding-top:calc(var(--safe-t) + 62px)}
-  .brief{font-size:22px}.pills{margin-top:18px}
+  .brief{font-size:26.5px}.pills{margin-top:18px}
   .row{padding:14px 0 13px}.row .t{font-size:16.5px}
   .xnum{font-size:52px}.xnum i{margin-top:16px}
 }
-@media (max-width:370px){.brief{font-size:23px}.pill{padding:0 11px 0 9px;font-size:13px}}
+@media (max-width:370px){.brief{font-size:27.5px}.pill{padding:0 11px 0 9px;font-size:13px}}
 </style>
 </head>
 <body>
