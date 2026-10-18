@@ -1231,7 +1231,7 @@ function renderPelis(){
     const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
     return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}<div class="pvpanel"><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div><div class="pvbtns"><button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div></div></article>`}).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
-  pvSyncBg();
+  pvCenter();pvSyncBg();
   if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
   for(const x of db.lists.filter(x=>x.p&&!x.img&&!x.nf))pvLookup(x);
 }
@@ -1261,8 +1261,15 @@ function pvOpen(id){
 let pvView=(()=>{try{return localStorage.getItem("midia-pvview")||"grid"}catch(e){return "grid"}})();
 function setPvView(v){pvView=v;try{localStorage.setItem("midia-pvview",v)}catch(e){}
   $("#pPelis").classList.toggle("cards",v==="cards");$("#pvEye").classList.toggle("on",v==="cards");
-  $("#pvGrid").scrollLeft=0;$("#pvGrid").parentNode.scrollTop=0;pvSyncBg()}
+  pvCenter();$("#pvGrid").scrollLeft=0;$("#pvGrid").parentNode.scrollTop=0;pvSyncBg()}
 let pvBgCur="",pvBgK=0;
+/* centra la ficha grande: el hueco a cada lado es la mitad de lo que sobra de pantalla */
+function pvCenter(){
+  const g=$("#pvGrid");if(pvView!=="cards"){g.style.paddingLeft=g.style.paddingRight="";return}
+  const c=g.querySelector(".pv");if(!c)return;
+  const pad=Math.max(12,(g.clientWidth-c.offsetWidth)/2)+"px";g.style.paddingLeft=g.style.paddingRight=pad;
+}
+addEventListener("resize",()=>{if(typeof pvView!=="undefined")pvCenter()});
 function pvSyncBg(){
   if(pvView!=="cards")return;
   const g=$("#pvGrid"),cards=[...g.querySelectorAll(".pv")];if(!cards.length)return;
