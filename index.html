@@ -461,6 +461,9 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   #sparks{display:none}
 }
+/* sin sombras dentro de zonas con scroll: el navegador las recorta y se ve un corte */
+.dd.on{box-shadow:none!important}
+#pPelis.cards .pv{box-shadow:none!important}
 </style>
 </head>
 <body>
@@ -840,7 +843,7 @@ function layout(){
   const pills=$("#pills"),collapsedTop=Math.max(dark.offsetTop+pills.offsetTop+pills.offsetHeight+14,H*.42);
   maxTy=Math.max(80,collapsedTop-topE);
   $("#sparks").style.height=collapsedTop+"px";
-  pills.style.transform="";const pb=pills.getBoundingClientRect().bottom-home.getBoundingClientRect().top;
+  const pb=dark.offsetTop+pills.offsetTop+pills.offsetHeight;   // offsetTop no se ve afectado por transformaciones
   pills.style.transform=`translateY(${Math.max(0,collapsedTop-14-pb)}px)`;
   apply(expanded?0:maxTy);
 }
@@ -1312,6 +1315,7 @@ $("#sSync").onclick=()=>sync(true);
 render();renderBrief(true);
 requestAnimationFrame(()=>{layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
 addEventListener("resize",()=>{cancelAnimationFrame(tween);layout()});
+try{new ResizeObserver(()=>{if(!drag)layout()}).observe($("#brief"))}catch(e){}
 document.fonts&&document.fonts.ready.then(()=>{if(!drag)layout()});
 setInterval(()=>{const n=new Date();n.setHours(0,0,0,0);if(n.getTime()!==today.getTime()){today=n;if(selDay<iso(today))selDay=iso(today)}renderBrief();renderPills()},30000);
 if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch(e){}if(n){db.name=n.trim();render();renderBrief(true)}},900)}
