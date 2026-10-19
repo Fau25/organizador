@@ -267,6 +267,11 @@ input{font:inherit;color:inherit}
 .ftype button{flex:1;height:44px;border-radius:12px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;color:#666;transition:background .2s,color .2s}
 .ftype button span{font-size:18px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .ftype button.on{background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ftype.cats button{flex-direction:column;gap:1px;height:56px;font-size:11.5px;padding:0}.ftype.cats button span{font-size:20px}
+.lhd{display:flex;align-items:center;gap:8px;padding:22px 0 2px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
+.lhd:first-child{padding-top:6px}.lhd span{font-size:16px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}.lhd i{font-style:normal;font-weight:600;opacity:.7}
+.daypop.cats button b{font-size:22px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.daypop.cats{justify-content:space-between}.daypop.cats button{flex:1;min-width:0;padding:0 4px}
 
 
 /* ===== v17: tarjetas de evento compactas y títulos de sección en texto ===== */
@@ -932,6 +937,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <div class="dgrab"></div>
     <h4 id="edHead">Editar tarea</h4>
     <div class="f"><label for="edText">Qué es</label><input id="edText" enterkeyhint="done"></div>
+    <div class="ftype cats" id="edCat" hidden></div>
     <div class="f" id="edDateBox"><label for="edDate">Día</label><input type="date" id="edDate"></div>
     <button type="button" class="save" id="edSave">Guardar</button>
     <button type="button" class="gfdelbig" id="edDel">Eliminar</button>
@@ -1180,8 +1186,8 @@ function renderXhead(){
   $("#xnum").classList.toggle("title",mode==="listas"||mode==="pelis");
   if(key!==lastX){lastX=key;$("#xnum").innerHTML=L;rollNums($("#xnum"))}
   $("#xday").innerHTML=R;
-  $("#qday").hidden=mode==="listas"||mode==="pelis";
-  $("#qdayTxt").textContent=mode==="eventos"?dayChip(evSel<iso(today)?iso(today):evSel):dayChip(selDay);
+  $("#qday").hidden=mode==="pelis";
+  if(mode==="listas")setLiCat(liCat);else $("#qdayTxt").textContent=mode==="eventos"?dayChip(evSel<iso(today)?iso(today):evSel):dayChip(selDay);
   $("#qtext").placeholder=mode==="eventos"?"Nuevo evento…":mode==="pelis"?"Añadir peli o serie…":mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
 }
 const row=(kind,id,title,meta="",metaCls="")=>`<div class="row" data-ed="${kind}:${id}" style="--bar:${metaCls==="late"?"#ff3b30":barOf(id)}"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
@@ -1197,7 +1203,9 @@ function renderList(){
       +(!expanded&&all.length>4?`<p class="pvmore">+${all.length-4} más · desliza hacia arriba</p>`:"");
     $("#list").innerHTML=h;pvLookupAll();return;
   }else if(mode==="listas"){
-    h=db.lists.filter(x=>!x.p&&!x.g).map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
+    const its=db.lists.filter(x=>!x.p&&!x.g);
+    for(const [k,em,name] of LCAT){const g=its.filter(x=>lcatOf(x)===k);if(g.length)h+=`<div class="lhd"><span>${em}</span>${name} <i>${g.length}</i></div>`+g.map(x=>row("l",x.id,x.t)).join("")}
+    if(!h)h=`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
   }else{
     // todas las tareas a la vez: atrasadas, lo de hoy y lo de los próximos días (con su día a la derecha)
     const t=iso(today);
@@ -1213,6 +1221,11 @@ function renderList(){
 function renderHome(){renderBrief();renderPills();renderXhead();renderList();renderFeat()}
 function render(){save();schedulePush();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage);if(curPage==="pelis")renderPelis();if(curPage==="regalos")renderRegalos()}
 
+// categorías de Listas
+const LCAT=[["super","🛒","Súper"],["casa","🏠","Casa"],["tec","📱","Tecnología"],["ropa","👕","Ropa"],["otros","📦","Otros"]];
+const lcatOf=x=>LCAT.some(c=>c[0]===x.lc)?x.lc:"otros";
+let liCat=(()=>{try{return localStorage.getItem("midia-licat")||"super"}catch(e){return "super"}})();
+function setLiCat(k){liCat=k;try{localStorage.setItem("midia-licat",k)}catch(e){}const c=LCAT.find(c=>c[0]===k);$("#qdayTxt").textContent=c[1]+" "+c[2]}
 const MODES=["tareas","listas","eventos","pelis"];
 const PANEL={tareas:0,listas:0,eventos:1,pelis:2};   // 0 = texto, 1 = calendario, 2 = pelis destacadas
 let topE=0;   // 0 = texto, 1 = calendario
@@ -1363,7 +1376,8 @@ document.addEventListener("click",e=>{if(suppress){e.stopPropagation();e.prevent
 
 /* ---------------- selector de días ---------------- */
 function openDayPop(){
-  const pop=$("#daypop");let h="";
+  const pop=$("#daypop");let h="";pop.classList.toggle("cats",mode==="listas");
+  if(mode==="listas"){pop.innerHTML=LCAT.map(([k,em,n])=>`<button type="button" data-lcat="${k}" class="${k===liCat?"on":""}"><b>${em}</b><small>${n==="Tecnología"?"Tecno":n}</small></button>`).join("");pop.hidden=false;$("#qday").classList.add("openp");return}
   for(let n=0;n<7;n++){const d=new Date(today);d.setDate(d.getDate()+n);const k=iso(d);
     h+=`<button type="button" data-pick="${k}" class="${k===(mode==="eventos"?evSel:selDay)?"on":""}"><small>${n===0?"Hoy":n===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b></button>`}
   h+=`<button type="button" class="other ${daysFrom(mode==="eventos"?evSel:selDay)>6?"on":""}"><small>Otra</small><b>···</b><input type="date" id="otherDate" min="${iso(today)}" aria-label="Otra fecha"></button>`;
@@ -1372,7 +1386,7 @@ function openDayPop(){
 }
 function closeDayPop(){$("#daypop").hidden=true;$("#qday").classList.remove("openp")}
 $("#qday").onclick=()=>$("#daypop").hidden?openDayPop():closeDayPop();
-$("#daypop").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(b){setDay(b.dataset.pick);closeDayPop()}});
+$("#daypop").addEventListener("click",e=>{const c=e.target.closest("[data-lcat]");if(c){setLiCat(c.dataset.lcat);closeDayPop();$("#qtext").focus();return}const b=e.target.closest("[data-pick]");if(b){setDay(b.dataset.pick);closeDayPop()}});
 
 /* ---------------- añadir ---------------- */
 function quickAdd(){
@@ -1380,7 +1394,7 @@ function quickAdd(){
   if(mode==="eventos"){inp.value="";inp.blur();openDateSheet("evento",v,evSel<iso(today)?iso(today):evSel,true);return}
   if(!v){inp.focus();return}
   inp.value="";
-  if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,q:v,p:1,u:nowU()}:{id:uid(),t:v,u:nowU()});if(mode==="pelis"&&pvTab==="seen")pvTab="todo";render();return}
+  if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,q:v,p:1,u:nowU()}:{id:uid(),t:v,lc:liCat,u:nowU()});if(mode==="pelis"&&pvTab==="seen")pvTab="todo";render();return}
   db.tasks.push({id:uid(),t:v,d:selDay,u:nowU()});render();
   if(selDay!==iso(today))toast("Añadida a "+dayChip(selDay).toLowerCase()+" ✓");
 }
@@ -1913,13 +1927,16 @@ function openEdit(ref){
   const [k,id]=ref.split(":"),x=db[LISTNAME[k]].find(y=>y.id===id);if(!x)return;edRef={k,x};
   $("#edHead").textContent=k==="t"?"Editar tarea":"Editar";$("#edText").value=x.t;
   $("#edDateBox").hidden=k!=="t";if(k==="t")$("#edDate").value=x.d;
+  const ec=$("#edCat");ec.hidden=k!=="l";if(k==="l"){edLc=lcatOf(x);ec.innerHTML=LCAT.map(([c,em,n])=>`<button type="button" data-elc="${c}" class="${c===edLc?"on":""}"><span>${em}</span>${n==="Tecnología"?"Tecno":n}</button>`).join("")}
   $("#edWrap").classList.add("show");
 }
+let edLc="otros";
+$("#edCat").addEventListener("click",e=>{const b=e.target.closest("[data-elc]");if(!b)return;edLc=b.dataset.elc;$$("#edCat [data-elc]").forEach(y=>y.classList.toggle("on",y===b))});
 const closeEdit=()=>{$("#edWrap").classList.remove("show");$("#edText").blur();edRef=null};
 function saveEdit(){
   if(!edRef)return;const {k,x}=edRef,v=$("#edText").value.trim();
   if(!v){$("#edText").focus();return}
-  x.t=v;if(k==="t"&&$("#edDate").value)x.d=$("#edDate").value;x.u=nowU();
+  x.t=v;if(k==="t"&&$("#edDate").value)x.d=$("#edDate").value;if(k==="l")x.lc=edLc;x.u=nowU();
   closeEdit();render();toast("Guardado ✓");
 }
 $("#list").addEventListener("click",e=>{
