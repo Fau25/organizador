@@ -269,7 +269,13 @@ input{font:inherit;color:inherit}
 .ftype button.on{background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .ftype.cats button{flex-direction:column;gap:1px;height:56px;font-size:11.5px;padding:0}.ftype.cats button span{font-size:20px}
 .lhd{display:flex;align-items:center;gap:8px;padding:22px 0 2px;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mute)}
-.lhd:first-child{padding-top:6px}.lhd span{font-size:16px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}.lhd i{font-style:normal;font-weight:600;opacity:.7}
+.lhd:first-child{padding-top:6px}
+/* Listas más compacta (-30 %) */
+#home.mli #list .row{align-items:center;gap:13px;padding:13px 0 12px}
+#home.mli #list .row .t{font-size:12.6px;letter-spacing:-.15px}
+#home.mli #list .row .ck{transform:scale(.78);margin:0 -3px}
+#home.mli #list .lhd{font-size:10.5px;padding-top:18px}#home.mli #list .lhd:first-child{padding-top:6px}#home.mli #list .lhd span{font-size:13px}
+@media (min-width:700px){#home.mli #list .row .t{font-size:14px}}.lhd span{font-size:16px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}.lhd i{font-style:normal;font-weight:600;opacity:.7}
 .daypop.cats button b{font-size:22px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .daypop.cats{justify-content:space-between}.daypop.cats button{flex:1;min-width:0;padding:0 4px}
 
@@ -1239,7 +1245,7 @@ function setMode(m,dir){
   if(m===mode)return;
   if(!dir)dir=MODES.indexOf(m)>MODES.indexOf(mode)?1:-1;
   mode=m;
-  const ev=m==="eventos";dark.classList.toggle("ev",ev);home.classList.toggle("ev",ev);home.classList.toggle("mpv",m==="pelis");themeDark=null;
+  const ev=m==="eventos";dark.classList.toggle("ev",ev);home.classList.toggle("ev",ev);home.classList.toggle("mpv",m==="pelis");home.classList.toggle("mli",m==="listas");themeDark=null;
   if(!ev){$("#evSearch").hidden=true;evQuery="";$("#evQ").value=""}
   const l=$("#list");l.style.transform="";l.style.opacity="";
   const cls=dir>0?"slinL":"slinR";
@@ -1389,11 +1395,24 @@ $("#qday").onclick=()=>$("#daypop").hidden?openDayPop():closeDayPop();
 $("#daypop").addEventListener("click",e=>{const c=e.target.closest("[data-lcat]");if(c){setLiCat(c.dataset.lcat);closeDayPop();$("#qtext").focus();return}const b=e.target.closest("[data-pick]");if(b){setDay(b.dataset.pick);closeDayPop()}});
 
 /* ---------------- añadir ---------------- */
+// Entiende frases dictadas: «añade a la lista en ropa calzado y calcetines» → Ropa: Calzado, Calcetines
+const LALIAS={super:"super|supermercado|súper|compra|comida|mercadona",casa:"casa|hogar",tec:"tecnolog[ií]a|tecno|electr[oó]nica",ropa:"ropa|calzado y ropa",otros:"otros|otro|varios"};
+function parseListPhrase(v){
+  let t=v.trim().replace(/[.!¡¿?]+$/,"");const t0=t;
+  t=t.replace(/^(?:a[ñn]ade|a[ñn]adir|apunta|pon|mete|agrega)\s+/i,"").replace(/^(?:(?:a|en)\s+)?(?:la\s+)?lista\s*(?:de\s+(?:la\s+)?)?/i,"");
+  const had=t!==t0;let cat=null;
+  for(const k in LALIAS){const m=new RegExp("^((?:en|a)\\s+(?:(?:el|la)\\s+)?(?:categor[ií]a\\s+(?:de\\s+)?)?)?(?:"+LALIAS[k]+")(?=[\\s:,.-]|$)\\s*([:,.-])?\\s*","i").exec(t);
+    if(m&&(m[1]||m[2]||had)&&t.length>m[0].length){cat=k;t=t.slice(m[0].length);break}}
+  const items=t.split(/\s*,\s*|\s+y\s+/i).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1));
+  return {cat,items:items.length?items:[v.trim()]};
+}
 function quickAdd(){
   const inp=$("#qtext"),v=inp.value.trim();
   if(mode==="eventos"){inp.value="";inp.blur();openDateSheet("evento",v,evSel<iso(today)?iso(today):evSel,true);return}
   if(!v){inp.focus();return}
   inp.value="";
+  if(mode==="listas"){const {cat,items}=parseListPhrase(v);if(cat)setLiCat(cat);const c=cat||liCat;items.forEach(t=>db.lists.push({id:uid(),t,lc:c,u:nowU()}));render();
+    if(cat||items.length>1)toast(`${items.length===1?"Añadido":"Añadidos "+items.length} a ${LCAT.find(x=>x[0]===c)[2]}`);return}
   if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,q:v,p:1,u:nowU()}:{id:uid(),t:v,lc:liCat,u:nowU()});if(mode==="pelis"&&pvTab==="seen")pvTab="todo";render();return}
   db.tasks.push({id:uid(),t:v,d:selDay,u:nowU()});render();
   if(selDay!==iso(today))toast("Añadida a "+dayChip(selDay).toLowerCase()+" ✓");
