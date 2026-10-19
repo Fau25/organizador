@@ -717,6 +717,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .gfrow.gfin{animation:gfin .38s var(--spring,ease)}
 @keyframes gfin{from{opacity:0;transform:translateY(-8px)}}
 @media (min-width:700px){.gfsec{margin:12px var(--pad) 0}.gfsec.open{margin-left:0;margin-right:0}.gfsec.open .gftog{padding-left:calc(var(--pad) - 4px)}}
+
+/* v64: los productos vuelven a pasar por detrás; la barra de añadir es de cristal (blur) */
+.gfbody{margin-bottom:0!important;padding:6px 0 calc(var(--safe-b) + 112px)!important;-webkit-mask-image:none!important;mask-image:none!important}
+.gfadd{background:rgba(236,232,224,.55)!important;-webkit-backdrop-filter:blur(24px) saturate(1.7)!important;backdrop-filter:blur(24px) saturate(1.7)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:0 8px 30px rgba(60,50,30,.08)!important}
+.sharebar:not(.dark) .shbtn:not(.on){background:rgba(217,212,202,.6);-webkit-backdrop-filter:blur(24px) saturate(1.7);backdrop-filter:blur(24px) saturate(1.7)}
 </style>
 </head>
 <body>
