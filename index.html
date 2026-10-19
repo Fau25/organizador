@@ -1406,7 +1406,9 @@ function completeItem(ref,rowEl){
     render();toast(DONEMSG[kind],true);
   },rowEl?600:0);
 }
-function finalizeDone(keep){if(!lastDone)return;const {it,timer}=lastDone;clearTimeout(timer);lastDone=null;if(it.gid&&linked())apiPost({action:"delete",gid:it.gid},keep).catch(()=>{})}
+function driveDel(url,keep){const m=/googleusercontent\.com\/d\/([\w-]+)/.exec(url||"");if(m&&linked())apiPost({action:"delImg",id:m[1]},keep).catch(()=>{})}   // manda a la papelera de Drive la foto pegada
+function finalizeDone(keep){if(!lastDone)return;const {it,timer}=lastDone;clearTimeout(timer);lastDone=null;if(it.gid&&linked())apiPost({action:"delete",gid:it.gid},keep).catch(()=>{});
+  if(it.g){driveDel(it.img,keep);try{localStorage.removeItem("midia-img-"+it.id)}catch(e){}}}
 function undoLast(){if(!lastDone)return;const {name,it,i,timer}=lastDone;clearTimeout(timer);lastDone=null;delete db.tomb[it.id];if(name==="tasks"||name==="lists")it.u=nowU();db[name].splice(Math.min(i,db[name].length),0,it);render();toast("Recuperado")}
 function toast(m,undo){const t=$("#toast");t.innerHTML=`<span>${esc(m)}</span>`+(undo?'<button data-undo>Deshacer</button>':"");t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),undo?4500:2200)}
 
@@ -1760,7 +1762,7 @@ function gfAdd(){
   if(gfEdit){   // editar uno que ya existe
     const it=gfEdit,urlCh=url!==(it.url||""),nameCh=v&&v!==it.t;
     if(v)it.t=it.q=v;it.c=gfNewCat;if(url)it.url=url;else delete it.url;delete it.nt;
-    if(gfPasted){it.pi=1;it.nf=1;gfLocalImg[it.id]=gfPasted;it.img="";uploadPasted(it,gfPasted)}
+    if(gfPasted){driveDel(it.img);it.pi=1;it.nf=1;gfLocalImg[it.id]=gfPasted;it.img="";uploadPasted(it,gfPasted)}
     else if(!it.pi&&(urlCh&&url||nameCh&&!it.url)){delete it.img;delete it.nf;gfFail.delete(it.id)}
     it.u=nowU();gfOpenRows.add(it.c);closeGfSheet();render();renderRegalos();toast("Guardado ✓");return;
   }

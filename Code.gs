@@ -61,6 +61,7 @@ function doPost(e) {
       case 'img':      return { ok: true, r: imgSearch_(b.q) };
       case 'linkImg':  return Object.assign({ ok: true }, linkImg_(b.url));
       case 'upImg':    return { ok: true, url: upImg_(b.data) };
+      case 'delImg':   return { ok: true, done: delImg_(b.id) };
       case 'rating':   return { ok: true, r: rating_(b.id) };
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
@@ -342,6 +343,14 @@ function linkImg_(u) {
 }
 
 /* Guarda en tu Google Drive una imagen pegada en la app (Regalos) y devuelve un enlace para verla. */
+/* Manda a la papelera la foto de un producto borrado (solo si está en la carpeta de la app). */
+function delImg_(id) {
+  if (!/^[\w-]{20,}$/.test(String(id || ''))) return false;
+  const f = DriveApp.getFileById(id), ps = f.getParents();
+  while (ps.hasNext()) if (ps.next().getName() === 'Mi Día · imágenes') { f.setTrashed(true); return true; }
+  return false;
+}
+
 function upImg_(dataUrl) {
   const m = String(dataUrl || '').match(/^data:(image\/[\w+.-]+);base64,(.+)$/);
   if (!m) throw new Error('Imagen no válida');
