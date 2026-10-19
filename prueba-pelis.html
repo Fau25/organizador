@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c0c0c">
+<title>Prueba · Pelis en la portada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--safe-t:env(safe-area-inset-top);--safe-b:env(safe-area-inset-bottom);--spring:cubic-bezier(.32,.72,0,1);--pad:22px}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0c0c0c;color:#fff;font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;background:none;border:0}
+  #app{position:fixed;inset:0;max-width:520px;margin:0 auto;overflow:hidden;touch-action:none}
+  .note{position:absolute;top:calc(var(--safe-t) + 10px);left:50%;transform:translateX(-50%);z-index:30;font-size:11.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:#0c0c0c;background:#d9f05a;padding:5px 11px;border-radius:99px;white-space:nowrap}
+
+  /* ---- arriba: 3 destacadas ---- */
+  .top{position:absolute;left:0;right:0;top:0;padding-top:calc(var(--safe-t) + 50px);will-change:opacity,transform,filter}
+  .kick{padding:0 var(--pad);font-size:13px;font-weight:600;color:#8a8a8a;letter-spacing:.3px;text-transform:uppercase}
+  .feat{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px var(--pad) 4px;scrollbar-width:none;touch-action:pan-x}
+  .feat::-webkit-scrollbar{display:none}
+  .fc{flex:none;position:relative;width:62%;aspect-ratio:3/4;max-height:250px;border-radius:24px;overflow:hidden;scroll-snap-align:start;background:#1c1c1f}
+  .fc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .fc .rank{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18)}
+  .fc .info{position:absolute;left:8px;right:8px;bottom:8px;padding:10px 12px;border-radius:16px;background:rgba(18,18,20,.42);-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);border:1px solid rgba(255,255,255,.14)}
+  .fc b{display:block;font-size:16px;font-weight:600;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fc small{display:flex;gap:6px;align-items:center;margin-top:2px;font-size:12.5px;color:rgba(255,255,255,.75)}
+  .fc small i{font-style:normal;color:#ffd166}
+
+  /* ---- menú, en su sitio de siempre ---- */
+  .pills{position:absolute;left:var(--pad);right:var(--pad);display:flex;gap:14px}
+  .pill{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:25px;background:rgba(30,30,32,.62);border:1px solid rgba(255,255,255,.11);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+  .pill.on{background:rgba(52,52,56,.72);border-color:rgba(255,255,255,.3)}
+
+  /* ---- ficha inferior ---- */
+  .sheet{position:absolute;left:0;right:0;height:100%;background:#161618;border-radius:34px 34px 0 0;will-change:transform;display:flex;flex-direction:column;box-shadow:0 -1px 0 rgba(255,255,255,.06)}
+  .grab{flex:none;height:22px;display:grid;place-items:center}.grab i{width:38px;height:4px;border-radius:9px;background:#3a3a3e}
+  .shead{flex:none;display:flex;align-items:baseline;justify-content:space-between;padding:0 var(--pad) 10px}
+  .shead h2{font-size:22px;font-weight:600;letter-spacing:-.5px}
+  .shead span{font-size:14px;color:#8a8a8a}
+  .tabs{flex:none;display:flex;gap:22px;padding:0 var(--pad) 8px;overflow:hidden;max-height:0;opacity:0;transition:max-height .3s,opacity .3s}
+  .open .tabs{max-height:50px;opacity:1}
+  .tabs button{font-size:15.5px;font-weight:500;color:#8a8a8a;padding:8px 0}.tabs button.on{color:#fff;font-weight:600}
+  .grid{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px var(--pad) calc(var(--safe-b) + 110px);align-content:start}
+  .open .grid{overflow-y:auto;touch-action:pan-y}
+  .pv{position:relative;aspect-ratio:2/3;border-radius:22px;overflow:hidden;background:#232327}
+  .pv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .pv .pi{position:absolute;left:8px;right:8px;bottom:8px;padding:8px 10px;border-radius:14px;background:rgba(18,18,20,.42);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid rgba(255,255,255,.14)}
+  .pv .pi b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pv .pi small{font-size:12px;color:rgba(255,255,255,.72)}
+  .more{grid-column:1/-1;text-align:center;font-size:14px;color:#8a8a8a;padding:6px 0}
+  .open .more{display:none}
+  .add{position:absolute;left:18px;right:18px;bottom:calc(var(--safe-b) + 16px);height:58px;border-radius:99px;display:flex;align-items:center;gap:8px;padding:0 7px 0 20px;background:rgba(30,30,32,.55);-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.1);opacity:0;transform:translateY(24px);pointer-events:none;transition:opacity .3s,transform .3s var(--spring)}
+  .open .add{opacity:1;transform:none;pointer-events:auto}
+  .add span{flex:1;color:#7a7a7a;font-size:17px}
+  .add i{width:44px;height:44px;border-radius:50%;background:#ff5c7a;color:#111;display:grid;place-items:center;font-style:normal;font-size:24px}
+  .hint{position:absolute;left:0;right:0;bottom:calc(var(--safe-b) + 8px);text-align:center;font-size:12px;color:#5c5c60;transition:opacity .3s}
+  .open .hint{opacity:0}
+
+  /* ajustes: 3 destacadas a la vista, 2×2 que cabe en la ficha plegada, cuadrícula completa al abrir */
+  .feat{overflow:visible;gap:10px}
+  .fc{width:calc((100% - 20px)/3);aspect-ratio:2/3;max-height:none;border-radius:20px}
+  .fc .info{left:6px;right:6px;bottom:6px;padding:7px 8px;border-radius:13px}
+  .fc b{font-size:13px}.fc small{font-size:11.5px;gap:4px}
+  .fc .rank{width:24px;height:24px;font-size:12px;top:7px;left:7px}
+  .grid{grid-auto-rows:max-content}
+  .sheet:not(.open) .pv{aspect-ratio:auto;height:calc((100vh - var(--sy,420px) - 120px)/2);max-height:200px;min-height:110px}
+  .sheet:not(.open) .pv img{object-position:50% 20%}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="note">Prueba · no está en la app</div>
+  <div class="top" id="top">
+    <p class="kick">⭐ Mejor valoradas</p>
+    <div class="feat" id="feat"></div>
+  </div>
+  <div class="pills" id="pills"><button class="pill">✅</button><button class="pill">🛍️</button><button class="pill">🗓️</button><button class="pill on">🍿</button><button class="pill">🎁</button></div>
+  <div class="sheet" id="sheet">
+    <div class="grab"><i></i></div>
+    <div class="shead"><h2>Por ver</h2><span id="cnt"></span></div>
+    <div class="tabs"><button class="on">Por ver</button><button>Pelis</button><button>Series</button><button>Vistas</button></div>
+    <div class="grid" id="grid"></div>
+    <div class="add"><span>Añadir peli o serie…</span><i>+</i></div>
+    <p class="hint">Desliza la ficha hacia arriba para ver todas y añadir</p>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+// datos de ejemplo (en la app vendrían de tu lista; la nota la daría IMDb)
+const L=[
+  ["Shōgun","tvMiniSeries",2024,8.6],["Oppenheimer","movie",2023,8.3],["Severance","tvSeries",2022,8.7],
+  ["Dune: Part Two","movie",2024,8.5],["The Bear","tvSeries",2022,8.5],["Silo","tvSeries",2023,8.1],
+  ["Poor Things","movie",2023,7.8],["Fallout","tvSeries",2024,8.3],["Past Lives","movie",2023,7.8],["Up","movie",2009,8.3]];
+const COL=["#3b2f5c","#5c2f2f","#2f4a5c","#5c4a2f","#2f5c45","#4a2f5c","#5c2f4a","#2f3b5c","#455c2f","#5c3b2f"];
+const isTv=k=>/^tv/.test(k);
+const ph=i=>`linear-gradient(160deg,${COL[i%COL.length]},#151517)`;
+function card(x,i,cls){const [t,k,y,r]=x;return `<div class="${cls}" style="background:${ph(i)}"><img data-q="${t}" alt="" hidden>${cls==="fc"?`<span class="rank">${i+1}</span>`:""}<div class="${cls==="fc"?"info":"pi"}"><b>${t}</b><small>${cls==="fc"?`<i>★ ${r}</i> ${isTv(k)?"Serie":"Peli"}`:`${y} · ${isTv(k)?"Serie":"Peli"}`}</small></div></div>`}
+const best=L.slice().sort((a,b)=>b[3]-a[3]).slice(0,3);
+$("#feat").innerHTML=best.map((x,i)=>card(x,i,"fc")).join("");
+$("#cnt").textContent=L.length+" en la lista";
+function renderGrid(open){$("#grid").innerHTML=(open?L:L.slice(0,4)).map((x,i)=>card(x,i+3,"pv")).join("")+(open?"":`<p class="more">+${L.length-4} más · desliza hacia arriba</p>`);loadPosters()}
+// pósters reales de IMDb (si hay conexión); si no, se queda el color
+const cache={};
+function loadPosters(){document.querySelectorAll("img[data-q]").forEach(im=>{const q=im.dataset.q;const set=u=>{if(u){im.src=u;im.hidden=false}};if(q in cache)return set(cache[q]);
+  const k=q.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9 ]/g," ").trim().replace(/\s+/g,"_");
+  window["imdb$"+k]=j=>{const r=(j.d||[]).find(x=>x.i);cache[q]=r?(Array.isArray(r.i)?r.i[0]:r.i.imageUrl).replace(/\._V1_.*?\.jpg$/,"._V1_QL75_UX400_.jpg"):"";document.querySelectorAll(`img[data-q="${q}"]`).forEach(m=>{if(cache[q]){m.src=cache[q];m.hidden=false}})};
+  if(!document.getElementById("s_"+k)){const s=document.createElement("script");s.id="s_"+k;s.src=`https://sg.media-imdb.com/suggests/${k[0]}/${k}.json`;document.head.appendChild(s)}})}
+
+// ---- ficha que sube y baja (igual que en la portada) ----
+const app=$("#app"),sheet=$("#sheet"),top_=$("#top"),pills=$("#pills");
+let ty=0,minY=0,maxY=0,open=false;
+function layout(){
+  const H=app.clientHeight,fb=top_.offsetTop+top_.offsetHeight;
+  pills.style.top=(fb+14)+"px";
+  maxY=fb+14+54+16;sheet.style.setProperty("--sy",maxY+"px");minY=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-t"))||0)+44;
+  apply(open?minY:maxY);
+}
+function apply(y){ty=y;sheet.style.transform=`translateY(${y}px)`;const p=Math.min(1,Math.max(0,(maxY-y)/(maxY-minY)));
+  top_.style.opacity=1-p;top_.style.transform=`translateY(${-p*30}px) scale(${1-p*.04})`;top_.style.filter=p>.02?`blur(${p*6}px)`:"";
+  pills.style.opacity=Math.max(0,1-p*1.6);}
+function settle(o){if(o!==open){open=o;sheet.classList.toggle("open",o);renderGrid(o)}sheet.style.transition="transform .5s var(--spring)";apply(o?minY:maxY);setTimeout(()=>sheet.style.transition="",520)}
+let d=null;
+sheet.addEventListener("touchstart",e=>{const g=$("#grid");d={y:e.touches[0].clientY,ty,t:performance.now(),fromGrid:!!e.target.closest(".grid"),st:g.scrollTop}},{passive:true});
+sheet.addEventListener("touchmove",e=>{if(!d)return;const dy=e.touches[0].clientY-d.y;
+  if(open&&d.fromGrid&&(dy<0||d.st>0)){d=null;return}
+  e.preventDefault();d.dy=dy;apply(Math.min(maxY+40,Math.max(minY-30,d.ty+dy)))},{passive:false});
+sheet.addEventListener("touchend",()=>{if(!d)return;const v=(d.dy||0)/Math.max(1,performance.now()-d.t);settle(v<-.3?true:v>.3?false:ty<(minY+maxY)/2);d=null});
+sheet.addEventListener("click",e=>{if(e.target.closest(".grab"))settle(!open)});
+renderGrid(false);loadPosters();
+requestAnimationFrame(()=>{layout();apply(app.clientHeight);requestAnimationFrame(()=>{sheet.style.transition="transform .7s var(--spring)";apply(maxY);setTimeout(()=>sheet.style.transition="",720)})});
+addEventListener("resize",layout);
+</script>
+</body>
+</html>
