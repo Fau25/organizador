@@ -49,7 +49,7 @@ Sin conectarlo, la app funciona igual y, al guardar un cumpleaños o evento, abr
 ## Actualizar la app más adelante
 
 1. Sube el `index.html` nuevo al repositorio (sustituyendo el anterior).
-2. Abre `sw.js` y sube el número de `VERSION` (ahora va por `mi-dia-v60`: la siguiente sería `mi-dia-v61`).
+2. Abre `sw.js` y sube el número de `VERSION` (ahora va por `mi-dia-v61`: la siguiente sería `mi-dia-v62`).
 3. En el móvil, cierra la app del todo y vuelve a abrirla (a veces hace falta dos veces).
 
 Tus tareas y datos **no se pierden** al actualizar.
