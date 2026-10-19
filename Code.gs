@@ -58,6 +58,7 @@ function doPost(e) {
   return guard_(body, b => {
     switch (b.action) {
       case 'imdb':     return { ok: true, d: imdb_(b.q) };
+      case 'img':      return { ok: true, r: imgSearch_(b.q) };
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
@@ -284,3 +285,30 @@ function imdb_(q) {
   if (r.getResponseCode() !== 200) return [];
   return (JSON.parse(r.getContentText()).d || []).slice(0, 8);
 }
+
+/* Busca fotos de un producto (para la sección Regalos): devuelve [{ m: foto original, t: miniatura }]. */
+function imgSearch_(q) {
+  q = String(q || '').trim();
+  if (!q) return [];
+  const url = 'https://www.bing.com/images/search?q=' + encodeURIComponent(q) + '&form=HDRSC3&first=1&setlang=es';
+  const r = UrlFetchApp.fetch(url, {
+    muteHttpExceptions: true,
+    headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15', 'Accept-Language': 'es-ES,es;q=0.9' },
+  });
+  if (r.getResponseCode() !== 200) return [];
+  const html = r.getContentText(), out = [], seen = {};
+  const re = /murl&quot;:&quot;(.*?)&quot;.*?turl&quot;:&quot;(.*?)&quot;/g;
+  let m;
+  while ((m = re.exec(html)) && out.length < 8) {
+    const murl = m[1].replace(/&amp;/g, '&'), turl = m[2].replace(/&amp;/g, '&');
+    if (seen[murl]) continue; seen[murl] = 1;
+    out.push({ m: murl, t: turl });
+  }
+  return out;
+}
+
+/** Ejecuta esto una vez desde el editor para dar permiso a la búsqueda de fotos y ver que funciona. */
+function probarFotos() {
+  Logger.log(JSON.stringify(imgSearch_('iPhone 18 Pro celeste').slice(0, 3), null, 1));
+}
+
