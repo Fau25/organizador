@@ -692,6 +692,15 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   .gfrow{padding:2px var(--pad) 8px;scroll-padding:0 var(--pad);gap:18px}
   .gfrow .gf{width:210px}
 }
+
+/* v62: hoja de compartir con el enlace visible */
+#shWrap.show .sheet-bg{opacity:1;pointer-events:auto}#shWrap.show .dsheet{transform:none;visibility:visible}
+@media (min-width:700px){#shWrap.show .dsheet{transform:translate(-50%,0)}}
+.shsub{font-size:14px;color:#77736d;margin:-8px 0 12px}
+.shurl{font:13px/1.45 ui-monospace,Menlo,monospace;color:#555;background:#f2efe9;border-radius:14px;padding:12px 14px;max-height:76px;overflow:hidden;word-break:break-all;-webkit-user-select:text;user-select:text;margin-bottom:14px}
+.shwa{display:grid;place-items:center;background:#25d366!important;color:#fff;text-decoration:none}
+.shrow{display:flex;gap:8px;margin-top:10px}
+.shrow .pbtn{flex:1;display:grid;place-items:center;text-decoration:none;color:#111;font-size:14px;padding:0 8px}
 </style>
 </head>
 <body>
@@ -847,6 +856,18 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <button type="button" class="save" id="gfSave">Guardar</button>
     <button type="button" class="gfdelbig" id="gfDel" hidden>Eliminar regalo</button>
   </form>
+</div>
+<!-- HOJA DE COMPARTIR -->
+<div id="shWrap">
+  <div class="sheet-bg" id="shBg"></div>
+  <div class="dsheet shsheet" role="dialog" aria-labelledby="shTitle">
+    <div class="dgrab"></div>
+    <h4 id="shTitle">Tu lista</h4>
+    <p class="shsub">Este enlace abre una página con lo que has elegido.</p>
+    <div class="shurl" id="shUrl"></div>
+    <a class="save shwa" id="shWa" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+    <div class="shrow"><button type="button" class="pbtn" id="shCopy">Copiar enlace</button><button type="button" class="pbtn" id="shMore">Más opciones…</button><a class="pbtn" id="shOpen" target="_blank" rel="noopener">Ver página</a></div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 <input type="file" id="photoIn" accept="image/*" hidden>
@@ -1734,10 +1755,16 @@ async function shareList(kind,title,items){
   const url=shareBase()+await packShare({k:kind,n:db.name||"",s:title,i:items});
   const who=db.name?` de ${db.name}`:"";
   const text=kind==="p"?`🍿 Pelis y series${who}`:`🎁 ${title}${who}`;
-  try{if(navigator.share){await navigator.share({title:text,text,url});return}}catch(e){if(e&&e.name==="AbortError")return}
-  try{await navigator.clipboard.writeText(url)}catch(e){}
-  location.href="https://wa.me/?text="+encodeURIComponent(text+"\n"+url);
+  // hoja propia con el enlace a la vista: WhatsApp a veces se come la URL si va aparte en el menú de compartir
+  const full=text+"\n"+url;
+  $("#shTitle").textContent=text;$("#shUrl").textContent=url;
+  $("#shWa").href="https://wa.me/?text="+encodeURIComponent(full);
+  $("#shCopy").onclick=async()=>{try{await navigator.clipboard.writeText(url);toast("Enlace copiado ✓")}catch(e){const r=document.createRange();r.selectNodeContents($("#shUrl"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast("Mantén pulsado y copia")}};
+  $("#shMore").hidden=!navigator.share;$("#shMore").onclick=async()=>{try{await navigator.share({text:full})}catch(e){}};
+  $("#shOpen").href=url;
+  $("#shWrap").classList.add("show");
 }
+const closeShare=()=>$("#shWrap").classList.remove("show");
 const SEL={gf:new Set(),pv:new Set()};
 function setSelMode(k,on){
   const pg=k==="gf"?$("#pRegalos"):$("#pPelis");SEL[k].clear();pg.classList.toggle("sel",on);
@@ -1750,6 +1777,7 @@ $("#gfSelBtn").onclick=()=>setSelMode("gf",!$("#pRegalos").classList.contains("s
 $("#pvSelBtn").onclick=()=>setSelMode("pv",!$("#pPelis").classList.contains("sel"));
 $("#gfGrid").addEventListener("click",e=>{if(!$("#pRegalos").classList.contains("sel"))return;const c=e.target.closest("[data-gid]");if(!c)return;e.preventDefault();e.stopImmediatePropagation();toggleSel("gf",c.dataset.gid,c)},true);
 $("#pvGrid").addEventListener("click",e=>{if(!$("#pPelis").classList.contains("sel"))return;const c=e.target.closest("[data-pv-id]");if(!c)return;e.preventDefault();e.stopImmediatePropagation();toggleSel("pv",c.dataset.pvId,c)},true);
+$("#shBg").onclick=closeShare;
 $("#gfShare").onclick=()=>{
   const items=db.lists.filter(x=>x.g&&SEL.gf.has(x.id)).map(x=>[x.t,/^data:/.test(x.img||"")?"":(x.img||""),x.url||"",x.c||""]);
   const cats=[...new Set(items.map(x=>x[3]))],title=cats.length===1&&GFCAT[cats[0]]?({navidad:"Lista de Navidad",cumple:"Lista de cumpleaños",capricho:"Caprichos"})[cats[0]]:"Lista de regalos";
