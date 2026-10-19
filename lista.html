@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lista compartida · Mi Día</title>
+<meta name="description" content="Una lista compartida desde Mi Día">
+<meta property="og:title" content="🎁 Una lista para ti">
+<meta property="og:description" content="Ábrela para ver los regalos o las pelis que te han compartido.">
+<meta property="og:image" content="https://fau25.github.io/organizador/icon-512.png">
+<meta name="theme-color" content="#f2efe9">
+<link rel="icon" type="image/png" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f2efe9;--card:#fff;--ink:#111;--mute:#77736d;--line:#e6e1d8;--pad:22px}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  body.dark{--bg:#000;--card:#161618;--ink:#fff;--mute:#8a8a8a;--line:#262628}
+  main{max-width:860px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 40px) var(--pad) calc(env(safe-area-inset-bottom) + 40px)}
+  .kicker{font-size:14px;font-weight:600;color:var(--mute);letter-spacing:.2px}
+  h1{margin-top:10px;font-size:44px;line-height:1.02;font-weight:300;letter-spacing:-1.6px}
+  .sub{margin-top:12px;font-size:16px;color:var(--mute);line-height:1.45}
+  .grid{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .it{display:flex;flex-direction:column;background:var(--card);border-radius:26px;padding:14px 12px 12px;text-decoration:none;color:inherit;opacity:0;transform:translateY(10px);animation:in .5s cubic-bezier(.32,.72,0,1) forwards}
+  @keyframes in{to{opacity:1;transform:none}}
+  .im{display:grid;place-items:center;height:150px;margin-bottom:12px;border-radius:18px;overflow:hidden}
+  .im img{max-width:90%;max-height:150px;object-fit:contain;mix-blend-mode:multiply}
+  .dark .im{height:auto;aspect-ratio:2/3;margin:-2px -0px 12px;background:#222}
+  .dark .im img{max-width:none;max-height:none;width:100%;height:100%;object-fit:cover;mix-blend-mode:normal}
+  .ph{font-size:48px;opacity:.35}
+  .it b{font-size:15.5px;line-height:1.25;font-weight:600;letter-spacing:-.2px;text-align:center}
+  .it small{margin-top:4px;font-size:13px;color:var(--mute);text-align:center}
+  .go{margin-top:12px;align-self:center;height:36px;padding:0 16px;border-radius:99px;background:var(--bg);font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .dark .go{background:#262628}
+  .tag{align-self:center;margin-top:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;border:1.5px solid var(--c);color:var(--c)}
+  footer{margin-top:44px;text-align:center;font-size:13px;color:var(--mute)}
+  .err{margin-top:80px;text-align:center;color:var(--mute);font-size:17px;line-height:1.5}
+  @media (min-width:700px){h1{font-size:60px}.grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}}
+  @media (prefers-reduced-motion:reduce){.it{animation:none;opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<main id="app"><p class="err">Abriendo la lista…</p></main>
+<script>
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fromB64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function unpack(code){
+  const kind=code[0],bytes=fromB64u(code.slice(1));
+  if(kind==="z"){const ds=new DecompressionStream("deflate-raw"),w=ds.writable.getWriter();w.write(bytes);w.close();return JSON.parse(await new Response(ds.readable).text())}
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+const CAT={navidad:["🎄 Navidad","#d64545"],cumple:["🎂 Cumpleaños","#d97a00"],capricho:["✨ Capricho","#6c5ce7"]};
+(async()=>{
+  const app=document.getElementById("app");
+  try{
+    const d=await unpack(decodeURIComponent(location.hash.slice(1)));
+    const pelis=d.k==="p";document.body.classList.toggle("dark",pelis);
+    document.querySelector('meta[name=theme-color]').content=pelis?"#000":"#f2efe9";
+    const who=d.n?esc(d.n):"";
+    document.title=(pelis?"Pelis y series":d.s||"Lista de regalos")+(who?" · "+d.n:"");
+    let h=`<p class="kicker">${pelis?"🍿 Para ver":"🎁 Lista de deseos"}${who?" · de "+who:""}</p><h1>${esc(pelis?"Pelis y series":d.s||"Lista de regalos")}</h1>`;
+    h+=`<p class="sub">${pelis?(who?who+" te recomienda":"Te recomiendan")+" estas "+d.i.length+(d.i.length===1?" peli o serie.":" pelis y series."):(d.i.length===1?"Una idea":d.i.length+" ideas")+" por si no sabes qué regalar"+(who?" a "+who:"")+" 😉"}</p><div class="grid">`;
+    d.i.forEach(([t,img,url,extra],n)=>{
+      const tag=!pelis&&CAT[extra]?`<span class="tag" style="--c:${CAT[extra][1]}">${CAT[extra][0]}</span>`:"";
+      const inner=`<div class="im">${img?`<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${pelis?"🍿":"🎁"}'}))">`:`<span class="ph">${pelis?"🍿":"🎁"}</span>`}</div><b>${esc(t)}</b>${pelis&&extra?`<small>${esc(extra)}</small>`:""}${tag}${url?`<span class="go">${pelis?"Ver en IMDb":"Ver en la tienda"} ↗</span>`:""}`;
+      h+=url?`<a class="it" style="animation-delay:${n*60}ms" href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="it" style="animation-delay:${n*60}ms">${inner}</div>`;
+    });
+    h+=`</div><footer>Compartido desde Mi Día</footer>`;
+    app.innerHTML=h;
+  }catch(e){app.innerHTML=`<p class="err">Este enlace no se ha podido abrir.<br>Pide que te lo vuelvan a mandar.</p>`}
+})();
+</script>
+</body>
+</html>

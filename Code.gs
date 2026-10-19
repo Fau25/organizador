@@ -60,6 +60,7 @@ function doPost(e) {
       case 'imdb':     return { ok: true, d: imdb_(b.q) };
       case 'img':      return { ok: true, r: imgSearch_(b.q) };
       case 'linkImg':  return Object.assign({ ok: true }, linkImg_(b.url));
+      case 'upImg':    return { ok: true, url: upImg_(b.data) };
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
@@ -337,4 +338,22 @@ function linkImg_(u) {
   let title = meta('og:title') || ((html.match(/<title[^>]*>([^<]+)/i) || [])[1] || '');
   title = title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim().slice(0, 80);
   return { img: img, title: title };
+}
+
+/* Guarda en tu Google Drive una imagen pegada en la app (Regalos) y devuelve un enlace para verla. */
+function upImg_(dataUrl) {
+  const m = String(dataUrl || '').match(/^data:(image\/[\w+.-]+);base64,(.+)$/);
+  if (!m) throw new Error('Imagen no válida');
+  const folders = DriveApp.getFoldersByName('Mi Día · imágenes');
+  const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder('Mi Día · imágenes');
+  const ext = m[1].split('/')[1].replace('jpeg', 'jpg');
+  const file = folder.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], 'regalo-' + Date.now() + '.' + ext));
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return 'https://lh3.googleusercontent.com/d/' + file.getId() + '=w900';
+}
+
+/** Ejecuta esto una vez desde el editor para dar permiso a guardar imágenes pegadas en tu Drive. */
+function autorizarDrive() {
+  const f = DriveApp.getFoldersByName('Mi Día · imágenes');
+  Logger.log(f.hasNext() ? 'Carpeta lista' : 'Permiso concedido; la carpeta se creará con la primera imagen');
 }

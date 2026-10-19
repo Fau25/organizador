@@ -640,6 +640,35 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 @media (min-width:700px){#gfWrap.show .dsheet{transform:translate(-50%,0)}}
 .gf .lk{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#f2efe9;color:#111}
 .gf .lk svg{width:17px;height:17px}
+
+/* v60: pegar imagen, seleccionar y compartir */
+.gfright,.pvright{display:flex;align-items:center;gap:12px}
+.selbtn{height:34px;padding:0 14px;border-radius:99px;background:#e6e1d8;font-size:14px;font-weight:600;color:#111}
+.selbtn.dark{background:#1c1c1e;color:#fff;border:1px solid rgba(255,255,255,.12)}
+.sel .selbtn{background:#111;color:#fff}.sel .selbtn.dark{background:#fff;color:#111}
+.sel .gfcount{display:none}
+.sharebar{position:absolute;left:18px;right:18px;bottom:calc(var(--safe-b) + 16px);z-index:3;display:none}
+.sel .sharebar{display:block}
+.sel .gfadd,.sel .pvadd{display:none!important}
+.shbtn{width:100%;height:58px;border-radius:99px;background:#d9d4ca;color:#77736d;font-size:17px;font-weight:600;transition:background .2s,color .2s}
+.shbtn.on{background:#111;color:#fff}
+.sharebar.dark .shbtn{background:rgba(30,30,32,.7);color:#8a8a8a;-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.1)}
+.sharebar.dark .shbtn.on{background:#ff5c7a;color:#111;border-color:#ff5c7a}
+.sel .gf .re,.sel .gf .lk,.sel .gf .row2,.sel .pv .pvbtns{visibility:hidden}
+.sel .gf,.sel .pv{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.sel .gf::after,.sel .pv::before{content:"";position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;border:2px solid #bdb7ad;background:rgba(255,255,255,.8);z-index:3}
+.sel .gf .badge{right:44px}
+.sel .gf.picked{box-shadow:0 0 0 3px #111}
+.sel .gf.picked::after{background:#111 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/16px no-repeat;border-color:#111}
+.sel .pv::before{display:block!important;opacity:1!important;content:""!important;inset:auto!important;top:10px!important;right:10px!important;font-size:0!important;border-color:rgba(255,255,255,.7);background:rgba(0,0,0,.35)}
+.sel .pv.picked{box-shadow:0 0 0 3px #ff5c7a}
+.sel .pv.picked::before{background:#ff5c7a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/16px no-repeat!important;border-color:#ff5c7a}
+.gfpaste{position:relative;display:flex;align-items:center;gap:12px;margin:0 0 10px}
+.pbtn{height:44px;padding:0 16px;border-radius:14px;background:#f2efe9;font-size:15px;font-weight:600;white-space:nowrap}
+.gfpaste .gfhint{margin:0}
+#gfPrev{width:84px;height:84px;object-fit:contain;border-radius:16px;background:#f2efe9}
+.gfpaste .px{width:32px;height:32px;border-radius:50%;background:#f2efe9;font-size:14px}
+@media (min-width:700px){.sharebar{left:var(--side);right:var(--side)}}
 </style>
 </head>
 <body>
@@ -713,10 +742,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 <!-- PELIS Y SERIES -->
 <section class="page" data-p="pelis" id="pPelis">
   <div class="pvbg" id="pvBg"><i></i><i></i></div>
-  <div class="pvbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><button class="pveye" id="pvEye" aria-label="Cambiar vista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+  <div class="pvbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="pvright"><button class="selbtn dark" id="pvSelBtn">Seleccionar</button><button class="pveye" id="pvEye" aria-label="Cambiar vista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
   <h1 class="pvt">Pelis y series</h1>
   <div class="pvtabs" id="pvTabs"><button data-pv="todo" class="on">Por ver</button><button data-pv="movie">Pelis</button><button data-pv="tv">Series</button><button data-pv="seen">Vistas</button></div>
   <div class="pvbody"><div class="pvgrid" id="pvGrid"></div></div>
+  <div class="sharebar dark"><button class="shbtn" id="pvShare">Elige los que quieras</button></div>
   <form class="addbar pvadd" id="pvAdd" autocomplete="off">
     <input id="pvText" enterkeyhint="done" placeholder="Añadir peli o serie…" aria-label="Añadir peli o serie">
     <button type="button" class="addbtn" id="pvBtn" aria-label="Añadir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -724,11 +754,12 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 </section>
 <!-- REGALOS -->
 <section class="page" data-p="regalos" id="pRegalos">
-  <div class="gfbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="gfcount" id="gfCount"></span></div>
+  <div class="gfbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="gfright"><span class="gfcount" id="gfCount"></span><button class="selbtn" id="gfSelBtn">Seleccionar</button></span></div>
   <h1 class="gft">Regalos</h1>
   <p class="gfsub">Lo que te quieres comprar o tienes que regalar</p>
   <div class="gftabs" id="gfTabs"><button data-gf="todo" class="on">Todos</button><button data-gf="navidad">Navidad</button><button data-gf="cumple">Cumpleaños</button><button data-gf="capricho">Caprichos</button><button data-gf="hecho">Comprados</button></div>
   <div class="gfbody"><div class="gfgrid" id="gfGrid"></div></div>
+  <div class="sharebar"><button class="shbtn" id="gfShare">Elige los que quieras</button></div>
   <div class="addbar gfadd" id="gfAdd">
     <button type="button" class="gfopen" id="gfOpen">¿Qué te gustaría?</button>
     <button type="button" class="addbtn" id="gfBtn" aria-label="Añadir regalo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -789,7 +820,8 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <div class="ftype" id="gfType"><button type="button" data-gc="capricho" class="on"><span>✨</span>Capricho</button><button type="button" data-gc="navidad"><span>🎄</span>Navidad</button><button type="button" data-gc="cumple"><span>🎂</span>Cumple</button></div>
     <div class="f"><label for="gfName">Qué es</label><input id="gfName" placeholder="iPhone 18 Pro celeste" enterkeyhint="next"></div>
     <div class="f"><label for="gfUrl">Enlace de la tienda (opcional)</label><input id="gfUrl" type="url" inputmode="url" placeholder="https://…" enterkeyhint="done"></div>
-    <p class="gfhint">Si pones el enlace, la foto se coge de esa página. Si no, se busca por el nombre.</p>
+    <div class="gfpaste"><button type="button" class="pbtn" id="gfPasteBtn">📋 Pegar imagen copiada</button><span class="gfhint" id="gfPasteHint">o déjalo vacío y se busca sola</span><img id="gfPrev" alt="Imagen pegada" hidden><button type="button" class="px" id="gfPasteX" aria-label="Quitar imagen" hidden>✕</button></div>
+    <p class="gfhint">Foto: la que pegues; si no, la de la página del enlace; si no, se busca por el nombre.</p>
     <button type="button" class="save" id="gfSave">Guardar</button>
   </form>
 </div>
@@ -1267,7 +1299,8 @@ function openPage(p,dir){
   try{history.pushState({p},"")}catch(e){}
 }
 function closePage(silent){
-  if(!curPage)return;$(PAGE[curPage]).classList.remove("on");home.classList.remove("away");curPage=null;
+  if(!curPage)return;
+  for(const k of ["gf","pv"]){const pg=k==="gf"?$("#pRegalos"):$("#pPelis");if(pg.classList.contains("sel")){pg.classList.remove("sel");SEL[k].clear();$(k==="gf"?"#gfSelBtn":"#pvSelBtn").textContent="Seleccionar"}}$(PAGE[curPage]).classList.remove("on");home.classList.remove("away");curPage=null;
   $$(".pbar [data-q]").forEach(i=>i.blur());apply(ty);
   if(!silent)renderBrief();
 }
@@ -1433,7 +1466,7 @@ function renderPelis(){
   const items=pvList().slice().reverse();
   g.innerHTML=items.map(x=>{
     const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
-    return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}<div class="pvpanel"><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div><div class="pvbtns"><button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div></div></article>`}).join("")
+    return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}${SEL.pv.has(x.id)?" picked":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}<div class="pvpanel"><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div><div class="pvbtns"><button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div></div></article>`}).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
   pvCenter();pvSyncBg();
   if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
@@ -1539,8 +1572,9 @@ function renderRegalos(){
   const items=gfList().slice().reverse();
   const n=db.lists.filter(x=>x.g&&!x.w).length;$("#gfCount").textContent=n?`${n} por comprar`:"";
   g.innerHTML=items.map(x=>{const c=GFCAT[x.c]||GFCAT.capricho;
-    const im=x.img?`<img src="${esc(x.img)}" data-alt="${esc(x.img2||"")}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph">🎁</span>`;
-    return `<article class="gf${gfBusy.has(x.id)?" loading":""}${x.w?" done":""}" aria-label="${esc(x.t)}">
+    const src=x.img||gfLocalImg[x.id]||"";
+    const im=src?`<img src="${esc(src)}" data-alt="${esc(x.img2||"")}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph">🎁</span>`;
+    return `<article class="gf${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${x.w?" done":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
       <button class="re" data-gfre="${x.id}" aria-label="Buscar otra foto de ${esc(x.t)}">↻</button>
       <span class="badge" style="--bc:${c.c}">${c.t}</span>
       <div class="im">${im}</div><b>${esc(x.t)}</b>
@@ -1554,16 +1588,17 @@ $("#gfGrid").addEventListener("load",e=>{if(e.target.tagName==="IMG")e.target.cl
 $("#gfGrid").addEventListener("error",e=>{const im=e.target;if(im.tagName!=="IMG")return;
   if(im.dataset.alt&&im.src!==im.dataset.alt){im.src=im.dataset.alt;return}
   im.replaceWith(Object.assign(document.createElement("span"),{className:"ph",textContent:"🎁"}))},true);
-function setGfTab(t){gfTab=t;$$("#gfTabs button").forEach(b=>b.classList.toggle("on",b.dataset.gf===t));if(GFCAT[t])setGfCat(t);renderRegalos()}
+function setGfTab(t){if($("#pRegalos").classList.contains("sel")){SEL.gf.clear();updSelBar("gf")}gfTab=t;$$("#gfTabs button").forEach(b=>b.classList.toggle("on",b.dataset.gf===t));if(GFCAT[t])setGfCat(t);renderRegalos()}
 function setGfCat(c){gfNewCat=c;$$("#gfType [data-gc]").forEach(b=>b.classList.toggle("on",b.dataset.gc===c))}
-function openGfSheet(){$("#gfForm").reset();setGfCat(GFCAT[gfTab]?gfTab:gfNewCat);$("#gfWrap").classList.add("show");setTimeout(()=>$("#gfName").focus(),350)}
+function openGfSheet(){$("#gfForm").reset();setPasted(null);setGfCat(GFCAT[gfTab]?gfTab:gfNewCat);$("#gfWrap").classList.add("show");setTimeout(()=>$("#gfName").focus(),350)}
 const closeGfSheet=()=>{$("#gfWrap").classList.remove("show");$("#gfName").blur();$("#gfUrl").blur()};
 function gfAdd(){
   let v=$("#gfName").value.trim(),url=$("#gfUrl").value.trim();
   if(url&&!/^https?:\/\//i.test(url)){const m=url.match(/https?:\/\/\S+/i);url=m?m[0]:(/^[\w-]+\.[\w.-]+\//.test(url)?"https://"+url:"")}
-  if(!v&&!url){$("#gfName").focus();toast("Escribe qué es o pega el enlace");return}
+  if(!v&&!url){$("#gfName").focus();toast(gfPasted?"Ponle un nombre":"Escribe qué es o pega el enlace");return}
   const it={id:uid(),t:v||"Cargando…",q:v,g:1,c:gfNewCat,u:nowU()};if(url)it.url=url;if(!v)it.nt=1;
-  db.lists.push(it);closeGfSheet();
+  const pasted=gfPasted;if(pasted){it.nf=1;gfLocalImg[it.id]=pasted}
+  db.lists.push(it);closeGfSheet();if(pasted){uploadPasted(it,pasted);if(!v&&url)apiPost({action:"linkImg",url}).then(j=>{if(j.title&&it.nt){it.t=it.q=j.title;delete it.nt;it.u=nowU();render()}}).catch(()=>{})}
   if(gfTab==="hecho"||(GFCAT[gfTab]&&gfTab!==gfNewCat))setGfTab("todo");render();renderRegalos();
 }
 $("#gfTabs").addEventListener("click",e=>{const b=e.target.closest("[data-gf]");if(b)setGfTab(b.dataset.gf)});
@@ -1608,6 +1643,76 @@ $("#gfGrid").addEventListener("click",e=>{
     if(dx>90||(dx>30&&v>.45))openPage("pelis")};
   gf.addEventListener("touchend",end2);gf.addEventListener("touchcancel",end2);
 })();
+
+/* ---------------- imagen pegada (Regalos) ---------------- */
+let gfPasted=null;const gfLocalImg={};
+function blobToSmallJpeg(blob,max=640,q=.82){
+  return new Promise((res,rej)=>{const u=URL.createObjectURL(blob),im=new Image();
+    im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",q))};
+    im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("img"))};im.src=u});
+}
+function setPasted(d){gfPasted=d;const p=$("#gfPrev");p.hidden=!d;if(d)p.src=d;$("#gfPasteX").hidden=!d;$("#gfPasteBtn").hidden=!!d;$("#gfPasteHint").hidden=!!d}
+async function pasteFromClipboard(){
+  try{
+    if(!navigator.clipboard||!navigator.clipboard.read)throw new Error("no");
+    const items=await navigator.clipboard.read();
+    for(const it of items){const ty=it.types.find(t=>t.startsWith("image/"));if(ty){setPasted(await blobToSmallJpeg(await it.getType(ty)));return}}
+    toast("No hay ninguna imagen copiada");
+  }catch(e){toast("Mantén pulsado el campo «Qué es» y elige Pegar")}
+}
+$("#gfPasteBtn").onclick=pasteFromClipboard;
+$("#gfPasteX").onclick=()=>setPasted(null);
+document.addEventListener("paste",async e=>{
+  if(!$("#gfWrap").classList.contains("show"))return;
+  const f=[...(e.clipboardData&&e.clipboardData.items||[])].find(i=>i.type.startsWith("image/"));
+  if(!f)return;e.preventDefault();try{setPasted(await blobToSmallJpeg(f.getAsFile()))}catch(err){}
+});
+async function uploadPasted(it,data){
+  if(linked()){try{const j=await apiPost({action:"upImg",data});if(j.url){it.img=j.url;delete it.nf;delete gfLocalImg[it.id];it.u=nowU();render();renderRegalos();return}}catch(e){}}
+  // sin conexión con Google: se guarda una versión pequeñita dentro de la propia lista
+  try{it.img=await blobToSmallJpeg(await (await fetch(data)).blob(),300,.7)}catch(e){it.img=data}
+  delete it.nf;delete gfLocalImg[it.id];it.u=nowU();render();renderRegalos();
+}
+
+/* ---------------- seleccionar y compartir (Regalos y Pelis) ---------------- */
+const b64u=bytes=>{let s="";for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
+async function packShare(obj){
+  const raw=new TextEncoder().encode(JSON.stringify(obj));
+  try{const cs=new CompressionStream("deflate-raw"),w=cs.writable.getWriter();w.write(raw);w.close();return "z"+b64u(new Uint8Array(await new Response(cs.readable).arrayBuffer()))}
+  catch(e){return "j"+b64u(raw)}
+}
+const shareBase=()=>location.href.split("#")[0].replace(/[^/]*$/,"")+"lista.html#";
+async function shareList(kind,title,items){
+  if(!items.length){toast("Elige al menos uno");return}
+  const url=shareBase()+await packShare({k:kind,n:db.name||"",s:title,i:items});
+  const who=db.name?` de ${db.name}`:"";
+  const text=kind==="p"?`🍿 Pelis y series${who}`:`🎁 ${title}${who}`;
+  try{if(navigator.share){await navigator.share({title:text,text,url});return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(url)}catch(e){}
+  location.href="https://wa.me/?text="+encodeURIComponent(text+"\n"+url);
+}
+const SEL={gf:new Set(),pv:new Set()};
+function setSelMode(k,on){
+  const pg=k==="gf"?$("#pRegalos"):$("#pPelis");SEL[k].clear();pg.classList.toggle("sel",on);
+  $(k==="gf"?"#gfSelBtn":"#pvSelBtn").textContent=on?"Cancelar":"Seleccionar";updSelBar(k);
+  if(k==="gf")renderRegalos();else renderPelis();
+}
+function updSelBar(k){const n=SEL[k].size,b=$(k==="gf"?"#gfShare":"#pvShare");b.textContent=n?`Compartir ${n}`:"Elige los que quieras";b.classList.toggle("on",n>0)}
+function toggleSel(k,id,card){const s=SEL[k];if(s.has(id))s.delete(id);else s.add(id);card.classList.toggle("picked",s.has(id));updSelBar(k)}
+$("#gfSelBtn").onclick=()=>setSelMode("gf",!$("#pRegalos").classList.contains("sel"));
+$("#pvSelBtn").onclick=()=>setSelMode("pv",!$("#pPelis").classList.contains("sel"));
+$("#gfGrid").addEventListener("click",e=>{if(!$("#pRegalos").classList.contains("sel"))return;const c=e.target.closest("[data-gid]");if(!c)return;e.preventDefault();e.stopImmediatePropagation();toggleSel("gf",c.dataset.gid,c)},true);
+$("#pvGrid").addEventListener("click",e=>{if(!$("#pPelis").classList.contains("sel"))return;const c=e.target.closest("[data-pv-id]");if(!c)return;e.preventDefault();e.stopImmediatePropagation();toggleSel("pv",c.dataset.pvId,c)},true);
+$("#gfShare").onclick=()=>{
+  const items=db.lists.filter(x=>x.g&&SEL.gf.has(x.id)).map(x=>[x.t,/^data:/.test(x.img||"")?"":(x.img||""),x.url||"",x.c||""]);
+  const title=GFCAT[gfTab]?({navidad:"Lista de Navidad",cumple:"Lista de cumpleaños",capricho:"Caprichos"})[gfTab]:"Lista de regalos";
+  shareList("g",title,items).then(()=>setSelMode("gf",false));
+};
+$("#pvShare").onclick=()=>{
+  const items=db.lists.filter(x=>x.p&&SEL.pv.has(x.id)).map(x=>[x.t,x.img?pvImg(x.img):"",x.imdb?`https://www.imdb.com/title/${x.imdb}/`:"",[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ")]);
+  shareList("p","Pelis y series",items).then(()=>setSelMode("pv",false));
+};
 const pvClose=()=>$("#pvSheet").classList.remove("on");
 $("#pvGrid").addEventListener("click",e=>{
   const xb=e.target.closest("[data-del]");
