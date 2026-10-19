@@ -61,6 +61,7 @@ function doPost(e) {
       case 'img':      return { ok: true, r: imgSearch_(b.q) };
       case 'linkImg':  return Object.assign({ ok: true }, linkImg_(b.url));
       case 'upImg':    return { ok: true, url: upImg_(b.data) };
+      case 'rating':   return { ok: true, r: rating_(b.id) };
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
@@ -73,7 +74,7 @@ function doPost(e) {
 function guard_(params, fn) {
   if (!params || params.key !== CONFIG.SECRET) return json_({ ok: false, error: 'Clave incorrecta' });
   // las búsquedas (fotos, IMDb) y las lecturas no necesitan turno: así no hacen esperar a la sincronización
-  if (/^(img|linkImg|imdb|store|ping)$/.test(params.action || '')) {
+  if (/^(img|linkImg|imdb|rating|store|ping)$/.test(params.action || '')) {
     try { return json_(fn(params)); } catch (err) { return json_({ ok: false, error: String(err && err.message || err) }); }
   }
   const lock = LockService.getScriptLock();
@@ -357,3 +358,18 @@ function autorizarDrive() {
   const f = DriveApp.getFoldersByName('Mi Día · imágenes');
   Logger.log(f.hasNext() ? 'Carpeta lista' : 'Permiso concedido; la carpeta se creará con la primera imagen');
 }
+
+/* Nota de IMDb de una peli o serie (para las destacadas de Pelis). */
+function rating_(id) {
+  if (!/^tt\d+$/.test(String(id || ''))) return 0;
+  const r = UrlFetchApp.fetch('https://www.imdb.com/title/' + id + '/', {
+    muteHttpExceptions: true,
+    headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8' },
+  });
+  const html = r.getContentText() || '';
+  const m = html.match(/"aggregateRating"\s*:\s*\{[^}]*"ratingValue"\s*:\s*"?([\d.]+)/) || html.match(/"ratingValue"\s*:\s*"?([\d.]+)/);
+  return m ? Number(m[1]) : 0;
+}
+
+/** Prueba: muestra la nota de Dune: Parte Dos. */
+function probarNota() { Logger.log(rating_('tt15239678')); }

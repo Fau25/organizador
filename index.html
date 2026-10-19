@@ -732,6 +732,41 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 #edWrap.show .sheet-bg{opacity:1;pointer-events:auto}#edWrap.show .dsheet{transform:none;visibility:visible}
 @media (min-width:700px){#edWrap.show .dsheet{transform:translate(-50%,0)}}
 .row[data-ed] .t{cursor:pointer}
+
+/* ======================= v67: Pelis dentro de la portada ======================= */
+.pvfeat{position:absolute;left:var(--pad);right:var(--pad);top:calc(var(--safe-t) + 64px);opacity:0;pointer-events:none;will-change:transform,opacity}
+.pvfeat .kick{font-size:13px;font-weight:600;color:#8a8a8a;letter-spacing:.3px;text-transform:uppercase;margin-bottom:12px}
+.featrow{display:flex;gap:10px}
+.fc{flex:1;min-width:0;position:relative;aspect-ratio:2/3;border-radius:20px;overflow:hidden;background:#1c1c1f}
+.fc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fc .rank{position:absolute;top:7px;left:7px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18)}
+.fc .info{position:absolute;left:6px;right:6px;bottom:6px;padding:7px 8px;border-radius:13px;color:#fff;background:rgba(18,18,20,.42);-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);border:1px solid rgba(255,255,255,.14)}
+.fc b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc small{display:block;margin-top:1px;font-size:11.5px;color:rgba(255,255,255,.75);white-space:nowrap}
+.fc small i{font-style:normal;color:#ffd166}
+.featempty{font-size:16px;line-height:1.45;color:#8a8a8a;padding:20px 0 40px}
+#home.mpv .sheet{background:#161618}
+#home.mpv .grab{background:transparent}
+#home.mpv .lightbg{background:#0c0c0c}
+#home.mpv .xnum{color:#fff}
+#home.mpv .list{padding:2px 16px calc(var(--safe-b) + 120px)}
+#home.mpv .addbar{background:rgba(30,30,32,.55);-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.1)}
+#home.mpv .addbar input{color:#fff}#home.mpv .addbar input::placeholder{color:#7a7a7a}
+#home.mpv .addbtn{background:#ff5c7a;color:#111}
+.pvhgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#home.mpv:not(.open) .pvhgrid .pv{aspect-ratio:auto;height:var(--pvh,180px)}
+#home.mpv:not(.open) .pvhgrid .pv img{object-position:50% 22%}
+.pvmore{text-align:center;font-size:14px;color:#8a8a8a;padding:12px 0 4px}
+#home.mpv .pvempty{color:#8a8a8a}
+.pvtabs.hv{padding:2px 6px 12px!important}
+@media (min-width:700px){.pvfeat{left:var(--side);right:var(--side);top:calc(var(--safe-t) + 90px)}.featrow{gap:16px}.fc{max-width:220px}
+  #home.mpv .list{padding:4px var(--side) 140px}.pvhgrid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}}
+#home.mpv:not(.open) .pvhgrid .pvbtns{display:none}
+#home.mpv:not(.open) .pvhgrid .pv .pvi{margin:0}
+#home.mpv .sheet,#home.mpv .lightbg{transition:background-color .35s}
+.sheet,.lightbg{transition:background-color .35s}
+.pvhh{display:flex;align-items:baseline;justify-content:space-between;padding:2px 6px 12px;color:#fff}
+.pvhh b{font-size:21px;font-weight:600;letter-spacing:-.5px}.pvhh span{font-size:14px;color:#8a8a8a}
 </style>
 </head>
 <body>
@@ -752,6 +787,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <div class="weeks" id="weeks"></div>
   </header>
     <div id="briefWrap"><p class="brief" id="brief"></p></div>
+    <div class="pvfeat" id="pvFeat"><p class="kick">⭐ Mejor valoradas</p><div class="featrow" id="featRow"></div></div>
     <div class="pills" id="pills">
       <button class="pill ic" data-pill="tareas" aria-label="Tareas"><span class="em" aria-hidden="true">✅</span></button>
       <button class="pill ic" data-pill="listas" aria-label="Listas"><span class="em" aria-hidden="true">🛍️</span><span class="n" id="nLi"></span></button>
@@ -1153,7 +1189,12 @@ function renderList(){
   let h="";
   if(mode==="eventos"){buildWeeksKeep();renderEventsBody();return}
   if(mode==="pelis"){
-    h=db.lists.filter(x=>x.p).map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Pelis y series que quieres ver 🍿</p>`;
+    const all=pvList().slice().reverse(),shown=expanded?all:all.slice(0,4);
+    h=(expanded?`<div class="pvtabs hv">${[["todo","Por ver"],["movie","Pelis"],["tv","Series"],["seen","Vistas"]].map(([k,t])=>`<button data-pv="${k}" class="${pvTab===k?"on":""}">${t}</button>`).join("")}</div>`:"")
+      +(!expanded&&all.length?`<div class="pvhh"><b>Por ver</b><span>${all.length} en la lista</span></div>`:"")+`<div class="pvhgrid">${shown.map(pvCard).join("")}</div>`
+      +(!all.length?`<p class="pvempty">${expanded?(pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"):"Desliza hacia arriba para añadir<br>pelis y series 🍿"}</p>`:"")
+      +(!expanded&&all.length>4?`<p class="pvmore">+${all.length-4} más · desliza hacia arriba</p>`:"");
+    $("#list").innerHTML=h;pvLookupAll();return;
   }else if(mode==="listas"){
     h=db.lists.filter(x=>!x.p&&!x.g).map(x=>row("l",x.id,x.t)).join("")||`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
   }else{
@@ -1168,31 +1209,30 @@ function renderList(){
   }
   $("#list").innerHTML=h;
 }
-function renderHome(){renderBrief();renderPills();renderXhead();renderList()}
+function renderHome(){renderBrief();renderPills();renderXhead();renderList();renderFeat()}
 function render(){save();schedulePush();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage);if(curPage==="pelis")renderPelis();if(curPage==="regalos")renderRegalos()}
 
-const MODES=["tareas","listas","eventos"];
+const MODES=["tareas","listas","eventos","pelis"];
+const PANEL={tareas:0,listas:0,eventos:1,pelis:2};   // 0 = texto, 1 = calendario, 2 = pelis destacadas
 let topE=0;   // 0 = texto, 1 = calendario
 function setTop(e,anim){
-  topE=Math.max(0,Math.min(1,e));const W=home.clientWidth,br=$("#briefWrap"),ch=dark.querySelector(".calh");
-  const tr=anim?"transform .45s var(--ease),opacity .45s":"none";
-  br.style.transition=ch.style.transition=tr;
-  br.style.transform=`translateX(${-topE*W}px)`;br.style.opacity=String(1-topE);
-  ch.style.transform=`translateX(${(1-topE)*W}px)`;ch.style.opacity=String(topE);ch.style.pointerEvents=topE>.5?"auto":"none";
+  topE=Math.max(0,Math.min(2,e));const W=home.clientWidth,tr=anim?"transform .45s var(--ease),opacity .45s":"none";
+  [$("#briefWrap"),dark.querySelector(".calh"),$("#pvFeat")].forEach((el,i)=>{el.style.transition=tr;el.style.transform=`translateX(${(i-topE)*W}px)`;
+    el.style.opacity=String(clamp(1-Math.abs(i-topE)));el.style.pointerEvents=Math.abs(i-topE)<.5?"auto":"none"});
   const ts=$(".tset");ts.style.opacity=String(clamp(1-(1-ty/maxTy)*2)*clamp(1-topE*2.5));ts.style.pointerEvents=topE>.5||ty<maxTy/2?"none":"";
 }
 function setMode(m,dir){
   if(m===mode)return;
   if(!dir)dir=MODES.indexOf(m)>MODES.indexOf(mode)?1:-1;
   mode=m;
-  const ev=m==="eventos";dark.classList.toggle("ev",ev);home.classList.toggle("ev",ev);
+  const ev=m==="eventos";dark.classList.toggle("ev",ev);home.classList.toggle("ev",ev);home.classList.toggle("mpv",m==="pelis");themeDark=null;
   if(!ev){$("#evSearch").hidden=true;evQuery="";$("#evQ").value=""}
   const l=$("#list");l.style.transform="";l.style.opacity="";
   const cls=dir>0?"slinL":"slinR";
   // la cabecera grande solo se anima con la ficha abierta (si no, la animación la hacía aparecer de golpe sobre el fondo negro)
   for(const el of expanded?[l,xhead]:[l]){el.classList.remove("slinL","slinR","swap");void el.offsetWidth;el.classList.add(cls)}
   if(!expanded)xhead.classList.remove("slinL","slinR","swap");
-  setTop(ev?1:0,true);
+  setTop(PANEL[m],true);
   l.scrollTop=0;closeDayPop();renderHome();
   if(ev)requestAnimationFrame(()=>{scrollToWeek(evSel,false)});
   layout();
@@ -1211,11 +1251,12 @@ function layout(){
   const topE=$("#xnum").offsetTop+$("#xnum").offsetHeight+18;     // la hoja desplegada empieza bajo el número
   home.style.setProperty("--topE",topE+"px");
   const pills=$("#pills"),br=$("#briefWrap"),ch=dark.querySelector(".calh"),ph=pills.offsetHeight||54;
-  const topB=Math.max(br.offsetTop+br.offsetHeight,ch.offsetTop+ch.offsetHeight);   // lo más alto de los dos paneles
+  const fe=$("#pvFeat"),topB=Math.max(br.offsetTop+br.offsetHeight,ch.offsetTop+ch.offsetHeight,fe.offsetTop+fe.offsetHeight);   // lo más alto de los paneles
   const collapsedTop=Math.round(Math.max(topB+24+ph+14,H*.42));
   pills.style.top=(collapsedTop-14-ph)+"px";
   maxTy=Math.max(80,collapsedTop-topE);
   $("#sparks").style.height=collapsedTop+"px";
+  home.style.setProperty("--pvh",Math.max(96,Math.floor((H-collapsedTop-22-14-12-40)/2))+"px");   // alto de los pósters 2×2 con la ficha plegada
   if(!tweening)apply(expanded?0:maxTy);
 }
 function setBg(t){document.documentElement.style.setProperty("--pagebg",t)}
@@ -1228,7 +1269,7 @@ function apply(y){
   const q=clamp((p-.42)/.58);
   xhead.style.opacity=q;xhead.style.filter=q<.99?`blur(${(1-q)*8}px)`:"";xhead.style.transform=`translateY(${(1-q)*16}px)`;
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
-  const dk=p<.5;if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f2efe9";setBg(dk?"#0c0c0c":"#f2efe9")}
+  const dk=p<.5||mode==="pelis";if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f2efe9";setBg(dk?"#0c0c0c":"#f2efe9")}
 }
 let tweening=false;
 function animateTo(target,dur=520,v=0){
@@ -1242,6 +1283,7 @@ function animateTo(target,dur=520,v=0){
 }
 function settle(isOpen){
   const was=expanded;expanded=isOpen;home.classList.toggle("open",isOpen);
+  if(mode==="pelis"&&was!==isOpen)renderList();
   if(!isOpen){list.scrollTop=0;closeDayPop();$("#qtext").blur();if(was)renderBrief(true)}
 }
 const expand=()=>animateTo(0),collapse=()=>animateTo(maxTy);
@@ -1256,23 +1298,22 @@ function dStart(y,target,x,touch){
   drag={y0:y,x0:x||0,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
 }
 function hMove(dx){
-  const i=MODES.indexOf(mode),toPelis=dx<0&&mode==="eventos",edge=(dx>0&&i===0)||(dx<0&&i===MODES.length-1&&!toPelis);
-  const pp=$("#pPelis");
-  if(toPelis){pp.style.transition="none";pp.style.transform=`translateX(${home.clientWidth+dx}px)`;$("#list").style.transform="";$("#list").style.opacity="";return}   // Pelis entra por encima: la ficha no se mueve
+  const i=MODES.indexOf(mode),toBuy=dx<0&&mode==="pelis",edge=(dx>0&&i===0)||(dx<0&&i===MODES.length-1&&!toBuy);
+  const pp=$("#pRegalos");
+  if(toBuy){pp.style.transition="none";pp.style.transform=`translateX(${home.clientWidth+dx}px)`;$("#list").style.transform="";$("#list").style.opacity="";return}   // Compras entra por encima: la ficha no se mueve
   if(pp.style.transform){pp.style.transform=""}
   const k=edge?dx*.25:dx*.6;$("#list").style.transform=`translateX(${k}px)`;$("#list").style.opacity=String(1-Math.min(.5,Math.abs(k)/400));
   const W=home.clientWidth;
-  if(mode==="eventos"&&dx>0)setTop(1-dx/W,false);
-  else if(!edge&&MODES[i-Math.sign(dx)]==="eventos")setTop(-dx/W,false);
+  if(!edge){const a=PANEL[mode],b=PANEL[MODES[i-Math.sign(dx)]];if(a!==b)setTop(a+(b-a)*Math.min(1,Math.abs(dx)/W),false)}
 }
 function hEnd(dx){
-  const pp=$("#pPelis");
+  const pp=$("#pRegalos");
   if(pp.style.transform){pp.style.transition="";pp.style.transform="";
-    if(mode==="eventos"&&dx<-55){const l=$("#list");l.style.transform="";l.style.opacity="";setTop(1,false);if(typeof pvView!=="undefined")setPvView(pvView);openPage("pelis");return}}
+    if(mode==="pelis"&&dx<-55){const l=$("#list");l.style.transform="";l.style.opacity="";setTop(2,false);openPage("regalos");return}}
   const l=$("#list"),i=MODES.indexOf(mode),n=dx<-55?i+1:dx>55?i-1:i;
   if(n!==i&&n>=0&&n<MODES.length){setMode(MODES[n],n>i?1:-1);return}
   l.style.transition="transform .3s var(--ease),opacity .3s";l.style.transform="";l.style.opacity="";setTimeout(()=>l.style.transition="",320);
-  setTop(mode==="eventos"?1:0,true);
+  setTop(PANEL[mode],true);
 }
 function dMove(y,e,x){
   if(!drag)return;
@@ -1337,7 +1378,7 @@ function quickAdd(){
   if(mode==="eventos"){inp.value="";inp.blur();openDateSheet("evento",v,evSel<iso(today)?iso(today):evSel,true);return}
   if(!v){inp.focus();return}
   inp.value="";
-  if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,p:1,u:nowU()}:{id:uid(),t:v,u:nowU()});render();return}
+  if(mode==="listas"||mode==="pelis"){db.lists.push(mode==="pelis"?{id:uid(),t:v,q:v,p:1,u:nowU()}:{id:uid(),t:v,u:nowU()});if(mode==="pelis"&&pvTab==="seen")pvTab="todo";render();return}
   db.tasks.push({id:uid(),t:v,d:selDay,u:nowU()});render();
   if(selDay!==iso(today))toast("Añadida a "+dayChip(selDay).toLowerCase()+" ✓");
 }
@@ -1552,14 +1593,33 @@ function pvList(){
 function renderPelis(){
   const g=$("#pvGrid");if(!g)return;
   const items=pvList().slice().reverse();
-  g.innerHTML=items.map(x=>{
-    const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
-    return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}${SEL.pv.has(x.id)?" picked":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}<div class="pvpanel"><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div><div class="pvbtns"><button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div></div></article>`}).join("")
+  g.innerHTML=items.map(pvCard).join("")
     ||`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"}</p>`;
   pvCenter();pvSyncBg();
   if(!renderPelis.re){renderPelis.re=1;db.lists.forEach(x=>{if(x.p&&!x.img)delete x.nf})}
-  for(const x of db.lists.filter(x=>x.p&&!x.img&&!x.nf))pvLookup(x);
+  pvLookupAll();
 }
+function featList(){
+  return db.lists.filter(x=>x.p&&!x.w&&x.img).sort((a,b)=>((b.r||0)-(a.r||0))||((+b.y||0)-(+a.y||0))).slice(0,3);
+}
+function renderFeat(){
+  const row=$("#featRow");if(!row)return;const f=featList(),any=f.some(x=>x.r);
+  $("#pvFeat .kick").textContent=any?"⭐ Mejor valoradas":"🍿 Tus pelis y series";
+  row.innerHTML=f.map((x,i)=>`<div class="fc"><img src="${esc(pvImg(x.img))}" alt="" loading="lazy"><span class="rank">${i+1}</span><div class="info"><b>${esc(x.t)}</b><small>${x.r?`<i>★ ${x.r}</i> `:""}${x.k?(isTv(x)?"Serie":"Peli"):(x.y||"")}</small></div></div>`).join("")
+    ||`<p class="featempty">Añade pelis y series y aquí verás<br>las mejor valoradas de tu lista.</p>`;
+}
+const pvRateBusy=new Set();let pvRateOn=0;
+async function pvRatings(){
+  if(!linked())return;
+  for(const x of db.lists.filter(x=>x.p&&x.imdb&&x.r===undefined&&!pvRateBusy.has(x.id))){
+    if(pvRateOn>=2)return;pvRateBusy.add(x.id);pvRateOn++;
+    apiPost({action:"rating",id:x.imdb}).then(j=>{x.r=j.r?Number(j.r):0;x.u=nowU();render()}).catch(()=>{}).finally(()=>{pvRateOn--;setTimeout(pvRatings,50)});
+  }
+}
+function pvLookupAll(){for(const x of db.lists.filter(x=>x.p&&!x.img&&!x.nf))pvLookup(x);pvRatings()}
+function pvCard(x){
+    const meta=[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ");
+    return `<article class="pv${pvBusy.has(x.id)&&!x.img?" loading":""}${SEL.pv.has(x.id)?" picked":""}" data-pv-id="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy" onload="this.classList.add('ok')">`:""}<div class="pvpanel"><div class="pvi"><b>${esc(x.t)}</b>${meta?`<small>${meta}</small>`:""}</div><div class="pvbtns"><button class="pvdel" data-del="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="pvseen${x.w?" on":""}" data-seen="${x.id}" aria-label="${x.w?"Devolver a por ver":"Marcar como vista"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div></div></article>`}
 function pvAdd(){
   const i=$("#pvText"),v=i.value.trim();if(!v)return;i.value="";
   const it={id:uid(),t:v,q:v,p:1,u:nowU()};db.lists.push(it);
@@ -1749,11 +1809,10 @@ $("#gfGrid").addEventListener("click",e=>{
   gf.addEventListener("touchstart",e=>{if(e.touches.length!==1||e.target.closest("input,.gftabs,.gfcat,.gfrow")){s2=null;return}s2={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
   gf.addEventListener("touchmove",e=>{if(!s2)return;const dx=e.touches[0].clientX-s2.x,dy=e.touches[0].clientY-s2.y,now=performance.now();
     if(s2.t)s2.v=.7*((dx-(s2.dx||0))/Math.max(1,now-s2.t))+.3*(s2.v||0);s2.t=now;
-    if(!s2.on){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(dx>0&&dx>Math.abs(dy)*1.2){s2.on=true;const pv=$("#pPelis");pv.style.transition="none";pv.classList.add("on");void pv.offsetWidth;pv.style.transition=""}else{s2=null;return}}
+    if(!s2.on){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(dx>0&&dx>Math.abs(dy)*1.2){s2.on=true}else{s2=null;return}}
     e.preventDefault();s2.dx=dx;gf.style.transition="none";gf.style.transform=`translateX(${Math.max(0,dx)}px)`},{passive:false});
   const end2=()=>{if(!s2||!s2.on){s2=null;return}const dx=s2.dx||0,v=s2.v||0;s2=null;gf.style.transition="";gf.style.transform="";
-    if(dx>90||(dx>30&&v>.45))openPage("pelis");
-    else setTimeout(()=>{if(curPage!=="pelis"){const pv=$("#pPelis");pv.style.transition="none";pv.classList.remove("on");void pv.offsetWidth;pv.style.transition=""}},480)};
+    if(dx>90||(dx>30&&v>.45)){if(history.state&&history.state.p)history.back();else closePage()}};
   gf.addEventListener("touchend",end2);gf.addEventListener("touchcancel",end2);
 })();
 
@@ -1851,6 +1910,9 @@ function saveEdit(){
   closeEdit();render();toast("Guardado ✓");
 }
 $("#list").addEventListener("click",e=>{
+  if(mode==="pelis"){const tb=e.target.closest("[data-pv]");if(tb){pvTab=tb.dataset.pv;renderList();return}
+    const xb=e.target.closest("[data-del]");if(xb){const x=db.lists.find(y=>y.id===xb.dataset.del);if(x)pvDel(x);return}
+    const sb=e.target.closest("[data-seen]");if(sb){const x=db.lists.find(y=>y.id===sb.dataset.seen);if(!x)return;if(x.w)delete x.w;else x.w=1;x.u=nowU();render();toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");return}}
   if(e.target.closest("button"))return;const r=e.target.closest("[data-ed]");if(!r||r.classList.contains("checking"))return;
   if(!expanded&&!e.target.closest(".t"))return;openEdit(r.dataset.ed);
 });
@@ -2013,8 +2075,8 @@ setSync("ok");sync(true);
 function resetHome(){
   drag=null;cancelAnimationFrame(tween);tweening=false;
   const l=$("#list");l.style.transform="";l.style.opacity="";
-  const pp=$("#pPelis");if(pp.style.transform){pp.style.transition="";pp.style.transform=""}
-  setTop(mode==="eventos"?1:0,false);
+  const pp=$("#pRegalos");if(pp.style.transform){pp.style.transition="";pp.style.transform=""}
+  setTop(PANEL[mode],false);
   if(expanded||ty!==maxTy){$("#qtext").blur();closeDayPop();apply(maxTy);settle(false)}
   // repintar la franja de la hora con el color de la portada (iOS a veces se queda con el anterior)
   if(!curPage){themeDark=null;apply(ty);requestAnimationFrame(()=>{themeDark=null;apply(ty)})}
