@@ -362,6 +362,17 @@ function autorizarDrive() {
 /* Nota de IMDb de una peli o serie (para las destacadas de Pelis). */
 function rating_(id) {
   if (!/^tt\d+$/.test(String(id || ''))) return 0;
+  // 1) API pública de IMDb (la web bloquea a los servidores de Google)
+  try {
+    const g = UrlFetchApp.fetch('https://api.graphql.imdb.com/', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      payload: JSON.stringify({ query: '{title(id:"' + id + '"){ratingsSummary{aggregateRating}}}' }),
+    });
+    const v = JSON.parse(g.getContentText() || '{}');
+    const n = v && v.data && v.data.title && v.data.title.ratingsSummary && v.data.title.ratingsSummary.aggregateRating;
+    if (n) return Number(n);
+  } catch (e) {}
+  // 2) Plan B: la ficha web
   const r = UrlFetchApp.fetch('https://www.imdb.com/title/' + id + '/', {
     muteHttpExceptions: true,
     headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8' },

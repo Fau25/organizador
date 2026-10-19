@@ -1611,9 +1611,9 @@ function renderFeat(){
 const pvRateBusy=new Set();let pvRateOn=0;
 async function pvRatings(){
   if(!linked())return;
-  for(const x of db.lists.filter(x=>x.p&&x.imdb&&x.r===undefined&&!pvRateBusy.has(x.id))){
+  for(const x of db.lists.filter(x=>x.p&&x.imdb&&!x.r&&!pvRateBusy.has(x.id))){
     if(pvRateOn>=2)return;pvRateBusy.add(x.id);pvRateOn++;
-    apiPost({action:"rating",id:x.imdb}).then(j=>{x.r=j.r?Number(j.r):0;x.u=nowU();render()}).catch(()=>{}).finally(()=>{pvRateOn--;setTimeout(pvRatings,50)});
+    apiPost({action:"rating",id:x.imdb}).then(j=>{if(j.r){x.r=Number(j.r);x.u=nowU();render()}}).catch(()=>{}).finally(()=>{pvRateOn--;setTimeout(pvRatings,50)});
   }
 }
 function pvLookupAll(){for(const x of db.lists.filter(x=>x.p&&!x.img&&!x.nf))pvLookup(x);pvRatings()}
