@@ -734,8 +734,9 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .row[data-ed] .t{cursor:pointer}
 
 /* ======================= v67: Pelis dentro de la portada ======================= */
-.pvfeat{position:absolute;left:var(--pad);right:var(--pad);top:calc(var(--safe-t) + 64px);opacity:0;pointer-events:none;will-change:transform,opacity}
-.pvfeat .kick{font-size:13px;font-weight:600;color:#8a8a8a;letter-spacing:.3px;text-transform:uppercase;margin-bottom:12px}
+.pvfeat{position:absolute;left:6px;right:6px;top:calc(var(--safe-t) + 6px);box-sizing:border-box;display:flex;flex-direction:column;padding:22px 14px 14px;border-radius:36px;overflow:hidden;background:radial-gradient(120% 90% at 0% 0%,#3a1f2a 0%,transparent 60%),#141416;opacity:0;pointer-events:none;will-change:transform,opacity}
+.pvfeat .featrow{flex:1;min-height:0}.pvfeat .fc{aspect-ratio:auto;height:100%}
+.pvfeat .kick{font-size:13px;font-weight:600;color:#8a8a8a;letter-spacing:.3px;text-transform:uppercase;margin:0 4px 12px}
 .featrow{display:flex;gap:10px}
 .fc{flex:1;min-width:0;position:relative;aspect-ratio:2/3;border-radius:20px;overflow:hidden;background:#1c1c1f}
 .fc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -759,7 +760,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .pvmore{text-align:center;font-size:14px;color:#8a8a8a;padding:12px 0 4px}
 #home.mpv .pvempty{color:#8a8a8a}
 .pvtabs.hv{padding:2px 6px 12px!important}
-@media (min-width:700px){.pvfeat{left:var(--side);right:var(--side);top:calc(var(--safe-t) + 90px)}.featrow{gap:16px}.fc{max-width:220px}
+@media (min-width:700px){.pvfeat{left:max(24px,calc((100% - var(--col))/2 - 20px));right:max(24px,calc((100% - var(--col))/2 - 20px));top:calc(var(--safe-t) + 24px)}.featrow{gap:16px}.fc{max-width:220px}
   #home.mpv .list{padding:4px var(--side) 140px}.pvhgrid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}}
 #home.mpv:not(.open) .pvhgrid .pvbtns{display:none}
 #home.mpv:not(.open) .pvhgrid .pv .pvi{margin:0}
@@ -1251,7 +1252,8 @@ function layout(){
   const topE=$("#xnum").offsetTop+$("#xnum").offsetHeight+18;     // la hoja desplegada empieza bajo el número
   home.style.setProperty("--topE",topE+"px");
   const pills=$("#pills"),br=$("#briefWrap"),ch=dark.querySelector(".calh"),ph=pills.offsetHeight||54;
-  const fe=$("#pvFeat"),topB=Math.max(br.offsetTop+br.offsetHeight,ch.offsetTop+ch.offsetHeight,fe.offsetTop+fe.offsetHeight);   // lo más alto de los paneles
+  const fe=$("#pvFeat");fe.style.top=ch.offsetTop+"px";fe.style.height=ch.offsetHeight+"px";   // mismas medidas que el calendario: sin saltos al deslizar
+  const topB=Math.max(br.offsetTop+br.offsetHeight,ch.offsetTop+ch.offsetHeight,fe.offsetTop+fe.offsetHeight);   // lo más alto de los paneles
   const collapsedTop=Math.round(Math.max(topB+24+ph+14,H*.42));
   pills.style.top=(collapsedTop-14-ph)+"px";
   maxTy=Math.max(80,collapsedTop-topE);
