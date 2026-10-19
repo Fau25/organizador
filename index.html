@@ -1204,7 +1204,7 @@ function renderList(){
     $("#list").innerHTML=h;pvLookupAll();return;
   }else if(mode==="listas"){
     const its=db.lists.filter(x=>!x.p&&!x.g);
-    for(const [k,em,name] of LCAT){const g=its.filter(x=>lcatOf(x)===k);if(g.length)h+=`<div class="lhd"><span>${em}</span>${name} <i>${g.length}</i></div>`+g.map(x=>row("l",x.id,x.t)).join("")}
+    for(const [k,em,name,col] of LCAT){const g=its.filter(x=>lcatOf(x)===k);if(g.length)h+=`<div class="lhd"><span>${em}</span>${name} <i>${g.length}</i></div>`+g.map(x=>row("l",x.id,x.t).replace(/--bar:[^"]*/,"--bar:"+col)).join("")}
     if(!h)h=`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
   }else{
     // todas las tareas a la vez: atrasadas, lo de hoy y lo de los próximos días (con su día a la derecha)
@@ -1222,7 +1222,7 @@ function renderHome(){renderBrief();renderPills();renderXhead();renderList();ren
 function render(){save();schedulePush();try{renderHome()}catch(e){console.error(e)}if(curPage==="eventos"||curPage==="cumple")renderPage(curPage);if(curPage==="pelis")renderPelis();if(curPage==="regalos")renderRegalos()}
 
 // categorías de Listas
-const LCAT=[["super","🛒","Súper"],["casa","🏠","Casa"],["tec","📱","Tecnología"],["ropa","👕","Ropa"],["otros","📦","Otros"]];
+const LCAT=[["super","🛒","Súper","#2fa36b"],["casa","🏠","Casa","#f2633b"],["tec","📱","Tecnología","#3d7be0"],["ropa","👕","Ropa","#8b63e6"],["otros","📦","Otros","#9a948b"]];
 const lcatOf=x=>LCAT.some(c=>c[0]===x.lc)?x.lc:"otros";
 let liCat=(()=>{try{return localStorage.getItem("midia-licat")||"super"}catch(e){return "super"}})();
 function setLiCat(k){liCat=k;try{localStorage.setItem("midia-licat",k)}catch(e){}const c=LCAT.find(c=>c[0]===k);$("#qdayTxt").textContent=c[1]+" "+c[2]}
