@@ -59,6 +59,7 @@ function doPost(e) {
     switch (b.action) {
       case 'imdb':     return { ok: true, d: imdb_(b.q) };
       case 'img':      return { ok: true, r: imgSearch_(b.q) };
+      case 'linkImg':  return Object.assign({ ok: true }, linkImg_(b.url));
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
@@ -70,6 +71,10 @@ function doPost(e) {
 
 function guard_(params, fn) {
   if (!params || params.key !== CONFIG.SECRET) return json_({ ok: false, error: 'Clave incorrecta' });
+  // las búsquedas (fotos, IMDb) y las lecturas no necesitan turno: así no hacen esperar a la sincronización
+  if (/^(img|linkImg|imdb|store|ping)$/.test(params.action || '')) {
+    try { return json_(fn(params)); } catch (err) { return json_({ ok: false, error: String(err && err.message || err) }); }
+  }
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
@@ -312,3 +317,24 @@ function probarFotos() {
   Logger.log(JSON.stringify(imgSearch_('iPhone 18 Pro celeste').slice(0, 3), null, 1));
 }
 
+/* Foto y nombre de un producto a partir del enlace de la tienda (Regalos). */
+function linkImg_(u) {
+  u = String(u || '').trim();
+  if (!/^https?:\/\//i.test(u)) return { img: '', title: '' };
+  const r = UrlFetchApp.fetch(u, {
+    muteHttpExceptions: true, followRedirects: true,
+    headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1', 'Accept-Language': 'es-ES,es;q=0.9' },
+  });
+  const html = r.getContentText() || '';
+  const meta = name => {
+    const a = html.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + name + '["\'][^>]*content=["\']([^"\']+)', 'i'));
+    const b = html.match(new RegExp('<meta[^>]+content=["\']([^"\']+)["\'][^>]*(?:property|name)=["\']' + name + '["\']', 'i'));
+    return (a && a[1]) || (b && b[1]) || '';
+  };
+  let img = meta('og:image:secure_url') || meta('og:image') || meta('twitter:image') || meta('twitter:image:src');
+  if (!img) { const m = html.match(/data-old-hires=["']([^"']+)/i) || html.match(/"hiRes":"(https:[^"]+)"/) || html.match(/"large":"(https:[^"]+)"/) || html.match(/<link[^>]+rel=["']image_src["'][^>]*href=["']([^"']+)/i); img = m ? m[1] : ''; }
+  if (img) { img = img.replace(/&amp;/g, '&'); if (img.indexOf('//') === 0) img = 'https:' + img; else if (img[0] === '/') img = u.match(/^https?:\/\/[^/]+/)[0] + img; }
+  let title = meta('og:title') || ((html.match(/<title[^>]*>([^<]+)/i) || [])[1] || '');
+  title = title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim().slice(0, 80);
+  return { img: img, title: title };
+}

@@ -626,6 +626,20 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   .gfadd{left:var(--side)!important;right:var(--side)!important}
 }
 .page.outl{transform:translateX(-104%)!important}
+
+/* v59: regalos en crema como el resto, tarjetas blancas y hoja para añadir */
+.page[data-p=regalos]{background:#f2efe9!important}
+.gf{background:#fff!important}
+.gf .row2 button{background:#f2efe9!important}
+.gf .row2 .gfok.on{background:#111!important}
+.gf .badge{background:#fff!important}
+.gfopen{flex:1;min-width:0;height:100%;text-align:left;padding-left:14px;font-size:17px;font-weight:500;color:#857f76;letter-spacing:-.3px}
+.gfadd{background:rgba(230,225,216,.82)!important;border:0!important;box-shadow:none!important}
+.gfhint{font-size:13px;color:#77736d;margin:-2px 0 16px;line-height:1.4}
+#gfWrap.show .sheet-bg{opacity:1;pointer-events:auto}#gfWrap.show .dsheet{transform:none;visibility:visible}
+@media (min-width:700px){#gfWrap.show .dsheet{transform:translate(-50%,0)}}
+.gf .lk{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#f2efe9;color:#111}
+.gf .lk svg{width:17px;height:17px}
 </style>
 </head>
 <body>
@@ -715,11 +729,10 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   <p class="gfsub">Lo que te quieres comprar o tienes que regalar</p>
   <div class="gftabs" id="gfTabs"><button data-gf="todo" class="on">Todos</button><button data-gf="navidad">Navidad</button><button data-gf="cumple">Cumpleaños</button><button data-gf="capricho">Caprichos</button><button data-gf="hecho">Comprados</button></div>
   <div class="gfbody"><div class="gfgrid" id="gfGrid"></div></div>
-  <form class="addbar gfadd" id="gfAdd" autocomplete="off">
-    <button type="button" class="gfcat" id="gfCat" aria-label="Cambiar ocasión"><span id="gfCatTxt">✨ Capricho</span></button>
-    <input id="gfText" enterkeyhint="done" placeholder="¿Qué te gustaría?" aria-label="Añadir regalo">
-    <button type="button" class="addbtn" id="gfBtn" aria-label="Añadir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-  </form>
+  <div class="addbar gfadd" id="gfAdd">
+    <button type="button" class="gfopen" id="gfOpen">¿Qué te gustaría?</button>
+    <button type="button" class="addbtn" id="gfBtn" aria-label="Añadir regalo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
 </section>
 <div class="pvsheet" id="pvSheet"><div class="box" id="pvBox"></div></div>
 
@@ -765,6 +778,19 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     </div>
     <label class="chk" id="gcBox"><input type="checkbox" id="fGc" checked> <span id="gcLbl">Añadir también a Google Calendar</span></label>
     <button type="button" class="save" id="saveBtn">Guardar</button>
+  </form>
+</div>
+<!-- HOJA DE NUEVO REGALO -->
+<div id="gfWrap">
+  <div class="sheet-bg" id="gfBg"></div>
+  <form class="dsheet" id="gfForm" autocomplete="off">
+    <div class="dgrab"></div>
+    <h4>Nuevo regalo</h4>
+    <div class="ftype" id="gfType"><button type="button" data-gc="capricho" class="on"><span>✨</span>Capricho</button><button type="button" data-gc="navidad"><span>🎄</span>Navidad</button><button type="button" data-gc="cumple"><span>🎂</span>Cumple</button></div>
+    <div class="f"><label for="gfName">Qué es</label><input id="gfName" placeholder="iPhone 18 Pro celeste" enterkeyhint="next"></div>
+    <div class="f"><label for="gfUrl">Enlace de la tienda (opcional)</label><input id="gfUrl" type="url" inputmode="url" placeholder="https://…" enterkeyhint="done"></div>
+    <p class="gfhint">Si pones el enlace, la foto se coge de esa página. Si no, se busca por el nombre.</p>
+    <button type="button" class="save" id="gfSave">Guardar</button>
   </form>
 </div>
 <div class="toast" id="toast"></div>
@@ -1237,7 +1263,7 @@ function openPage(p,dir){
   if(p==="pelis"){setPvTab("todo");$("#pvGrid").parentNode.scrollTop=0}else if(p==="regalos"){setGfTab("todo");$("#gfGrid").parentNode.scrollTop=0}else if(p!=="ajustes")renderPage(p);else fillSettings();
   if(p==="eventos")requestAnimationFrame(()=>scrollToWeek(evSel,false));
   $(PAGE[p]).classList.add("on");home.classList.add("away");
-  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":p==="pelis"?"#000000":p==="regalos"?"#f7f7f5":"#f2f2f4";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
+  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":p==="pelis"?"#000000":p==="regalos"?"#f2efe9":"#f2f2f4";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
   try{history.pushState({p},"")}catch(e){}
 }
 function closePage(silent){
@@ -1489,6 +1515,13 @@ const gfBusy=new Set(),gfFail=new Set();
 async function gfLookup(it,next){
   if(gfBusy.has(it.id))return;if(!next&&gfFail.has(it.id))return;gfBusy.add(it.id);gfFail.delete(it.id);renderRegalos();
   try{
+    if(it.url&&!next){   // con enlace: la foto (y el nombre si falta) salen de la propia página de la tienda
+      try{const j=await apiPost({action:"linkImg",url:it.url});
+        if(j.title&&it.nt){it.t=j.title;it.q=j.title;delete it.nt}
+        if(j.img){Object.assign(it,{img:j.img,img2:"",ri:-1});delete it.nf;it.u=nowU();render();return}}catch(e){}
+      if(it.nt){it.t=(it.url.match(/\/\/(?:www\.)?([^/]+)/)||[,"Regalo"])[1];it.q="";delete it.nt}
+    }
+    if(!(it.q||it.t)){it.nf=1;it.u=nowU();render();return}
     const r=await giftSearch(it.q||it.t);
     if(!r.length)it.nf=1;else{const i=next?((it.ri||0)+1)%r.length:0;Object.assign(it,{ri:i,img:r[i].m,img2:r[i].t||""});delete it.nf}
     it.u=nowU();render();
@@ -1511,6 +1544,7 @@ function renderRegalos(){
       <button class="re" data-gfre="${x.id}" aria-label="Buscar otra foto de ${esc(x.t)}">↻</button>
       <span class="badge" style="--bc:${c.c}">${c.t}</span>
       <div class="im">${im}</div><b>${esc(x.t)}</b>
+      ${x.url?`<a class="lk" href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="Abrir la tienda de ${esc(x.t)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>`:""}
       <div class="row2"><button data-gfdel="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="gfok${x.w?" on":""}" data-gfok="${x.id}" aria-label="${x.w?"Devolver a pendientes":"Marcar como comprado"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div>
     </article>`}).join("")||`<p class="gfempty">${gfTab==="hecho"?"Aún no has comprado nada de la lista.":"Escribe abajo lo que quieres<br>y la foto aparecerá sola 🎁"}</p>`;
   for(const x of db.lists.filter(x=>x.g&&!x.img&&!x.nf))gfLookup(x);
@@ -1521,17 +1555,32 @@ $("#gfGrid").addEventListener("error",e=>{const im=e.target;if(im.tagName!=="IMG
   if(im.dataset.alt&&im.src!==im.dataset.alt){im.src=im.dataset.alt;return}
   im.replaceWith(Object.assign(document.createElement("span"),{className:"ph",textContent:"🎁"}))},true);
 function setGfTab(t){gfTab=t;$$("#gfTabs button").forEach(b=>b.classList.toggle("on",b.dataset.gf===t));if(GFCAT[t])setGfCat(t);renderRegalos()}
-function setGfCat(c){gfNewCat=c;$("#gfCatTxt").textContent=GFCAT[c].t}
+function setGfCat(c){gfNewCat=c;$$("#gfType [data-gc]").forEach(b=>b.classList.toggle("on",b.dataset.gc===c))}
+function openGfSheet(){$("#gfForm").reset();setGfCat(GFCAT[gfTab]?gfTab:gfNewCat);$("#gfWrap").classList.add("show");setTimeout(()=>$("#gfName").focus(),350)}
+const closeGfSheet=()=>{$("#gfWrap").classList.remove("show");$("#gfName").blur();$("#gfUrl").blur()};
 function gfAdd(){
-  const i=$("#gfText"),v=i.value.trim();if(!v){i.focus();return}i.value="";
-  db.lists.push({id:uid(),t:v,q:v,g:1,c:gfNewCat,u:nowU()});
+  let v=$("#gfName").value.trim(),url=$("#gfUrl").value.trim();
+  if(url&&!/^https?:\/\//i.test(url)){const m=url.match(/https?:\/\/\S+/i);url=m?m[0]:(/^[\w-]+\.[\w.-]+\//.test(url)?"https://"+url:"")}
+  if(!v&&!url){$("#gfName").focus();toast("Escribe qué es o pega el enlace");return}
+  const it={id:uid(),t:v||"Cargando…",q:v,g:1,c:gfNewCat,u:nowU()};if(url)it.url=url;if(!v)it.nt=1;
+  db.lists.push(it);closeGfSheet();
   if(gfTab==="hecho"||(GFCAT[gfTab]&&gfTab!==gfNewCat))setGfTab("todo");render();renderRegalos();
 }
 $("#gfTabs").addEventListener("click",e=>{const b=e.target.closest("[data-gf]");if(b)setGfTab(b.dataset.gf)});
-$("#gfCat").onclick=()=>setGfCat(GFORD[(GFORD.indexOf(gfNewCat)+1)%GFORD.length]);
-$("#gfAdd").addEventListener("submit",e=>{e.preventDefault();gfAdd()});
-$("#gfBtn").addEventListener("click",e=>{e.preventDefault();gfAdd()});
-$("#gfText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();gfAdd()}});
+$("#gfOpen").onclick=openGfSheet;$("#gfBtn").onclick=openGfSheet;
+$("#gfType").addEventListener("click",e=>{const b=e.target.closest("[data-gc]");if(b)setGfCat(b.dataset.gc)});
+$("#gfBg").onclick=closeGfSheet;
+$("#gfSave").addEventListener("click",e=>{e.preventDefault();gfAdd()});
+$("#gfForm").addEventListener("submit",e=>{e.preventDefault();gfAdd()});
+$("#gfName").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();$("#gfUrl").focus()}});
+$("#gfUrl").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();gfAdd()}});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#gfWrap").classList.contains("show"))closeGfSheet()});
+(()=>{const f=$("#gfForm");let s=null;
+  f.addEventListener("touchstart",e=>{if(e.target.closest("input,button,label")){s=null;return}s={y:e.touches[0].clientY,t:performance.now(),dy:0}},{passive:true});
+  f.addEventListener("touchmove",e=>{if(!s)return;s.dy=Math.max(0,e.touches[0].clientY-s.y);if(s.dy>0){e.preventDefault();f.style.transition="none";f.style.transform=matchMedia("(min-width:700px)").matches?`translate(-50%,${s.dy}px)`:`translateY(${s.dy}px)`}},{passive:false});
+  const end=()=>{if(!s)return;const v=s.dy/Math.max(1,performance.now()-s.t),dy=s.dy;s=null;f.style.transition="";f.style.transform="";if(dy>110||(dy>30&&v>.5))closeGfSheet()};
+  f.addEventListener("touchend",end);f.addEventListener("touchcancel",end);
+})();
 $("#gfGrid").addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;const id=b.dataset.gfdel||b.dataset.gfok||b.dataset.gfre,x=db.lists.find(y=>y.id===id);if(!x)return;
   if(b.dataset.gfdel){finalizeDone();const i=db.lists.indexOf(x);db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderRegalos();toast("Eliminado",true)}
