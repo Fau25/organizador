@@ -1768,7 +1768,7 @@ function gfAdd(){
   }
   const it={id:uid(),t:v||"Cargando…",q:v,g:1,c:gfNewCat,u:nowU()};if(url)it.url=url;if(!v)it.nt=1;
   const pasted=gfPasted;if(pasted){it.nf=1;it.pi=1;gfLocalImg[it.id]=pasted}
-  db.lists.push(it);closeGfSheet();if(pasted){uploadPasted(it,pasted);if(!v&&url)apiPost({action:"linkImg",url}).then(j=>{if(j.title&&it.nt){it.t=it.q=j.title;delete it.nt;it.u=nowU();render()}}).catch(()=>{})}
+  db.lists.push(it);closeGfSheet();if(pasted){uploadPasted(it,pasted);if(!v&&url)apiPost({action:"linkImg",url}).then(j=>{const c=db.lists.find(y=>y.id===it.id);if(j.title&&c&&c.nt){c.t=c.q=j.title;delete c.nt;c.u=nowU();render();renderRegalos()}}).catch(()=>{})}
   gfOpenRows.add(it.c);render();renderRegalos();
   requestAnimationFrame(()=>{const r=$(`#gfGrid .gfrow[data-row="${it.c}"]`);if(r){r.scrollTo({left:0,behavior:"smooth"});r.closest(".gfsec").scrollIntoView({behavior:"smooth",block:"nearest"})}});
 }
@@ -1853,10 +1853,12 @@ document.addEventListener("paste",async e=>{
 });
 async function uploadPasted(it,data){
   gfKeep(it.id,data);
-  if(linked()){try{const j=await apiPost({action:"upImg",data});if(j.url){it.img=j.url;delete it.nf;delete gfLocalImg[it.id];it.u=nowU();render();renderRegalos();return}}catch(e){}}
+  // mientras sube, la sincronización puede haber cambiado la ficha por otra copia: se busca la actual
+  const done=img=>{const cur=db.lists.find(y=>y.id===it.id);if(!cur)return;cur.img=img;delete cur.nf;delete gfLocalImg[it.id];cur.u=nowU();save();render();renderRegalos()};
+  if(linked()){try{const j=await apiPost({action:"upImg",data});if(j.url){done(j.url);return}}catch(e){}}
   // sin conexión con Google: se guarda una versión pequeñita dentro de la propia lista
-  try{it.img=await blobToSmallJpeg(await (await fetch(data)).blob(),300,.7)}catch(e){it.img=data}
-  delete it.nf;delete gfLocalImg[it.id];it.u=nowU();render();renderRegalos();
+  let small;try{small=await blobToSmallJpeg(await (await fetch(data)).blob(),300,.7)}catch(e){small=data}
+  done(small);
 }
 
 /* ---------------- seleccionar y compartir (Regalos y Pelis) ---------------- */
