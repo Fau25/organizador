@@ -1720,7 +1720,7 @@ function renderRegalos(){
   const n=all.filter(x=>!x.w).length;$("#gfCount").textContent=n?`${n} por comprar`:"";
   const card=x=>{
     const src=x.img||gfLocalImg[x.id]||"";
-    const im=src?`<img src="${esc(src)}" data-alt="${esc(x.img2||"")}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph">🎁</span>`;
+    const im=src?`<img src="${esc(src)}" data-alt="${esc(gfFallbacks(x).join(" "))}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph">🎁</span>`;
     return `<article class="gf${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${x.w?" done":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
       <div class="im">${im}</div><b>${esc(x.t)}</b>
       ${x.url?`<a class="lk" href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="Abrir la tienda de ${esc(x.t)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>`:""}
@@ -1740,7 +1740,7 @@ function renderRegalos(){
 /* fotos: al cargar se muestran con un fundido; si la original no deja verse, se usa la miniatura */
 $("#gfGrid").addEventListener("load",e=>{if(e.target.tagName==="IMG")e.target.classList.add("ok")},true);
 $("#gfGrid").addEventListener("error",e=>{const im=e.target;if(im.tagName!=="IMG")return;
-  if(im.dataset.alt&&im.src!==im.dataset.alt){im.src=im.dataset.alt;return}
+  const alts=(im.dataset.alt||"").split(" ").filter(Boolean);if(alts.length){im.dataset.alt=alts.slice(1).join(" ");im.src=alts[0];return}
   im.replaceWith(Object.assign(document.createElement("span"),{className:"ph",textContent:"🎁"}))},true);
 function setGfTab(t){renderRegalos()}
 function setGfCat(c){gfNewCat=c;$$("#gfType [data-gc]").forEach(b=>b.classList.toggle("on",b.dataset.gc===c))}
@@ -1820,6 +1820,12 @@ $("#gfGrid").addEventListener("click",e=>{
 
 /* ---------------- imagen pegada (Regalos) ---------------- */
 let gfPasted=null;const gfLocalImg={};
+// copia local de las fotos pegadas (por si la de Drive no carga en este dispositivo)
+const gfKeep=(id,d)=>{try{localStorage.setItem("midia-img-"+id,d)}catch(e){}};
+const gfKept=id=>{try{return localStorage.getItem("midia-img-"+id)||""}catch(e){return ""}};
+function gfFallbacks(x){const out=[];if(x.img2)out.push(x.img2);
+  const m=/googleusercontent\.com\/d\/([\w-]+)/.exec(x.img||"");if(m)out.push("https://drive.google.com/thumbnail?id="+m[1]+"&sz=w900");
+  const k=gfLocalImg[x.id]||gfKept(x.id);if(k&&k!==x.img)out.push(k);return out}
 function blobToSmallJpeg(blob,max=640,q=.82){
   return new Promise((res,rej)=>{const u=URL.createObjectURL(blob),im=new Image();
     im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
@@ -1844,6 +1850,7 @@ document.addEventListener("paste",async e=>{
   if(!f)return;e.preventDefault();try{setPasted(await blobToSmallJpeg(f.getAsFile()))}catch(err){}
 });
 async function uploadPasted(it,data){
+  gfKeep(it.id,data);
   if(linked()){try{const j=await apiPost({action:"upImg",data});if(j.url){it.img=j.url;delete it.nf;delete gfLocalImg[it.id];it.u=nowU();render();renderRegalos();return}}catch(e){}}
   // sin conexión con Google: se guarda una versión pequeñita dentro de la propia lista
   try{it.img=await blobToSmallJpeg(await (await fetch(data)).blob(),300,.7)}catch(e){it.img=data}
