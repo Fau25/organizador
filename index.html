@@ -701,6 +701,22 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .shwa{display:grid;place-items:center;background:#25d366!important;color:#fff;text-decoration:none}
 .shrow{display:flex;gap:8px;margin-top:10px}
 .shrow .pbtn{flex:1;display:grid;place-items:center;text-decoration:none;color:#111;font-size:14px;padding:0 8px}
+/* v63: Compras con secciones plegadas y el scroll termina encima de la barra de añadir */
+.gfbody{flex:1;min-height:0;margin-bottom:calc(var(--safe-b) + 88px);padding:6px 0 16px!important;-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent);mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
+.gfsec{margin:10px 16px 0;border-radius:24px;background:rgba(255,255,255,.55);transition:background .25s}
+.gfsec.open{background:transparent;margin-left:0;margin-right:0}
+.gfsech{padding:6px 10px 6px 6px!important;gap:6px}
+.gfsec.open .gfsech{padding:6px 16px 8px 6px!important}
+.gftog{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:56px;padding:0 10px 0 14px;text-align:left;color:#111}
+.gfsec.open .gftog{padding-left:16px}
+.gftog h3{flex:none;font-size:20px!important}
+.gfthumbs{flex:1;display:flex;justify-content:flex-end;min-width:0}
+.gfthumbs img,.gfthumbs span{width:34px;height:34px;border-radius:50%;object-fit:contain;background:#fff;border:2px solid #f2efe9;margin-left:-8px;display:grid;place-items:center;font-size:16px}
+.chev{flex:none;width:20px;height:20px;color:#77736d;transition:transform .3s var(--spring,ease)}
+.gfsec.open .chev{transform:rotate(180deg)}
+.gfrow.gfin{animation:gfin .38s var(--spring,ease)}
+@keyframes gfin{from{opacity:0;transform:translateY(-8px)}}
+@media (min-width:700px){.gfsec{margin:12px var(--pad) 0}.gfsec.open{margin-left:0;margin-right:0}.gfsec.open .gftog{padding-left:calc(var(--pad) - 4px)}}
 </style>
 </head>
 <body>
@@ -726,7 +742,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
       <button class="pill ic" data-pill="listas" aria-label="Listas"><span class="em" aria-hidden="true">🛍️</span><span class="n" id="nLi"></span></button>
       <button class="pill ic" data-pill="eventos" aria-label="Eventos"><span class="em" aria-hidden="true">🗓️</span><span class="n" id="nEv"></span></button>
       <button class="pill ic" data-pill="pelis" aria-label="Pelis y series"><span class="em" aria-hidden="true">🍿</span></button>
-      <button class="pill ic" data-pill="regalos" aria-label="Regalos"><span class="em" aria-hidden="true">🎁</span></button>
+      <button class="pill ic" data-pill="regalos" aria-label="Compras"><span class="em" aria-hidden="true">🎁</span></button>
     </div>
   </div>
   <button class="tset" data-page="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sync" id="syncInd" hidden><i></i><span></span></span></button>
@@ -787,13 +803,13 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 <!-- REGALOS -->
 <section class="page" data-p="regalos" id="pRegalos">
   <div class="gfbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="gfright"><span class="gfcount" id="gfCount"></span><button class="selbtn" id="gfSelBtn">Seleccionar</button></span></div>
-  <h1 class="gft">Regalos</h1>
-  <p class="gfsub">Lo que te quieres comprar o tienes que regalar</p>
+  <h1 class="gft">Compras</h1>
+  <p class="gfsub">Lo que quieres comprarte o tienes que regalar</p>
   <div class="gfbody"><div class="gfgrid" id="gfGrid"></div></div>
   <div class="sharebar"><button class="shbtn" id="gfShare">Elige los que quieras</button></div>
   <div class="addbar gfadd" id="gfAdd">
     <button type="button" class="gfopen" id="gfOpen">¿Qué te gustaría?</button>
-    <button type="button" class="addbtn" id="gfBtn" aria-label="Añadir regalo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button type="button" class="addbtn" id="gfBtn" aria-label="Añadir compra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
 </section>
 <div class="pvsheet" id="pvSheet"><div class="box" id="pvBox"></div></div>
@@ -847,14 +863,14 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   <div class="sheet-bg" id="gfBg"></div>
   <form class="dsheet" id="gfForm" autocomplete="off">
     <div class="dgrab"></div>
-    <h4 id="gfHead">Nuevo regalo</h4>
+    <h4 id="gfHead">Nueva compra</h4>
     <div class="ftype" id="gfType"><button type="button" data-gc="capricho" class="on"><span>✨</span>Capricho</button><button type="button" data-gc="navidad"><span>🎄</span>Navidad</button><button type="button" data-gc="cumple"><span>🎂</span>Cumple</button></div>
     <div class="f"><label for="gfName">Qué es</label><input id="gfName" placeholder="iPhone 18 Pro celeste" enterkeyhint="next"></div>
     <div class="f"><label for="gfUrl">Enlace de la tienda (opcional)</label><input id="gfUrl" type="url" inputmode="url" placeholder="https://…" enterkeyhint="done"></div>
     <div class="gfpaste"><button type="button" class="pbtn" id="gfPasteBtn">📋 Pegar imagen copiada</button><button type="button" class="pbtn" id="gfOther" hidden>🔄 Otra foto</button><span class="gfhint" id="gfPasteHint">o déjalo vacío y se busca sola</span><img id="gfPrev" alt="Imagen pegada" hidden><button type="button" class="px" id="gfPasteX" aria-label="Quitar imagen" hidden>✕</button></div>
     <p class="gfhint">Foto: la que pegues; si no, la de la página del enlace; si no, se busca por el nombre.</p>
     <button type="button" class="save" id="gfSave">Guardar</button>
-    <button type="button" class="gfdelbig" id="gfDel" hidden>Eliminar regalo</button>
+    <button type="button" class="gfdelbig" id="gfDel" hidden>Eliminar</button>
   </form>
 </div>
 <!-- HOJA DE COMPARTIR -->
@@ -1606,7 +1622,7 @@ async function gfLookup(it,next){
   finally{gfBusy.delete(it.id);renderRegalos()}
 }
 const GFROWS=[["navidad","🎄 Navidad"],["cumple","🎂 Cumpleaños"],["capricho","✨ Caprichos"],["hecho","✓ Comprados"]];
-const gfRowScroll={};
+const gfRowScroll={},gfOpenRows=new Set();
 function renderRegalos(){
   const g=$("#gfGrid");if(!g)return;
   $$("#gfGrid .gfrow").forEach(r=>gfRowScroll[r.dataset.row]=r.scrollLeft);
@@ -1624,7 +1640,8 @@ function renderRegalos(){
   for(const [k,label] of GFROWS){
     const its=k==="hecho"?all.filter(x=>x.w):all.filter(x=>!x.w&&(x.c||"capricho")===k);
     if(!its.length)continue;
-    h+=`<section class="gfsec${k==="hecho"?" bought":""}"><div class="gfsech"><h3>${label} <span>${its.length}</span></h3>${k!=="hecho"?`<button class="gfplus" data-gfnew="${k}" aria-label="Añadir a ${label}">+</button>`:""}</div><div class="gfrow" data-row="${k}">${its.map(card).join("")}</div></section>`;
+    const open=gfOpenRows.has(k),thumbs=its.slice(0,3).map(x=>{const s2=x.img||gfLocalImg[x.id]||"";return s2?`<img src="${esc(s2)}" alt="" referrerpolicy="no-referrer">`:`<span>🎁</span>`}).join("");
+    h+=`<section class="gfsec${k==="hecho"?" bought":""}${open?" open":""}" data-sec="${k}"><div class="gfsech"><button class="gftog" data-gftog="${k}" aria-expanded="${open}"><h3>${label} <span>${its.length}</span></h3><span class="gfthumbs">${open?"":thumbs}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>${k!=="hecho"?`<button class="gfplus" data-gfnew="${k}" aria-label="Añadir a ${label}">+</button>`:""}</div>${open?`<div class="gfrow" data-row="${k}">${its.map(card).join("")}</div>`:""}</section>`;
   }
   g.innerHTML=h||`<p class="gfempty">Escribe abajo lo que quieres<br>y la foto aparecerá sola 🎁</p>`;
   $$("#gfGrid .gfrow").forEach(r=>{if(gfRowScroll[r.dataset.row])r.scrollLeft=gfRowScroll[r.dataset.row]});
@@ -1640,7 +1657,7 @@ function setGfCat(c){gfNewCat=c;$$("#gfType [data-gc]").forEach(b=>b.classList.t
 let gfEdit=null;
 function openGfSheet(item,cat){
   gfEdit=item&&item.id?item:null;$("#gfForm").reset();setPasted(null);
-  $("#gfHead").textContent=gfEdit?"Editar regalo":"Nuevo regalo";$("#gfDel").hidden=!gfEdit;$("#gfOther").hidden=!gfEdit;
+  $("#gfHead").textContent=gfEdit?"Editar compra":"Nueva compra";$("#gfDel").hidden=!gfEdit;$("#gfOther").hidden=!gfEdit;
   setGfCat(gfEdit?(gfEdit.c||"capricho"):(typeof cat==="string"&&GFCAT[cat]?cat:gfNewCat));
   if(gfEdit){$("#gfName").value=gfEdit.nt?"":gfEdit.t;$("#gfUrl").value=gfEdit.url||"";showPrev(gfEdit.img||gfLocalImg[gfEdit.id]||"")}
   $("#gfWrap").classList.add("show");if(!gfEdit)setTimeout(()=>$("#gfName").focus(),350);
@@ -1655,12 +1672,12 @@ function gfAdd(){
     if(v)it.t=it.q=v;it.c=gfNewCat;if(url)it.url=url;else delete it.url;delete it.nt;
     if(gfPasted){it.pi=1;it.nf=1;gfLocalImg[it.id]=gfPasted;it.img="";uploadPasted(it,gfPasted)}
     else if(!it.pi&&(urlCh&&url||nameCh&&!it.url)){delete it.img;delete it.nf;gfFail.delete(it.id)}
-    it.u=nowU();closeGfSheet();render();renderRegalos();toast("Guardado ✓");return;
+    it.u=nowU();gfOpenRows.add(it.c);closeGfSheet();render();renderRegalos();toast("Guardado ✓");return;
   }
   const it={id:uid(),t:v||"Cargando…",q:v,g:1,c:gfNewCat,u:nowU()};if(url)it.url=url;if(!v)it.nt=1;
   const pasted=gfPasted;if(pasted){it.nf=1;it.pi=1;gfLocalImg[it.id]=pasted}
   db.lists.push(it);closeGfSheet();if(pasted){uploadPasted(it,pasted);if(!v&&url)apiPost({action:"linkImg",url}).then(j=>{if(j.title&&it.nt){it.t=it.q=j.title;delete it.nt;it.u=nowU();render()}}).catch(()=>{})}
-  render();renderRegalos();
+  gfOpenRows.add(it.c);render();renderRegalos();
   requestAnimationFrame(()=>{const r=$(`#gfGrid .gfrow[data-row="${it.c}"]`);if(r){r.scrollTo({left:0,behavior:"smooth"});r.closest(".gfsec").scrollIntoView({behavior:"smooth",block:"nearest"})}});
 }
 $("#gfOpen").onclick=()=>openGfSheet();$("#gfBtn").onclick=()=>openGfSheet();
@@ -1680,6 +1697,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#gfWrap").classList.conta
   f.addEventListener("touchend",end);f.addEventListener("touchcancel",end);
 })();
 $("#gfGrid").addEventListener("click",e=>{
+  const tg=e.target.closest("[data-gftog]");if(tg){const k=tg.dataset.gftog;if(gfOpenRows.has(k))gfOpenRows.delete(k);else gfOpenRows.add(k);renderRegalos();const sec=$(`#gfGrid [data-sec="${k}"]`);if(sec&&gfOpenRows.has(k)){sec.querySelector(".gfrow").classList.add("gfin");sec.scrollIntoView({behavior:"smooth",block:"nearest"})}return}
   const nb=e.target.closest("[data-gfnew]");if(nb){openGfSheet(null,nb.dataset.gfnew);return}
   const b=e.target.closest("button");
   if(!b){if(e.target.closest(".lk"))return;const c=e.target.closest("[data-gid]");if(c){const x=db.lists.find(y=>y.id===c.dataset.gid);if(x)openGfSheet(x)}return}
@@ -1780,7 +1798,7 @@ $("#pvGrid").addEventListener("click",e=>{if(!$("#pPelis").classList.contains("s
 $("#shBg").onclick=closeShare;
 $("#gfShare").onclick=()=>{
   const items=db.lists.filter(x=>x.g&&SEL.gf.has(x.id)).map(x=>[x.t,/^data:/.test(x.img||"")?"":(x.img||""),x.url||"",x.c||""]);
-  const cats=[...new Set(items.map(x=>x[3]))],title=cats.length===1&&GFCAT[cats[0]]?({navidad:"Lista de Navidad",cumple:"Lista de cumpleaños",capricho:"Caprichos"})[cats[0]]:"Lista de regalos";
+  const cats=[...new Set(items.map(x=>x[3]))],title=cats.length===1&&GFCAT[cats[0]]?({navidad:"Lista de Navidad",cumple:"Lista de cumpleaños",capricho:"Caprichos"})[cats[0]]:"Mi lista";
   shareList("g",title,items).then(()=>setSelMode("gf",false));
 };
 $("#pvShare").onclick=()=>{

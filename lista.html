@@ -58,8 +58,8 @@ const CAT={navidad:["🎄 Navidad","#d64545"],cumple:["🎂 Cumpleaños","#d97a0
     const pelis=d.k==="p";document.body.classList.toggle("dark",pelis);
     document.querySelector('meta[name=theme-color]').content=pelis?"#000":"#f2efe9";
     const who=d.n?esc(d.n):"";
-    document.title=(pelis?"Pelis y series":d.s||"Lista de regalos")+(who?" · "+d.n:"");
-    let h=`<p class="kicker">${pelis?"🍿 Para ver":"🎁 Lista de deseos"}${who?" · de "+who:""}</p><h1>${esc(pelis?"Pelis y series":d.s||"Lista de regalos")}</h1>`;
+    document.title=(pelis?"Pelis y series":d.s||"Mi lista")+(who?" · "+d.n:"");
+    let h=`<p class="kicker">${pelis?"🍿 Para ver":"🎁 Lista de deseos"}${who?" · de "+who:""}</p><h1>${esc(pelis?"Pelis y series":d.s||"Mi lista")}</h1>`;
     h+=`<p class="sub">${pelis?(who?who+" te recomienda":"Te recomiendan")+" estas "+d.i.length+(d.i.length===1?" peli o serie.":" pelis y series."):(d.i.length===1?"Una idea":d.i.length+" ideas")+" por si no sabes qué regalar"+(who?" a "+who:"")+" 😉"}</p><div class="grid">`;
     d.i.forEach(([t,img,url,extra],n)=>{
       const tag=!pelis&&CAT[extra]?`<span class="tag" style="--c:${CAT[extra][1]}">${CAT[extra][0]}</span>`:"";
