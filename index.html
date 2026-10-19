@@ -509,7 +509,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 #pPelis:not(.cards) .pvbg{display:none}
 /* v53: movimientos afinados (curva tipo iOS, más rápida al empezar y suave al llegar) */
 :root{--spring:cubic-bezier(.32,.72,0,1)}
-.page{transition:transform .48s var(--spring)!important}
+.page{transition:transform .48s var(--spring)}
 .dsheet{transition:transform .42s var(--spring),visibility .42s!important}
 .sheet-bg{transition:opacity .35s ease!important}
 .pvsheet .box{transition:transform .42s var(--spring)!important}
@@ -722,6 +722,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .gfbody{margin-bottom:0!important;padding:6px 0 calc(var(--safe-b) + 112px)!important;-webkit-mask-image:none!important;mask-image:none!important}
 .gfadd{background:rgba(236,232,224,.55)!important;-webkit-backdrop-filter:blur(24px) saturate(1.7)!important;backdrop-filter:blur(24px) saturate(1.7)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:0 8px 30px rgba(60,50,30,.08)!important}
 .sharebar:not(.dark) .shbtn:not(.on){background:rgba(217,212,202,.6);-webkit-backdrop-filter:blur(24px) saturate(1.7);backdrop-filter:blur(24px) saturate(1.7)}
+
+/* v65: sin contador, más aire bajo la frase y Pelis sin seleccionar */
+.gfcount{display:none!important}
+.gfsub{margin-bottom:14px}
+#pvSelBtn,.sharebar.dark{display:none!important}
 </style>
 </head>
 <body>
@@ -1352,10 +1357,11 @@ function openPage(p,dir){
   // Pelis ⇄ Regalos: la que se va sale por un lado y la nueva entra por el otro, como pasar de pantalla
   if(!dir&&curPage==="pelis"&&p==="regalos")dir=1;
   if(!dir&&curPage==="regalos"&&p==="pelis")dir=-1;
-  if(curPage){const old=$(PAGE[curPage]);
-    if(dir===1){old.classList.add("outl");setTimeout(()=>{old.style.transition="none";old.classList.remove("outl");void old.offsetWidth;old.style.transition=""},650)}
-    closePage(true)}
-  if(dir===-1){const el=$(PAGE[p]);el.style.transition="none";el.style.transform="translateX(-104%)";void el.offsetWidth;el.style.transition="";el.style.transform=""}
+  // como en iOS: la de delante entra o sale deslizándose y la de detrás se queda quieta debajo
+  const instant=(el,on)=>{el.style.transition="none";el.classList.toggle("on",on);void el.offsetWidth;el.style.transition=""};
+  if(curPage){const old=$(PAGE[curPage]);closePage(true);
+    if(dir===1){instant(old,true);setTimeout(()=>{if(curPage!==old.dataset.p)instant(old,false)},560)}}
+  if(dir===-1)instant($(PAGE[p]),true);
   curPage=p;if(p==="eventos"){evSel=iso(today);evMode="day";evQuery="";$("#evSearch").hidden=true;$("#evQ").value="";$("#calAll").classList.remove("on")}
   if(p==="pelis"){setPvTab("todo");$("#pvGrid").parentNode.scrollTop=0}else if(p==="regalos"){setGfTab("todo");$("#gfGrid").parentNode.scrollTop=0}else if(p!=="ajustes")renderPage(p);else fillSettings();
   if(p==="eventos")requestAnimationFrame(()=>scrollToWeek(evSel,false));
@@ -1726,10 +1732,11 @@ $("#gfGrid").addEventListener("click",e=>{
   gf.addEventListener("touchstart",e=>{if(e.touches.length!==1||e.target.closest("input,.gftabs,.gfcat,.gfrow")){s2=null;return}s2={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
   gf.addEventListener("touchmove",e=>{if(!s2)return;const dx=e.touches[0].clientX-s2.x,dy=e.touches[0].clientY-s2.y,now=performance.now();
     if(s2.t)s2.v=.7*((dx-(s2.dx||0))/Math.max(1,now-s2.t))+.3*(s2.v||0);s2.t=now;
-    if(!s2.on){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(dx>0&&dx>Math.abs(dy)*1.2)s2.on=true;else{s2=null;return}}
+    if(!s2.on){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(dx>0&&dx>Math.abs(dy)*1.2){s2.on=true;const pv=$("#pPelis");pv.style.transition="none";pv.classList.add("on");void pv.offsetWidth;pv.style.transition=""}else{s2=null;return}}
     e.preventDefault();s2.dx=dx;gf.style.transition="none";gf.style.transform=`translateX(${Math.max(0,dx)}px)`},{passive:false});
   const end2=()=>{if(!s2||!s2.on){s2=null;return}const dx=s2.dx||0,v=s2.v||0;s2=null;gf.style.transition="";gf.style.transform="";
-    if(dx>90||(dx>30&&v>.45))openPage("pelis")};
+    if(dx>90||(dx>30&&v>.45))openPage("pelis");
+    else setTimeout(()=>{if(curPage!=="pelis"){const pv=$("#pPelis");pv.style.transition="none";pv.classList.remove("on");void pv.offsetWidth;pv.style.transition=""}},480)};
   gf.addEventListener("touchend",end2);gf.addEventListener("touchcancel",end2);
 })();
 
