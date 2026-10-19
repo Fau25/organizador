@@ -727,6 +727,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .gfcount{display:none!important}
 .gfsub{margin-bottom:14px}
 #pvSelBtn,.sharebar.dark{display:none!important}
+
+/* v66: hoja para editar tareas y listas */
+#edWrap.show .sheet-bg{opacity:1;pointer-events:auto}#edWrap.show .dsheet{transform:none;visibility:visible}
+@media (min-width:700px){#edWrap.show .dsheet{transform:translate(-50%,0)}}
+.row[data-ed] .t{cursor:pointer}
 </style>
 </head>
 <body>
@@ -881,6 +886,18 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <p class="gfhint">Foto: la que pegues; si no, la de la página del enlace; si no, se busca por el nombre.</p>
     <button type="button" class="save" id="gfSave">Guardar</button>
     <button type="button" class="gfdelbig" id="gfDel" hidden>Eliminar</button>
+  </form>
+</div>
+<!-- HOJA DE EDITAR TAREA / LISTA -->
+<div id="edWrap">
+  <div class="sheet-bg" id="edBg"></div>
+  <form class="dsheet" id="edForm" autocomplete="off">
+    <div class="dgrab"></div>
+    <h4 id="edHead">Editar tarea</h4>
+    <div class="f"><label for="edText">Qué es</label><input id="edText" enterkeyhint="done"></div>
+    <div class="f" id="edDateBox"><label for="edDate">Día</label><input type="date" id="edDate"></div>
+    <button type="button" class="save" id="edSave">Guardar</button>
+    <button type="button" class="gfdelbig" id="edDel">Eliminar</button>
   </form>
 </div>
 <!-- HOJA DE COMPARTIR -->
@@ -1130,7 +1147,7 @@ function renderXhead(){
   $("#qdayTxt").textContent=mode==="eventos"?dayChip(evSel<iso(today)?iso(today):evSel):dayChip(selDay);
   $("#qtext").placeholder=mode==="eventos"?"Nuevo evento…":mode==="pelis"?"Añadir peli o serie…":mode==="listas"?"Añadir a la lista…":selDay===iso(today)?"Añadir una tarea…":`Añadir para ${dayChip(selDay).toLowerCase()}…`;
 }
-const row=(kind,id,title,meta="",metaCls="")=>`<div class="row" style="--bar:${metaCls==="late"?"#ff3b30":barOf(id)}"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
+const row=(kind,id,title,meta="",metaCls="")=>`<div class="row" data-ed="${kind}:${id}" style="--bar:${metaCls==="late"?"#ff3b30":barOf(id)}"><button class="ck" data-done="${kind}:${id}" aria-label="Completar"></button><div class="t">${esc(title)}</div>${meta?`<div class="m ${metaCls}">${meta}</div>`:""}</div>`;
 const irow=(icon,title,meta="")=>`<div class="row"><span class="ico">${icon}</span><div class="t">${esc(title)}</div>${meta?`<div class="m">${meta}</div>`:""}</div>`;
 function renderList(){
   let h="";
@@ -1817,6 +1834,37 @@ $("#pvShare").onclick=()=>{
   const items=db.lists.filter(x=>x.p&&SEL.pv.has(x.id)).map(x=>[x.t,x.img?pvImg(x.img):"",x.imdb?`https://www.imdb.com/title/${x.imdb}/`:"",[x.y,x.k?(isTv(x)?"Serie":"Peli"):""].filter(Boolean).join(" · ")]);
   shareList("p","Pelis y series",items).then(()=>setSelMode("pv",false));
 };
+
+/* ---------------- editar tareas y cosas de las listas (tocando el texto) ---------------- */
+let edRef=null;
+function openEdit(ref){
+  const [k,id]=ref.split(":"),x=db[LISTNAME[k]].find(y=>y.id===id);if(!x)return;edRef={k,x};
+  $("#edHead").textContent=k==="t"?"Editar tarea":"Editar";$("#edText").value=x.t;
+  $("#edDateBox").hidden=k!=="t";if(k==="t")$("#edDate").value=x.d;
+  $("#edWrap").classList.add("show");
+}
+const closeEdit=()=>{$("#edWrap").classList.remove("show");$("#edText").blur();edRef=null};
+function saveEdit(){
+  if(!edRef)return;const {k,x}=edRef,v=$("#edText").value.trim();
+  if(!v){$("#edText").focus();return}
+  x.t=v;if(k==="t"&&$("#edDate").value)x.d=$("#edDate").value;x.u=nowU();
+  closeEdit();render();toast("Guardado ✓");
+}
+$("#list").addEventListener("click",e=>{
+  if(e.target.closest("button"))return;const r=e.target.closest("[data-ed]");if(!r||r.classList.contains("checking"))return;
+  if(!expanded&&!e.target.closest(".t"))return;openEdit(r.dataset.ed);
+});
+$("#edSave").onclick=saveEdit;$("#edForm").addEventListener("submit",e=>{e.preventDefault();saveEdit()});
+$("#edText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();saveEdit()}});
+$("#edBg").onclick=closeEdit;
+$("#edDel").onclick=()=>{if(!edRef)return;const {k,x}=edRef,name=LISTNAME[k];closeEdit();finalizeDone();const i=db[name].indexOf(x);if(i<0)return;db[name].splice(i,1);db.tomb[x.id]=nowU();lastDone={name,it:x,i,timer:setTimeout(finalizeDone,4500)};render();toast("Eliminado",true)};
+addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#edWrap").classList.contains("show"))closeEdit()});
+(()=>{const f=$("#edForm");let s=null;
+  f.addEventListener("touchstart",e=>{if(e.target.closest("input,button,label")){s=null;return}s={y:e.touches[0].clientY,t:performance.now(),dy:0}},{passive:true});
+  f.addEventListener("touchmove",e=>{if(!s)return;s.dy=Math.max(0,e.touches[0].clientY-s.y);if(s.dy>0){e.preventDefault();f.style.transition="none";f.style.transform=matchMedia("(min-width:700px)").matches?`translate(-50%,${s.dy}px)`:`translateY(${s.dy}px)`}},{passive:false});
+  const end=()=>{if(!s)return;const v=s.dy/Math.max(1,performance.now()-s.t),dy=s.dy;s=null;f.style.transition="";f.style.transform="";if(dy>110||(dy>30&&v>.5))closeEdit()};
+  f.addEventListener("touchend",end);f.addEventListener("touchcancel",end);
+})();
 const pvClose=()=>$("#pvSheet").classList.remove("on");
 $("#pvGrid").addEventListener("click",e=>{
   const xb=e.target.closest("[data-del]");
