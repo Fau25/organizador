@@ -727,6 +727,28 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .gfsec.open .chev{transform:rotate(180deg)}
 .gfrow.gfin{animation:gfin .38s var(--spring,ease)}
 @keyframes gfin{from{opacity:0;transform:translateY(-8px)}}
+/* v79 · Compras en lista compacta: una fila por producto, sin scroll horizontal */
+.gfrow.gflist{display:block;overflow:visible;scroll-snap-type:none;margin:2px 16px 4px;padding:4px 0;border-radius:22px;background:#fff}
+.gflist .gf.gfl{display:flex;flex-direction:row;align-items:center;gap:12px;width:auto;min-height:0;padding:8px 12px;border-radius:0;background:transparent!important;overflow:visible;cursor:pointer}
+.gflist .gf.gfl+.gf.gfl{border-top:1px solid #f0ece5}
+.gflist .gfl .im{flex:none;width:52px;height:52px;min-height:0;margin:0;border-radius:14px;background:#f4f1ec;display:grid;place-items:center;overflow:hidden}
+.gflist .gfl .im img{max-width:86%;max-height:86%;object-fit:contain}
+.gflist .gfl .ph{font-size:24px}
+.gflist .gfl .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.gflist .gfl b{margin:0;font-size:15.5px;text-align:left;-webkit-line-clamp:1;letter-spacing:-.2px}
+.gflist .gfl .gffor{margin:0;text-align:left;font-size:13px}
+.gflist .gfl small{font-size:13px;color:#8a857d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gflist .gfl small.gffor{color:#9a7b4f;font-weight:600}
+.gflist .gfl .lk{position:static;transform:none;width:auto;height:auto;background:none;display:inline;font-size:13px;font-weight:600;color:#8a857d;text-decoration:none}
+.gflist .gfl .gfok{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid #d8d2c7;background:transparent;display:grid;place-items:center;font-size:14px;color:#fff;position:relative}
+.gflist .gfl .gfok::before{content:"";position:absolute;inset:-8px}
+.gflist .gfl .gfok.on{background:#111;border-color:#111}
+.gflist .gfl:active{transform:none;background:#faf8f4!important}
+.gfsec.bought .gflist .gf{opacity:.6}
+.sel .gflist .gf.picked{box-shadow:none;background:#f2efe9!important}
+.sel .gflist .gf.picked::after{position:absolute;right:12px;top:50%;margin-top:-15px;width:30px;height:30px;border-radius:50%}
+.sel .gflist .gfl .gfok{visibility:hidden}
+@media (min-width:700px){.gfrow.gflist{margin:2px 24px 6px}.gflist .gfl .im{width:60px;height:60px}}
 @media (min-width:700px){.gfsec{margin:12px var(--pad) 0}.gfsec.open{margin-left:0;margin-right:0}.gfsec.open .gftog{padding-left:calc(var(--pad) - 4px)}}
 
 /* v64: los productos vuelven a pasar por detrás; la barra de añadir es de cristal (blur) */
@@ -1765,17 +1787,19 @@ function renderRegalos(){
   const card=x=>{
     const src=x.img||gfLocalImg[x.id]||"";
     const im=src?`<img src="${esc(src)}" data-alt="${esc(gfFallbacks(x).join(" "))}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph">🎁</span>`;
-    return `<article class="gf${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${x.w?" done":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
-      <div class="im">${im}</div><b>${esc(x.t)}</b>${x.pq&&x.c!=="capricho"?`<span class="gffor">Para ${esc(x.pq)}</span>`:""}
-      ${x.url?`<a class="lk" href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="Abrir la tienda de ${esc(x.t)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>`:""}
-      <div class="row2"><button data-gfdel="${x.id}" aria-label="Eliminar ${esc(x.t)}">✕</button><button class="gfok${x.w?" on":""}" data-gfok="${x.id}" aria-label="${x.w?"Devolver a pendientes":"Marcar como comprado"}: ${esc(x.t)}">${x.w?"↩︎":"✓"}</button></div>
+    const sub=x.c!=="capricho"&&x.pq?`<small class="gffor">Para ${esc(x.pq)}</small>`
+      :x.url?`<a class="lk" href="${esc(x.url)}" target="_blank" rel="noopener">Ver en la tienda ↗</a>`
+      :x.c!=="capricho"&&x.ds?`<small>${esc(x.ds)}</small>`:"";
+    return `<article class="gf gfl${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${x.w?" done":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
+      <div class="im">${im}</div><div class="tx"><b>${esc(x.t)}</b>${sub}</div>
+      <button class="gfok${x.w?" on":""}" data-gfok="${x.id}" aria-label="${x.w?"Devolver a pendientes":"Marcar como comprado"}: ${esc(x.t)}">${x.w?"↩︎":""}</button>
     </article>`};
   let h="";
   for(const [k,label] of GFROWS){
     const its=k==="hecho"?all.filter(x=>x.w):all.filter(x=>!x.w&&(x.c||"capricho")===k);
     if(!its.length)continue;
     const open=gfOpenRows.has(k),thumbs=its.slice(0,3).map(x=>{const s2=x.img||gfLocalImg[x.id]||"";return s2?`<img src="${esc(s2)}" alt="" referrerpolicy="no-referrer">`:`<span>🎁</span>`}).join("");
-    h+=`<section class="gfsec${k==="hecho"?" bought":""}${open?" open":""}" data-sec="${k}"><div class="gfsech"><button class="gftog" data-gftog="${k}" aria-expanded="${open}"><h3>${label} <span>${its.length}</span></h3><span class="gfthumbs">${open?"":thumbs}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>${k!=="hecho"?`<button class="gfplus" data-gfnew="${k}" aria-label="Añadir a ${label}">+</button>`:""}</div>${open?`<div class="gfrow" data-row="${k}">${its.map(card).join("")}</div>`:""}</section>`;
+    h+=`<section class="gfsec${k==="hecho"?" bought":""}${open?" open":""}" data-sec="${k}"><div class="gfsech"><button class="gftog" data-gftog="${k}" aria-expanded="${open}"><h3>${label} <span>${its.length}</span></h3><span class="gfthumbs">${open?"":thumbs}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>${k!=="hecho"?`<button class="gfplus" data-gfnew="${k}" aria-label="Añadir a ${label}">+</button>`:""}</div>${open?`<div class="gfrow gflist" data-row="${k}">${its.map(card).join("")}</div>`:""}</section>`;
   }
   g.innerHTML=h||`<p class="gfempty">Escribe abajo lo que quieres<br>y la foto aparecerá sola 🎁</p>`;
   $$("#gfGrid .gfrow").forEach(r=>{if(gfRowScroll[r.dataset.row])r.scrollLeft=gfRowScroll[r.dataset.row]});
