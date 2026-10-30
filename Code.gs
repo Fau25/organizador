@@ -65,7 +65,7 @@ function doPost(e) {
       case 'linkImg':  return Object.assign({ ok: true }, linkImg_(b.url));
       case 'upImg':    return { ok: true, url: upImg_(b.data) };
       case 'delImg':   return { ok: true, done: delImg_(b.id) };
-      case 'rating':   return { ok: true, r: rating_(b.id) };
+      case 'rating':   return b.diag ? Object.assign({ ok: true }, rating_(b.id, true)) : { ok: true, r: rating_(b.id) };
       case 'addBday':  return { ok: true, gid: addBirthday_(b) };
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
@@ -373,26 +373,38 @@ function autorizarDrive() {
 }
 
 /* Nota de IMDb de una peli o serie (para las destacadas de Pelis). */
-function rating_(id) {
+function rating_(id, diag) {
   if (!/^tt\d+$/.test(String(id || ''))) return 0;
-  // 1) API pública de IMDb (la web bloquea a los servidores de Google)
-  try {
-    const g = UrlFetchApp.fetch('https://api.graphql.imdb.com/', {
-      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-      payload: JSON.stringify({ query: '{title(id:"' + id + '"){ratingsSummary{aggregateRating}}}' }),
-    });
-    const v = JSON.parse(g.getContentText() || '{}');
-    const n = v && v.data && v.data.title && v.data.title.ratingsSummary && v.data.title.ratingsSummary.aggregateRating;
-    if (n) return Number(n);
-  } catch (e) {}
-  // 2) Plan B: la ficha web
-  const r = UrlFetchApp.fetch('https://www.imdb.com/title/' + id + '/', {
-    muteHttpExceptions: true,
-    headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8' },
-  });
-  const html = r.getContentText() || '';
-  const m = html.match(/"aggregateRating"\s*:\s*\{[^}]*"ratingValue"\s*:\s*"?([\d.]+)/) || html.match(/"ratingValue"\s*:\s*"?([\d.]+)/);
-  return m ? Number(m[1]) : 0;
+  const log = [];
+  const tryJson = (name, url, opt, pick) => {
+    try {
+      const r = UrlFetchApp.fetch(url, Object.assign({ muteHttpExceptions: true }, opt || {}));
+      log.push(name + ':' + r.getResponseCode());
+      if (r.getResponseCode() !== 200) return 0;
+      return Number(pick(JSON.parse(r.getContentText() || '{}'))) || 0;
+    } catch (e) { log.push(name + ':' + e.message); return 0; }
+  };
+  const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
+  // 1) imdbapi.dev (gratis, sin clave)
+  let n = tryJson('imdbapi', 'https://api.imdbapi.dev/titles/' + id, { headers: { 'User-Agent': UA } },
+    j => j && j.rating && j.rating.aggregateRating);
+  // 2) API GraphQL de IMDb
+  if (!n) n = tryJson('graphql', 'https://api.graphql.imdb.com/', {
+    method: 'post', contentType: 'application/json',
+    headers: { 'User-Agent': UA, 'x-imdb-client-name': 'imdb-web-next-localized', 'Origin': 'https://www.imdb.com', 'Referer': 'https://www.imdb.com/' },
+    payload: JSON.stringify({ query: '{title(id:"' + id + '"){ratingsSummary{aggregateRating}}}' }),
+  }, j => j && j.data && j.data.title && j.data.title.ratingsSummary && j.data.title.ratingsSummary.aggregateRating);
+  // 3) Plan C: la ficha web
+  if (!n) {
+    try {
+      const r = UrlFetchApp.fetch('https://www.imdb.com/title/' + id + '/', { muteHttpExceptions: true, headers: { 'User-Agent': UA, 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8' } });
+      log.push('web:' + r.getResponseCode());
+      const html = r.getContentText() || '';
+      const m = html.match(/"aggregateRating"\s*:\s*\{[^}]*"ratingValue"\s*:\s*"?([\d.]+)/) || html.match(/"ratingValue"\s*:\s*"?([\d.]+)/);
+      n = m ? Number(m[1]) : 0;
+    } catch (e) { log.push('web:' + e.message); }
+  }
+  return diag ? { r: n, log: log } : n;
 }
 
 /** Prueba: muestra la nota de Dune: Parte Dos. */
