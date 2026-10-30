@@ -44,12 +44,15 @@ const TAG = 'midia';
 
 /* ---------------------- Entradas HTTP ---------------------- */
 
+// Lecturas. La app nueva las pide por POST (la clave no viaja en la dirección); GET se mantiene por compatibilidad.
+function read_(action) {
+  if ((action || 'sync') === 'ping') return { ok: true, user: Session.getActiveUser().getEmail() };
+  if (action === 'store') return { ok: true, store: readStore_() };   // consulta rápida: solo tareas, listas y pelis
+  return { ok: true, bdays: readBirthdays_(), events: readEvents_(), store: readStore_(), at: new Date().toISOString() };
+}
+
 function doGet(e) {
-  return guard_(e && e.parameter, p => {
-    if ((p.action || 'sync') === 'ping') return { ok: true, user: Session.getActiveUser().getEmail() };
-    if (p.action === 'store') return { ok: true, store: readStore_() };   // consulta rápida: solo tareas, listas y pelis
-    return { ok: true, bdays: readBirthdays_(), events: readEvents_(), store: readStore_(), at: new Date().toISOString() };
-  });
+  return guard_(e && e.parameter, p => read_(p.action));
 }
 
 function doPost(e) {
@@ -67,6 +70,7 @@ function doPost(e) {
       case 'addEvent': return { ok: true, gid: addEvent_(b) };
       case 'delete':   return { ok: true, deleted: deleteById_(b.gid) };
       case 'syncStore': return { ok: true, store: syncStore_(b.store) };
+      case 'ping': case 'store': case 'sync': return read_(b.action);
       default:         return { ok: false, error: 'Acción desconocida' };
     }
   });

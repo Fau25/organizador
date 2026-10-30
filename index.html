@@ -1057,19 +1057,27 @@ function flushNow(){
   if(storeSig()!==pushedSig){clearTimeout(pushT);apiPost({action:"syncStore",store:toStore()},true).catch(()=>{});pushedSig=storeSig()}
 }
 /* mientras la app está abierta, mira cada poco si hay cambios en los otros dispositivos */
-let pollT=null,pollN=0;
+// Ritmo: cada 15 s si hay movimiento (cambios tuyos o de otro dispositivo en los últimos 2 min); si no, cada 45 s.
+// Ahorra batería y la cuota diaria de scripts de Google. Al abrir la app y al guardar se sincroniza al momento igualmente.
+let pollT=null,lastActive=Date.now(),lastFull=Date.now();
+const markActive=()=>{const idle=Date.now()-lastActive>120000;lastActive=Date.now();if(idle)startPoll()};
 async function poll(){
-  if(!linked()||document.hidden||syncing)return;
-  pollN++;
-  if(pollN%4===0){sync(true);return}           // cada ~minuto, sincronización completa (calendario incluido)
-  try{const j=await apiGet("store");if(j.store)pullStore(j.store);setSync("ok")}catch(e){}
+  if(linked()&&!document.hidden&&!syncing){
+    if(Date.now()-lastFull>=90000){lastFull=Date.now();sync(true)}   // cada ~minuto y medio, completa (calendario incluido)
+    else{try{const before=storeSig(),j=await apiGet("store");if(j.store)pullStore(j.store);if(storeSig()!==before)markActive();setSync("ok")}catch(e){}}
+  }
+  startPoll(true);
 }
-function startPoll(){clearInterval(pollT);pollT=setInterval(poll,15000)}
-function schedulePush(){if(!linked())return;clearTimeout(pushT);pushT=setTimeout(()=>{if(storeSig()!==pushedSig)pushStore()},1200)}
+function startPoll(chain){clearTimeout(pollT);pollT=setTimeout(poll,Date.now()-lastActive<120000?15000:45000)}
+function schedulePush(){if(!linked())return;if(storeSig()!==pushedSig)markActive();clearTimeout(pushT);pushT=setTimeout(()=>{if(storeSig()!==pushedSig)pushStore()},1200)}
 const linked=()=>!!(db.cfg.url&&db.cfg.key);
 
 /* ---------------- Google (Apps Script) ---------------- */
+// Lecturas por POST: la clave no viaja en la dirección (no queda en registros ni historiales).
+// Si el script aún es el antiguo y no las entiende por POST, se usa GET como antes.
+let readByGet=false;
 async function apiGet(action="sync"){
+  if(!readByGet){try{return await apiPost({action})}catch(e){if(!/desconocida/i.test(e.message))throw e;readByGet=true}}
   const u=new URL(db.cfg.url);u.searchParams.set("key",db.cfg.key);u.searchParams.set("action",action);
   const r=await fetch(u,{redirect:"follow"});const j=await r.json();
   if(!j.ok)throw new Error(j.error||"Error");return j;

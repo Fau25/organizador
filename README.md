@@ -49,10 +49,14 @@ Sin conectarlo, la app funciona igual y, al guardar un cumpleaños o evento, abr
 ## Actualizar la app más adelante
 
 1. Sube el `index.html` nuevo al repositorio (sustituyendo el anterior).
-2. Abre `sw.js` y sube el número de `VERSION` (ahora va por `mi-dia-v81`: la siguiente sería `mi-dia-v82`).
+2. Abre `sw.js` y sube el número de `VERSION` (ahora va por `mi-dia-v82`: la siguiente sería `mi-dia-v83`).
 3. En el móvil, cierra la app del todo y vuelve a abrirla (a veces hace falta dos veces).
 
 Tus tareas y datos **no se pierden** al actualizar.
+
+### Pruebas automáticas
+
+Antes de publicar un cambio: `python3 tests/test_app.py` (necesita `pip install playwright`). Comprueba sin conexión las listas y frases dictadas, editar mientras sincroniza, las fotos pegadas, el teclado físico, que las lecturas vayan por POST y que la página de listas compartidas no acepte enlaces peligrosos. Si todo va bien, termina con «TODO BIEN ✓».
 
 ## Dónde se guardan tus datos
 
