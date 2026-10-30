@@ -1830,7 +1830,7 @@ function gfAdd(){
   if(url&&!/^https?:\/\//i.test(url)){const m=url.match(/https?:\/\/\S+/i);url=m?m[0]:(/^[\w-]+\.[\w.-]+\//.test(url)?"https://"+url:"")}
   if(!v&&(!url||gift)){$("#gfName").focus();toast(gfPasted||gift?"Ponle un nombre":"Escribe qué es o pega el enlace");return}
   if(gfEdit){   // editar uno que ya existe
-    const it=gfEdit,urlCh=url!==(it.url||""),nameCh=v&&v!==it.t;
+    const it=db.lists.find(y=>y.id===gfEdit.id)||gfEdit,urlCh=url!==(it.url||""),nameCh=v&&v!==it.t;
     if(v)it.t=it.q=v;it.c=gfNewCat;if(url)it.url=url;else delete it.url;delete it.nt;setGiftInfo(it);
     if(gfPasted){driveDel(it.img);it.pi=1;it.nf=1;gfLocalImg[it.id]=gfPasted;it.img="";uploadPasted(it,gfPasted)}
     else if(!it.pi&&(urlCh&&url||nameCh&&!it.url)){delete it.img;delete it.nf;gfFail.delete(it.id)}
@@ -1843,8 +1843,8 @@ function gfAdd(){
   requestAnimationFrame(()=>{const r=$(`#gfGrid .gfrow[data-row="${it.c}"]`);if(r){r.scrollTo({left:0,behavior:"smooth"});r.closest(".gfsec").scrollIntoView({behavior:"smooth",block:"nearest"})}});
 }
 $("#gfOpen").onclick=()=>openGfSheet();$("#gfBtn").onclick=()=>openGfSheet();
-$("#gfOther").onclick=async()=>{if(!gfEdit)return;const it=gfEdit;delete it.pi;setPasted(null);$("#gfOther").textContent="Buscando…";await gfLookup(it,true);$("#gfOther").textContent="🔄 Otra foto";if(gfEdit===it)showPrev(it.img||"")};
-$("#gfDel").onclick=()=>{const x=gfEdit;if(!x)return;closeGfSheet();finalizeDone();const i=db.lists.indexOf(x);if(i<0)return;db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderRegalos();toast("Eliminado",true)};
+$("#gfOther").onclick=async()=>{if(!gfEdit)return;const it=db.lists.find(y=>y.id===gfEdit.id)||gfEdit;gfEdit=it;delete it.pi;setPasted(null);$("#gfOther").textContent="Buscando…";await gfLookup(it,true);$("#gfOther").textContent="🔄 Otra foto";if(gfEdit===it)showPrev(it.img||"")};
+$("#gfDel").onclick=()=>{const x=gfEdit&&(db.lists.find(y=>y.id===gfEdit.id)||gfEdit);if(!x)return;closeGfSheet();finalizeDone();const i=db.lists.indexOf(x);if(i<0)return;db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderRegalos();toast("Eliminado",true)};
 $("#gfType").addEventListener("click",e=>{const b=e.target.closest("[data-gc]");if(b)setGfCat(b.dataset.gc)});
 $("#gfBg").onclick=closeGfSheet;
 $("#gfSave").addEventListener("click",e=>{e.preventDefault();gfAdd()});
@@ -1991,7 +1991,7 @@ let edLc="otros";
 $("#edCat").addEventListener("click",e=>{const b=e.target.closest("[data-elc]");if(!b)return;edLc=b.dataset.elc;$$("#edCat [data-elc]").forEach(y=>y.classList.toggle("on",y===b))});
 const closeEdit=()=>{$("#edWrap").classList.remove("show");$("#edText").blur();edRef=null};
 function saveEdit(){
-  if(!edRef)return;const {k,x}=edRef,v=$("#edText").value.trim();
+  if(!edRef)return;const k=edRef.k,x=db[LISTNAME[k]].find(y=>y.id===edRef.x.id)||edRef.x,v=$("#edText").value.trim();
   if(!v){$("#edText").focus();return}
   x.t=v;if(k==="t"&&$("#edDate").value)x.d=$("#edDate").value;if(k==="l")x.lc=edLc;x.u=nowU();
   closeEdit();render();toast("Guardado ✓");
@@ -2006,7 +2006,7 @@ $("#list").addEventListener("click",e=>{
 $("#edSave").onclick=saveEdit;$("#edForm").addEventListener("submit",e=>{e.preventDefault();saveEdit()});
 $("#edText").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();saveEdit()}});
 $("#edBg").onclick=closeEdit;
-$("#edDel").onclick=()=>{if(!edRef)return;const {k,x}=edRef,name=LISTNAME[k];closeEdit();finalizeDone();const i=db[name].indexOf(x);if(i<0)return;db[name].splice(i,1);db.tomb[x.id]=nowU();lastDone={name,it:x,i,timer:setTimeout(finalizeDone,4500)};render();toast("Eliminado",true)};
+$("#edDel").onclick=()=>{if(!edRef)return;const k=edRef.k,name=LISTNAME[k],x=db[name].find(y=>y.id===edRef.x.id)||edRef.x;closeEdit();finalizeDone();const i=db[name].indexOf(x);if(i<0)return;db[name].splice(i,1);db.tomb[x.id]=nowU();lastDone={name,it:x,i,timer:setTimeout(finalizeDone,4500)};render();toast("Eliminado",true)};
 addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#edWrap").classList.contains("show"))closeEdit()});
 (()=>{const f=$("#edForm");let s=null;
   f.addEventListener("touchstart",e=>{if(e.target.closest("input,button,label")){s=null;return}s={y:e.touches[0].clientY,t:performance.now(),dy:0}},{passive:true});
