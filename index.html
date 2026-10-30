@@ -84,6 +84,8 @@ input{font:inherit;color:inherit}
 .list{flex:1;min-height:0;overflow:hidden;padding:0 var(--pad) 120px;touch-action:none;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 #home.open .list{overflow-y:auto;touch-action:pan-y}
 .addbar,.daypop{touch-action:manipulation;-webkit-user-select:text;user-select:text}
+/* iOS: un campo dentro de algo con user-select:none no recibe lo que escribe un teclado físico */
+input,textarea,select,[contenteditable]{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default}
 .list.swap{animation:swap .45s var(--ease)}
 @keyframes swap{from{opacity:0;filter:blur(8px);transform:translateY(10px)}to{opacity:1;filter:none;transform:none}}
 
@@ -1420,6 +1422,13 @@ function quickAdd(){
 $("#addbar").addEventListener("submit",e=>{e.preventDefault();quickAdd()});
 $("#qadd").addEventListener("click",e=>{e.preventDefault();quickAdd()});
 $("#qtext").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();quickAdd()}});
+// teclado físico (iPad/Bluetooth): si escribes en la portada sin tocar ningún campo, se abre la ficha y empieza a escribir ahí
+document.addEventListener("keydown",e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||e.key.length!==1||e.isComposing)return;
+  if(e.target.closest&&e.target.closest("input,textarea,select,[contenteditable]"))return;
+  if(curPage||document.querySelector("#gfWrap.show,#edWrap.show,#sheetWrap.show,#shWrap.show")||mode==="eventos")return;
+  const q=$("#qtext");if(!expanded)expand();q.focus();
+});
 $("#qtext").addEventListener("focus",closeDayPop);
 
 /* ---------------- completar = quitar (con deshacer) ---------------- */
