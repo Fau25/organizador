@@ -43,7 +43,7 @@
 <body>
 <main id="app"><p class="err">Abriendo la lista…</p></main>
 <script>
-const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fromB64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
 async function unpack(code){
   const kind=code[0],bytes=fromB64u(code.slice(1));
@@ -62,6 +62,8 @@ const CAT={navidad:["🎄 Navidad","#d64545"],cumple:["🎂 Cumpleaños","#d97a0
     let h=`<p class="kicker">${pelis?"🍿 Para ver":"🎁 Lista de deseos"}${who?" · de "+who:""}</p><h1>${esc(pelis?"Pelis y series":d.s||"Mi lista")}</h1>`;
     h+=`<p class="sub">${pelis?(who?who+" te recomienda":"Te recomiendan")+" estas "+d.i.length+(d.i.length===1?" peli o serie.":" pelis y series."):(d.i.length===1?"Una idea":d.i.length+" ideas")+" por si no sabes qué regalar"+(who?" a "+who:"")+" 😉"}</p><div class="grid">`;
     d.i.forEach(([t,img,url,extra],n)=>{
+      // seguridad: solo enlaces web normales (un enlace «javascript:» podría leer los datos de la app, que vive en el mismo dominio)
+      if(!/^https?:\/\//i.test(url||""))url="";if(!/^https:\/\//i.test(img||""))img="";
       const tag=!pelis&&CAT[extra]?`<span class="tag" style="--c:${CAT[extra][1]}">${CAT[extra][0]}</span>`:"";
       const inner=`<div class="im">${img?`<img src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${pelis?"🍿":"🎁"}'}))">`:`<span class="ph">${pelis?"🍿":"🎁"}</span>`}</div><b>${esc(t)}</b>${pelis&&extra?`<small>${esc(extra)}</small>`:""}${tag}${url?`<span class="go">${pelis?"Ver en IMDb":"Ver en la tienda"} ↗</span>`:""}`;
       h+=url?`<a class="it" style="animation-delay:${n*60}ms" href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="it" style="animation-delay:${n*60}ms">${inner}</div>`;
