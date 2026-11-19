@@ -124,11 +124,11 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text!important;user-
   display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;transform-origin:30% 100%;animation:pop .28s var(--ease)}
 .daypop::-webkit-scrollbar{display:none}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96);filter:blur(4px)}}
-.daypop button{flex:none;min-width:58px;height:62px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#f3f3f3;padding:0 10px}
-.daypop button small{font-size:11.5px;font-weight:600;color:#8a8a8a;text-transform:capitalize}
-.daypop button b{font-size:19px;font-weight:600;letter-spacing:-.4px}
-.daypop button.on{background:var(--ink);color:#fff}.daypop button.on small{color:#aaa}
-.daypop .other{position:relative}
+.daypop button,.daypop label.other{flex:none;min-width:58px;height:62px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#f3f3f3;padding:0 10px}
+.daypop button small,.daypop label.other small{font-size:11.5px;font-weight:600;color:#8a8a8a;text-transform:capitalize}
+.daypop button b,.daypop label.other b{font-size:19px;font-weight:600;letter-spacing:-.4px}
+.daypop button.on,.daypop label.other.on{background:var(--ink);color:#fff}.daypop button.on small,.daypop label.other.on small{color:#aaa}
+.daypop .other{position:relative;cursor:pointer}
 .daypop .other input{position:absolute;inset:0;opacity:0}
 
 /* ======================= PÁGINAS (eventos / cumpleaños / ajustes) ======================= */
@@ -440,7 +440,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
 .addbar{background:#e6e1d8}
 .addbar input::placeholder{color:#857f76}
 .qday{background:#fff}
-.daypop button{background:#f2efe9}
+.daypop button,.daypop label.other{background:#f2efe9}
 .row .ico{color:#a39d93}
 .xday{color:#77726a}.xday b{color:#5f5a53}
 .row .m{color:var(--mute)}
@@ -568,7 +568,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   .addbtn{width:52px;height:52px}
   .qday{height:50px;font-size:16.5px;padding:0 18px}
   .daypop{left:var(--side);right:var(--side);bottom:calc(var(--safe-b) + 102px);justify-content:center}
-  .daypop button{min-width:72px;height:74px}
+  .daypop button,.daypop label.other{min-width:72px;height:74px}
   /* hoja de "nuevo evento": tarjeta flotante centrada */
   .dsheet{left:50%;right:auto;width:560px;max-width:calc(100% - 48px);margin:0;bottom:calc(var(--safe-b) + 24px);border-radius:32px;transform:translate(-50%,calc(100% + 60px));padding:22px 28px 28px}
   .show .dsheet{transform:translate(-50%,0)}
@@ -1455,12 +1455,17 @@ function openDayPop(){
   if(mode==="listas"){pop.innerHTML=LCAT.map(([k,em,n])=>`<button type="button" data-lcat="${k}" class="${k===liCat?"on":""}"><b>${em}</b><small>${n==="Tecnología"?"Tecno":n}</small></button>`).join("");pop.hidden=false;$("#qday").classList.add("openp");return}
   for(let n=0;n<7;n++){const d=new Date(today);d.setDate(d.getDate()+n);const k=iso(d);
     h+=`<button type="button" data-pick="${k}" class="${k===(mode==="eventos"?evSel:selDay)?"on":""}"><small>${n===0?"Hoy":n===1?"Mañana":DIAS[d.getDay()].slice(0,3)}</small><b>${d.getDate()}</b></button>`}
-  h+=`<button type="button" class="other ${daysFrom(mode==="eventos"?evSel:selDay)>6?"on":""}"><small>Otra</small><b>···</b><input type="date" id="otherDate" min="${iso(today)}" aria-label="Otra fecha"></button>`;
+  // «Otra»: una etiqueta (no un botón) con el selector de fecha encima; dentro de un botón, iOS lo abre y lo cierra al momento
+  h+=`<label class="other ${daysFrom(mode==="eventos"?evSel:selDay)>6?"on":""}"><small>Otra</small><b>···</b><input type="date" id="otherDate" min="${iso(today)}" aria-label="Otra fecha"></label>`;
   pop.innerHTML=h;pop.hidden=false;$("#qday").classList.add("openp");
-  $("#otherDate").onchange=e=>{if(e.target.value){setDay(e.target.value);closeDayPop()}};
+  const od=$("#otherDate");
+  od.addEventListener("focus",()=>{pickingDate=true});
+  od.addEventListener("blur",()=>{setTimeout(()=>{pickingDate=false},400)});
+  od.onchange=e=>{if(e.target.value){pickingDate=false;setDay(e.target.value);closeDayPop(true)}};
 }
-function closeDayPop(){$("#daypop").hidden=true;$("#qday").classList.remove("openp")}
-$("#qday").onclick=()=>$("#daypop").hidden?openDayPop():closeDayPop();
+let pickingDate=false;   // mientras el selector de fecha de iOS está abierto, nada cierra el menú (si no, se cierra el selector)
+function closeDayPop(force){if(pickingDate&&!force)return;$("#daypop").hidden=true;$("#qday").classList.remove("openp")}
+$("#qday").onclick=()=>$("#daypop").hidden?openDayPop():closeDayPop(true);
 $("#daypop").addEventListener("click",e=>{const c=e.target.closest("[data-lcat]");if(c){setLiCat(c.dataset.lcat);closeDayPop();$("#qtext").focus();return}const b=e.target.closest("[data-pick]");if(b){setDay(b.dataset.pick);closeDayPop()}});
 
 /* ---------------- añadir ---------------- */
@@ -2206,6 +2211,7 @@ if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch
 setSync("ok");sync(true);
 /* al dejar la app, la ficha vuelve a su sitio: al volver siempre se ve la portada plegada */
 function resetHome(){
+  if(pickingDate&&!document.hidden)return;   // el selector de fecha de iOS abierto no debe plegar la ficha
   drag=null;cancelAnimationFrame(tween);tweening=false;
   const l=$("#list");l.style.transform="";l.style.opacity="";
   const pp=$("#pRegalos");if(pp.style.transform){pp.style.transition="";pp.style.transform=""}
