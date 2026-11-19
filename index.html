@@ -1116,7 +1116,10 @@ function merge(list,remote,keyFn,inWindow=()=>true){
   const extra=[],seen=new Set();
   for(const r of remote){
     const mine=(r.app&&byId.get(r.app))||byGid.get(r.gid)||byKey.get(keyFn(r));
-    if(mine){seen.add(mine.id);if(!mine.gid)mine.gid=r.gid;if(mine.d.length===5&&r.d.length>5)mine.d=r.d;continue}
+    if(mine){seen.add(mine.id);if(!mine.gid)mine.gid=r.gid;
+      // si se cambió en Google (nombre, fecha u hora), manda Google: antes se quedaba la copia vieja y no se veía
+      if(!mine.pend){mine.t=r.t;if(md(mine.d)!==md(r.d)||r.d.length>mine.d.length||(mine.d.length>5&&r.d.length>5&&mine.d!==r.d))mine.d=r.d;if("h" in r)mine.h=r.h||""}
+      continue}
     extra.push({id:"g-"+r.gid,t:r.t,d:r.d,h:r.h||"",gid:r.gid,src:r.src||"google"});
   }
   // si ya estaba en Google y ha desaparecido de allí (se borró en otro dispositivo), aquí también se quita
