@@ -1083,7 +1083,7 @@ const markActive=()=>{const idle=Date.now()-lastActive>120000;lastActive=Date.no
 async function poll(){
   if(linked()&&!document.hidden&&!syncing){
     if(Date.now()-lastFull>=90000){lastFull=Date.now();sync(true)}   // cada ~minuto y medio, completa (calendario incluido)
-    else{try{const before=storeSig(),j=await apiGet("store");if(j.store)pullStore(j.store);if(storeSig()!==before)markActive();setSync("ok")}catch(e){}}
+    else{try{const before=storeSig(),j=await apiGet("store");if(j.store)pullStore(j.store);if(storeSig()!==before)markActive();setSync("ok")}catch(e){if(badKey(e))keyWarn()}}
   }
   startPoll(true);
 }
@@ -1135,7 +1135,7 @@ async function sync(force){
     db.events=merge(db.events,j.events.map(e=>({...e,src:"google"})),x=>x.t.trim().toLowerCase()+"|"+x.d+"|"+(x.h||""),x=>x.d>=t&&x.d<=lim);
     if(j.store)pullStore(j.store);
     db.lastSync=Date.now();render();setSync("ok");
-  }catch(e){setSync("err","Sin conexión con Google");console.warn(e)}
+  }catch(e){if(badKey(e))keyWarn();else setSync("err","Sin conexión con Google");console.warn(e)}
   syncing=false;
 }
 function setSync(state,msg){
@@ -1155,13 +1155,17 @@ function gcalUrl({t,d,h,yearly}){
   return "https://calendar.google.com/calendar/render?"+p.toString();
 }
 const openGcal=o=>window.open(gcalUrl(o),"_blank");
+// la clave de Ajustes no coincide con la del script (p. ej. tras cambiarla en Code.gs): avisar claro, no «sin conexión»
+const badKey=e=>/clave incorrecta/i.test(e&&e.message||"");
+let keyWarned=0;
+function keyWarn(){setSync("err","Clave incorrecta: revísala en Ajustes");if(Date.now()-keyWarned>60000){keyWarned=Date.now();toast("La clave de Ajustes no coincide con la del script de Google")}}
 async function toGoogle(kind,item){
   if(!linked()){
     if(kind==="bday")openGcal({t:"🎂 Cumpleaños de "+item.t,d:iso(nextBday(item.d).date),yearly:true});else openGcal(item);
     return;
   }
   try{const dd=item.d.length===5?`${nextBday(item.d).date.getFullYear()}-${item.d}`:item.d;const j=await apiPost({action:kind==="bday"?"addBday":"addEvent",t:item.t,d:dd,h:item.h||"",id:item.id});item.gid=j.gid;delete item.pend;toast("Guardado en Google ✓")}
-  catch(e){item.pend=true;toast("Guardado. Se subirá a Google al reconectar")}
+  catch(e){item.pend=true;if(badKey(e))keyWarn();else toast("Guardado. Se subirá a Google al reconectar")}
   render();
 }
 
