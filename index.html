@@ -1098,6 +1098,57 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
 #home.mpv .pvtabs.hv{transition:opacity .3s ease}
 #home.mpv:not(.open) .pvtabs.hv{opacity:0;pointer-events:none}
 #pvFeat .pvhero .info b{margin-top:0}
+
+/* ======================= v93 · COMPRAS: ESCAPARATE POR ESTADOS ======================= */
+.page[data-p=regalos] .gfsub,#gfCount{display:none!important}
+.page[data-p=regalos] .gft{font-family:var(--serif)!important;font-weight:400!important;font-size:38px!important;letter-spacing:-.6px!important;margin-bottom:2px!important}
+.gfmenu{display:flex;box-sizing:border-box;width:calc(100% - 32px);align-self:center;gap:2px;padding:4px;margin:10px 16px 4px;border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 6px 18px rgba(40,42,60,.06)}
+.gfmenu button{flex:1;min-width:0;height:38px;border:0;border-radius:999px;background:none;color:var(--ink);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;padding:0 4px}
+.gfmenu button i{font-style:normal;font-weight:600;font-size:11.5px;opacity:.5}
+.gfmenu button.on{background:var(--ink);color:#fff}
+.gfesc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:8px 16px 0}
+.gfc{position:relative;border-radius:24px;background:rgba(255,255,255,.95);box-shadow:0 8px 22px rgba(40,42,60,.06);padding:8px;display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
+.gfc .im{position:relative;aspect-ratio:1/0.82;border-radius:18px;overflow:hidden;background:linear-gradient(160deg,#F7F7F9,#E6E6EC);display:flex;align-items:center;justify-content:center}
+.gfc .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}.gfc .im img.ok{opacity:1}
+.gfc .ph,.gfx .ph{color:#9A9BA5;display:flex}.gfc .ph svg{width:34px;height:34px}
+.gfc .est{position:absolute;top:7px;left:7px;height:23px;padding:0 9px;border-radius:999px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center}
+.gfc.e0 .est{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(40,42,60,.08)}
+.gfc .tx{padding:0 6px;min-width:0}
+.gfc .tx b{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gfc .ln{display:flex;justify-content:space-between;gap:6px;margin-top:2px;font-size:12px;color:var(--mute)}
+.gfc .ln span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gfc .ln b{color:var(--ink);font-size:12px;flex:none}
+.gfc .sig{height:34px;border:0;border-radius:999px;background:#F1F1F4;color:var(--ink);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px}
+.gfc .sig svg{width:13px;height:13px}.gfc .sig:active{background:var(--ink);color:#fff}
+.gfc .fin{height:34px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--mute)}
+.gfc.e3{opacity:.5}
+.gfc.loading .im::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);background-size:200% 100%;animation:gfbrillo 1.2s infinite}
+@keyframes gfbrillo{from{background-position:100% 0}to{background-position:-100% 0}}
+#pRegalos.sel .gfc .sig{pointer-events:none;opacity:.4}
+#pRegalos .gfc.picked{box-shadow:0 0 0 3px var(--ink)}
+.page[data-p=regalos] .gfempty{text-align:center;color:var(--mute);padding:40px 20px}
+/* ficha (clara) */
+.pvx.gfx{background:var(--fondo,#E9E9EE);color:var(--ink)}
+.gfx .arr{padding:calc(var(--safe-t) + 10px) 20px 0}
+.gfx .cir{background:#fff;color:var(--ink);box-shadow:0 6px 16px rgba(40,42,60,.08)}
+.gfx .foto{position:relative;margin:14px 20px 0;aspect-ratio:1/0.78;border-radius:32px;overflow:hidden;background:linear-gradient(160deg,#FFFFFF,#E2E2E8);box-shadow:0 14px 34px rgba(40,42,60,.08);display:flex;align-items:center;justify-content:center}
+.gfx .foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.gfx .foto .ph svg{width:64px;height:64px}
+.gfx .cuerpo{padding:18px 22px calc(var(--safe-b) + 26px);display:flex;flex-direction:column;gap:14px}
+.gfx .tit{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.gfx .tit small{font-size:11.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--mute)}
+.gfx h2{font-size:30px;color:var(--ink);margin-top:2px}
+.gfx .pr{font-family:var(--serif);font-weight:400;font-size:28px;white-space:nowrap}
+.gfx .ds{margin:0;font-size:14px;line-height:1.5;color:#4A4B55}
+.gfx .pasos{display:flex;padding:14px 6px;border-radius:24px;background:rgba(255,255,255,.92)}
+.gfx .pasos button{flex:1;position:relative;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--mute);padding:0}
+.gfx .pasos button.on{color:var(--ink)}
+.gfx .pasos button>span{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid #C9CAD3;color:transparent;display:flex;align-items:center;justify-content:center}
+.gfx .pasos button.on>span{background:var(--ink);border-color:var(--ink);color:#fff}
+.gfx .pasos svg{width:14px;height:14px}
+.gfx .pasos i{position:absolute;top:15px;right:50%;width:100%;height:2px;background:#D6D7DE}.gfx .pasos i.on{background:var(--ink)}
+.gfx .grande{background:var(--ink);color:#fff}.gfx .grande svg{width:16px;height:16px}
+.gfx .grande.hecho{background:rgba(255,255,255,.9);color:var(--mute);display:flex;align-items:center;justify-content:center}
+.gfx .cir.g{width:54px;height:54px;background:#fff}
+@media (min-width:700px){.gfesc{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;padding:10px var(--pad,24px) 0}.gfmenu{width:min(560px,calc(100% - 48px));margin:12px auto 4px}}
 </style>
 </head>
 <body>
@@ -1192,6 +1243,7 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
   <div class="gfbar"><button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="gfright"><span class="gfcount" id="gfCount"></span><button class="selbtn" id="gfSelBtn">Seleccionar</button></span></div>
   <h1 class="gft">Compras</h1>
   <p class="gfsub">Lo que quieres comprarte o tienes que regalar</p>
+  <div class="gfmenu" id="gfMenu" role="tablist" aria-label="Ocasión"></div>
   <div class="gfbody"><div class="gfgrid" id="gfGrid"></div></div>
   <div class="sharebar"><button class="shbtn" id="gfShare">Elige los que quieras</button></div>
   <div class="addbar gfadd" id="gfAdd">
@@ -1201,6 +1253,7 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
 </section>
 <div class="pvsheet" id="pvSheet"><div class="box" id="pvBox"></div></div>
 <!-- v90: Pelis · ficha, colección y hoja para nombrar colecciones -->
+<section class="pvx gfx" id="gfFicha" role="dialog" aria-modal="true" aria-label="Ficha de la compra" hidden></section>
 <section class="pvx" id="pvFicha" role="dialog" aria-modal="true" aria-label="Ficha" hidden></section>
 <section class="pvx" id="pvCol" role="dialog" aria-modal="true" aria-label="Colección" hidden></section>
 <div class="pvnm" id="pvNm" hidden><form class="box" id="pvNmForm" autocomplete="off"><b id="pvNmT">Nueva colección</b>
@@ -1260,6 +1313,7 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
     <h4 id="gfHead">Nueva compra</h4>
     <div class="ftype" id="gfType"><button type="button" data-gc="capricho" class="on"><span>✨</span>Capricho</button><button type="button" data-gc="navidad"><span>🎄</span>Navidad</button><button type="button" data-gc="cumple"><span>🎂</span>Cumple</button></div>
     <div class="f"><label for="gfName">Qué es</label><input id="gfName" placeholder="iPhone 18 Pro celeste" enterkeyhint="next"></div>
+    <div class="f" id="gfPrBox"><label for="gfPr">Precio (opcional)</label><input id="gfPr" inputmode="decimal" placeholder="Por ejemplo 79" enterkeyhint="next"></div>
     <div class="f" id="gfForBox" hidden><label for="gfFor">Para quién</label><input id="gfFor" placeholder="Mamá, Lucía, el amigo invisible…" enterkeyhint="next" autocapitalize="words"></div>
     <div class="f" id="gfUrlBox"><label for="gfUrl">Enlace de la tienda (opcional)</label><input id="gfUrl" type="url" inputmode="url" placeholder="https://…" enterkeyhint="done"></div>
     <div class="f" id="gfNoteBox" hidden><label for="gfNote">Descripción</label><textarea id="gfNote" rows="3" placeholder="Talla M, le gusta el azul, lo vio en el Corte Inglés…"></textarea></div>
@@ -1838,7 +1892,8 @@ function closePage(silent){
   $$(".pbar [data-q]").forEach(i=>i.blur());apply(ty);
   if(!silent)renderBrief();
 }
-addEventListener("popstate",()=>{if(curPage)closePage()});
+let pvSaltaPop=false;   // al cerrar una ficha o colección con «atrás» no se cierra también la página de debajo
+addEventListener("popstate",()=>{if(pvSaltaPop||(typeof pvPila!=="undefined"&&pvPila.length)){pvSaltaPop=false;return}if(curPage)closePage()});
 document.addEventListener("click",e=>{if(e.target.closest("[data-back]")){if(history.state&&history.state.p)history.back();else closePage()}});
 
 const prow=(kind,id,d,title,sub,canDel=true)=>`<div class="prow"><div class="dt"><b>${d.getDate()}</b><small>${MESES[d.getMonth()]}</small></div><div class="tx"><b>${esc(title)}</b><span>${sub}</span></div>${canDel?`<button class="rchk" data-done="${kind}:${id}" aria-label="Quitar"></button>`:""}</div>`;
@@ -2153,7 +2208,7 @@ function pvHomeHTML(){
 /* --- pantallas a pantalla completa (ficha y colección) --- */
 const pvPila=[];
 function pvMostrar(el){el.hidden=false;el.style.zIndex=String(60+pvPila.length+(pvPila.includes(el)?0:1));requestAnimationFrame(()=>el.classList.add("on"));if(!pvPila.includes(el))pvPila.push(el);try{history.pushState({pvx:el.id},"")}catch(e){}}
-function pvCerrar(el,sinHist){if(!el||el.hidden)return;el.classList.remove("on");setTimeout(()=>{if(!el.classList.contains("on"))el.hidden=true},280);const i=pvPila.indexOf(el);if(i>=0)pvPila.splice(i,1);if(!sinHist&&history.state&&history.state.pvx===el.id)history.back()}
+function pvCerrar(el,sinHist){if(!el||el.hidden)return;el.classList.remove("on");setTimeout(()=>{if(!el.classList.contains("on"))el.hidden=true},280);const i=pvPila.indexOf(el);if(i>=0)pvPila.splice(i,1);if(!sinHist&&history.state&&history.state.pvx===el.id){pvSaltaPop=true;history.back()}}
 addEventListener("popstate",()=>{const el=pvPila[pvPila.length-1];if(el)pvCerrar(el,true)});
 addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("#pvNm").hidden){pvNmCerrar();return}const el=pvPila[pvPila.length-1];if(el)pvCerrar(el)});
 let pvFichaId=null;
@@ -2293,32 +2348,57 @@ async function gfLookup(it,next){
 }
 const GFROWS=[["navidad","🎄 Navidad"],["cumple","🎂 Cumpleaños"],["capricho","✨ Caprichos"],["hecho","✓ Comprados"]];
 const gfRowScroll={},gfOpenRows=new Set();
+/* v93 · Compras: escaparate por estados (Idea → Comprado → Envuelto → Entregado). Estado en x.s; x.w sigue = comprado. */
+let gfFichaId=null;
+const GFST=["Idea","Comprado","Envuelto","Entregado"];
+const GFMENU=[["todo","Todo"],["navidad","Navidad"],["cumple","Cumple"],["capricho","Caprichos"]];
+const gfPasos=x=>(x.c||"capricho")==="capricho"?[0,1,3]:[0,1,2,3];
+const gfEst=x=>{const w=x.w?1:0;return x.s!=null&&(x.s>=1)===!!w?x.s:w};
+const gfSig=x=>{const p=gfPasos(x),e=gfEst(x),k=p.indexOf(e);return k>=0&&k<p.length-1?p[k+1]:(k<0?p.find(n=>n>e)??null:null)};
+function gfSetEst(x,e){x.s=e;if(e>=1)x.w=1;else delete x.w;x.u=nowU()}
+const gfEur=n=>(Math.round(n*100)/100).toLocaleString("es-ES",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})+" €";
+const gfImgHTML=(x,cls="")=>{const src=x.img||gfLocalImg[x.id]||"";return src?`<img class="${cls}" src="${esc(src)}" data-alt="${esc(gfFallbacks(x).join(" "))}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-2-4-7-4-7-1s5 1 7 1zM12 7c2-4 7-4 7-1s-5 1-7 1z"/></svg></span>`};
 function renderRegalos(){
   const g=$("#gfGrid");if(!g)return;
-  $$("#gfGrid .gfrow").forEach(r=>gfRowScroll[r.dataset.row]=r.scrollLeft);
-  const all=db.lists.filter(x=>x.g).slice().reverse();
-  const n=all.filter(x=>!x.w).length;$("#gfCount").textContent=n?`${n} por comprar`:"";
-  const card=x=>{
-    const src=x.img||gfLocalImg[x.id]||"";
-    const im=src?`<img src="${esc(src)}" data-alt="${esc(gfFallbacks(x).join(" "))}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<span class="ph">🎁</span>`;
-    const sub=x.c!=="capricho"&&x.pq?`<small class="gffor">Para ${esc(x.pq)}</small>`
-      :/^https?:\/\//i.test(x.url||"")?`<a class="lk" href="${esc(x.url)}" target="_blank" rel="noopener">Ver en la tienda ↗</a>`
-      :x.c!=="capricho"&&x.ds?`<small>${esc(x.ds)}</small>`:"";
-    return `<article class="gf gfl${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${x.w?" done":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
-      <div class="im">${im}</div><div class="tx"><b>${esc(x.t)}</b>${sub}</div>
-      <button class="gfok${x.w?" on":""}" data-gfok="${x.id}" aria-label="${x.w?"Devolver a pendientes":"Marcar como comprado"}: ${esc(x.t)}">${x.w?"↩︎":""}</button>
-    </article>`};
-  let h="";
-  for(const [k,label] of GFROWS){
-    const its=k==="hecho"?all.filter(x=>x.w):all.filter(x=>!x.w&&(x.c||"capricho")===k);
-    if(!its.length)continue;
-    const open=gfOpenRows.has(k),thumbs=its.slice(0,3).map(x=>{const s2=x.img||gfLocalImg[x.id]||"";return s2?`<img src="${esc(s2)}" alt="" referrerpolicy="no-referrer">`:`<span>🎁</span>`}).join("");
-    h+=`<section class="gfsec${k==="hecho"?" bought":""}${open?" open":""}" data-sec="${k}"><div class="gfsech"><button class="gftog" data-gftog="${k}" aria-expanded="${open}"><h3>${label} <span>${its.length}</span></h3><span class="gfthumbs">${open?"":thumbs}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>${k!=="hecho"?`<button class="gfplus" data-gfnew="${k}" aria-label="Añadir a ${label}">+</button>`:""}</div>${open?`<div class="gfrow gflist" data-row="${k}">${its.map(card).join("")}</div>`:""}</section>`;
-  }
-  g.innerHTML=h||`<p class="gfempty">Escribe abajo lo que quieres<br>y la foto aparecerá sola 🎁</p>`;
-  $$("#gfGrid .gfrow").forEach(r=>{if(gfRowScroll[r.dataset.row])r.scrollLeft=gfRowScroll[r.dataset.row]});
+  const all=db.lists.filter(x=>x.g);
+  if(!GFMENU.some(m=>m[0]===gfTab))gfTab="todo";
+  const cnt=k=>all.filter(x=>(k==="todo"||(x.c||"capricho")===k)&&gfEst(x)<3).length;
+  $("#gfMenu").innerHTML=GFMENU.map(([k,t])=>`<button role="tab" aria-selected="${gfTab===k}" class="${gfTab===k?"on":""}" data-gfm="${k}">${t}<i>${cnt(k)}</i></button>`).join("");
+  const its=all.filter(x=>gfTab==="todo"||(x.c||"capricho")===gfTab).map((x,i)=>[x,i]).sort((a,b)=>(gfEst(a[0])-gfEst(b[0]))||(b[1]-a[1])).map(a=>a[0]);
+  g.innerHTML=its.length?`<div class="gfesc">${its.map(x=>{const e=gfEst(x),n=gfSig(x);
+    const sub=(x.c||"capricho")!=="capricho"&&x.pq?`Para ${esc(x.pq)}`:/^https?:\/\//i.test(x.url||"")?esc((x.url.match(/\/\/(?:www\.)?([^/]+)/)||[,""])[1]):"";
+    return `<article class="gfc e${e}${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
+      <div class="im">${gfImgHTML(x)}<span class="est">${GFST[e]}</span></div>
+      <div class="tx"><b>${esc(x.t)}</b><div class="ln"><span>${sub}</span>${x.pr?`<b>${gfEur(x.pr)}</b>`:""}</div></div>
+      ${n!=null?`<button class="sig" data-gfsig="${x.id}">${GFST[n]}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`:`<span class="fin">${GFST[e]} ✓</span>`}
+    </article>`}).join("")}</div>`
+    :`<p class="gfempty">${gfTab==="todo"?"Escribe abajo lo que quieres<br>y la foto aparecerá sola":"Nada en «"+GFMENU.find(m=>m[0]===gfTab)[1]+"» todavía"}</p>`;
   for(const x of db.lists.filter(x=>x.g&&!x.img&&!x.nf))gfLookup(x);
+  if(gfFichaId&&!$("#gfFicha").hidden)gfFichaPintar();
 }
+$("#gfMenu").addEventListener("click",e=>{const b=e.target.closest("[data-gfm]");if(!b)return;gfTab=b.dataset.gfm;if(gfTab!=="todo")gfNewCat=gfTab;renderRegalos();$("#gfGrid").parentNode.scrollTop=0});
+/* ficha del producto */
+function gfFichaOpen(id){gfFichaId=id;gfFichaPintar();pvMostrar($("#gfFicha"))}
+function gfFichaPintar(){
+  const x=db.lists.find(y=>y.id===gfFichaId);if(!x){pvCerrar($("#gfFicha"));return}
+  const e=gfEst(x),n=gfSig(x),p=gfPasos(x),cat=(x.c||"capricho");
+  const kick=[{navidad:"Navidad",cumple:"Cumpleaños",capricho:"Capricho"}[cat],cat!=="capricho"&&x.pq?"Para "+x.pq:""].filter(Boolean).join(" · ");
+  $("#gfFicha").innerHTML=`<div class="arr"><button class="cir" data-gx="cerrar" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><button class="cir" data-gx="editar" aria-label="Editar">···</button></div>
+  <div class="foto">${gfImgHTML(x)}</div>
+  <div class="cuerpo"><div class="tit"><div><small>${esc(kick)}</small><h2>${esc(x.t)}</h2></div>${x.pr?`<b class="pr">${gfEur(x.pr)}</b>`:""}</div>
+   ${x.ds?`<p class="ds">${esc(x.ds)}</p>`:""}
+   <div class="pasos">${p.map((k,i)=>`<button class="${k<=e?"on":""}" data-gest="${k}" aria-label="Marcar como ${GFST[k]}">${i?`<i class="${k<=e?"on":""}"></i>`:""}<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>${GFST[k]}</button>`).join("")}</div>
+   <div class="acc">${n!=null?`<button class="grande" data-gest="${n}">Pasar a «${GFST[n]}»<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`:`<span class="grande hecho">${GFST[e]} ✓</span>`}
+   ${/^https?:\/\//i.test(x.url||"")?`<a class="cir g" href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="Abrir la tienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>`:""}</div></div>`;
+}
+$("#gfFicha").addEventListener("click",ev=>{
+  const x=db.lists.find(y=>y.id===gfFichaId);if(!x)return;
+  const st=ev.target.closest("[data-gest]");if(st){const k=+st.dataset.gest;gfSetEst(x,k===gfEst(x)&&k>0?gfPasos(x)[gfPasos(x).indexOf(k)-1]:k);render();renderRegalos();if(+st.dataset.gest>=1)toast(GFST[gfEst(x)]+" ✓");return}
+  const b=ev.target.closest("[data-gx]");if(!b)return;
+  if(b.dataset.gx==="cerrar")pvCerrar($("#gfFicha"));
+  else{pvCerrar($("#gfFicha"));setTimeout(()=>openGfSheet(x),120)}
+});
+$("#gfFicha").addEventListener("error",e=>{const im=e.target;if(im.tagName!=="IMG")return;const alts=(im.dataset.alt||"").split(" ").filter(Boolean);if(alts.length){im.dataset.alt=alts.slice(1).join(" ");im.src=alts[0]}},true);
 /* fotos: al cargar se muestran con un fundido; si la original no deja verse, se usa la miniatura */
 $("#gfGrid").addEventListener("load",e=>{if(e.target.tagName==="IMG")e.target.classList.add("ok")},true);
 $("#gfGrid").addEventListener("error",e=>{const im=e.target;if(im.tagName!=="IMG")return;
@@ -2333,7 +2413,7 @@ function openGfSheet(item,cat){
   gfEdit=item&&item.id?item:null;$("#gfForm").reset();setPasted(null);
   $("#gfHead").textContent=gfEdit?"Editar compra":"Nueva compra";$("#gfDel").hidden=!gfEdit;$("#gfOther").hidden=!gfEdit;
   setGfCat(gfEdit?(gfEdit.c||"capricho"):(typeof cat==="string"&&GFCAT[cat]?cat:gfNewCat));
-  if(gfEdit){$("#gfName").value=gfEdit.nt?"":gfEdit.t;$("#gfUrl").value=gfEdit.url||"";$("#gfFor").value=gfEdit.pq||"";$("#gfNote").value=gfEdit.ds||"";showPrev(gfEdit.img||gfLocalImg[gfEdit.id]||"")}
+  if(gfEdit){$("#gfName").value=gfEdit.nt?"":gfEdit.t;$("#gfUrl").value=gfEdit.url||"";$("#gfFor").value=gfEdit.pq||"";$("#gfNote").value=gfEdit.ds||"";$("#gfPr").value=gfEdit.pr?String(gfEdit.pr).replace(".",","):"";showPrev(gfEdit.img||gfLocalImg[gfEdit.id]||"")}
   $("#gfWrap").classList.add("show");if(!gfEdit)setTimeout(()=>$("#gfName").focus(),350);
 }
 const closeGfSheet=()=>{$("#gfWrap").classList.remove("show");$("#gfName").blur();$("#gfUrl").blur();$("#gfFor").blur();$("#gfNote").blur();gfEdit=null};
@@ -2341,22 +2421,23 @@ function gfAdd(){
   const gift=gfNewCat!=="capricho",pq=$("#gfFor").value.trim(),ds=$("#gfNote").value.trim();
   let v=$("#gfName").value.trim(),url=gift?(gfEdit&&gfEdit.url||""):$("#gfUrl").value.trim();   // en regalos el enlace no se toca
   const setGiftInfo=it=>{if(gift&&pq)it.pq=pq;else delete it.pq;if(gift&&ds)it.ds=ds;else delete it.ds};
+  const prv=parseFloat(($("#gfPr").value||"").replace(/[^\d,.]/g,"").replace(",","."));const setPr=it=>{if(prv>0)it.pr=Math.round(prv*100)/100;else delete it.pr};
   if(url&&!/^https?:\/\//i.test(url)){const m=url.match(/https?:\/\/\S+/i);url=m?m[0]:(/^[\w-]+\.[\w.-]+\//.test(url)?"https://"+url:"")}
   if(!v&&(!url||gift)){$("#gfName").focus();toast(gfPasted||gift?"Ponle un nombre":"Escribe qué es o pega el enlace");return}
   if(gfEdit){   // editar uno que ya existe
     const it=db.lists.find(y=>y.id===gfEdit.id)||gfEdit,urlCh=url!==(it.url||""),nameCh=v&&v!==it.t;
-    if(v)it.t=it.q=v;it.c=gfNewCat;if(url)it.url=url;else delete it.url;delete it.nt;setGiftInfo(it);
+    if(v)it.t=it.q=v;it.c=gfNewCat;if(url)it.url=url;else delete it.url;delete it.nt;setGiftInfo(it);setPr(it);
     if(gfPasted){driveDel(it.img);it.pi=1;it.nf=1;gfLocalImg[it.id]=gfPasted;it.img="";uploadPasted(it,gfPasted)}
     else if(!it.pi&&(urlCh&&url||nameCh&&!it.url)){delete it.img;delete it.nf;gfFail.delete(it.id)}
     it.u=nowU();gfOpenRows.add(it.c);closeGfSheet();render();renderRegalos();toast("Guardado ✓");return;
   }
-  const it={id:uid(),t:v||"Cargando…",q:v,g:1,c:gfNewCat,u:nowU()};if(url)it.url=url;if(!v)it.nt=1;setGiftInfo(it);
+  const it={id:uid(),t:v||"Cargando…",q:v,g:1,c:gfNewCat,u:nowU()};if(url)it.url=url;if(!v)it.nt=1;setGiftInfo(it);setPr(it);
   const pasted=gfPasted;if(pasted){it.nf=1;it.pi=1;gfLocalImg[it.id]=pasted}
   db.lists.push(it);closeGfSheet();if(pasted){uploadPasted(it,pasted);if(!v&&url)apiPost({action:"linkImg",url}).then(j=>{const c=db.lists.find(y=>y.id===it.id);if(j.title&&c&&c.nt){c.t=c.q=j.title;delete c.nt;c.u=nowU();render();renderRegalos()}}).catch(()=>{})}
   gfOpenRows.add(it.c);render();renderRegalos();
   requestAnimationFrame(()=>{const r=$(`#gfGrid .gfrow[data-row="${it.c}"]`);if(r){r.scrollTo({left:0,behavior:"smooth"});r.closest(".gfsec").scrollIntoView({behavior:"smooth",block:"nearest"})}});
 }
-$("#gfOpen").onclick=()=>openGfSheet();$("#gfBtn").onclick=()=>openGfSheet();
+$("#gfOpen").onclick=()=>openGfSheet(null,gfTab!=="todo"?gfTab:undefined);$("#gfBtn").onclick=()=>openGfSheet(null,gfTab!=="todo"?gfTab:undefined);
 $("#gfOther").onclick=async()=>{if(!gfEdit)return;const it=db.lists.find(y=>y.id===gfEdit.id)||gfEdit;gfEdit=it;delete it.pi;setPasted(null);$("#gfOther").textContent="Buscando…";await gfLookup(it,true);$("#gfOther").textContent="🔄 Otra foto";if(gfEdit===it)showPrev(it.img||"")};
 $("#gfDel").onclick=()=>{const x=gfEdit&&(db.lists.find(y=>y.id===gfEdit.id)||gfEdit);if(!x)return;closeGfSheet();finalizeDone();const i=db.lists.indexOf(x);if(i<0)return;db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderRegalos();toast("Eliminado",true)};
 $("#gfType").addEventListener("click",e=>{const b=e.target.closest("[data-gc]");if(b)setGfCat(b.dataset.gc)});
@@ -2374,6 +2455,8 @@ addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#gfWrap").classList.conta
   f.addEventListener("touchend",end);f.addEventListener("touchcancel",end);
 })();
 $("#gfGrid").addEventListener("click",e=>{
+  const sg=e.target.closest("[data-gfsig]");if(sg){const x=db.lists.find(y=>y.id===sg.dataset.gfsig);if(!x)return;const n=gfSig(x);if(n==null)return;gfSetEst(x,n);render();renderRegalos();toast(GFST[n]+" ✓");return}
+  const cd=e.target.closest(".gfc[data-gid]");if(cd&&!e.target.closest("a")){gfFichaOpen(cd.dataset.gid);return}
   const tg=e.target.closest("[data-gftog]");if(tg){const k=tg.dataset.gftog;if(gfOpenRows.has(k))gfOpenRows.delete(k);else gfOpenRows.add(k);renderRegalos();const sec=$(`#gfGrid [data-sec="${k}"]`);if(sec&&gfOpenRows.has(k)){sec.querySelector(".gfrow").classList.add("gfin");sec.scrollIntoView({behavior:"smooth",block:"nearest"})}return}
   const nb=e.target.closest("[data-gfnew]");if(nb){openGfSheet(null,nb.dataset.gfnew);return}
   const b=e.target.closest("button");
