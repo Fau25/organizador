@@ -1093,6 +1093,11 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
 #pvFeat .puntos{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:6px;pointer-events:none}
 #pvFeat .puntos i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.4);transition:width .25s,background .25s}
 #pvFeat .puntos i.on{width:18px;background:#fff}
+
+/* v92: al desplegar Pelis no se redibuja nada; los botones ya tienen su hueco y solo aparecen con un fundido */
+#home.mpv .pvtabs.hv{transition:opacity .3s ease}
+#home.mpv:not(.open) .pvtabs.hv{opacity:0;pointer-events:none}
+#pvFeat .pvhero .info b{margin-top:0}
 </style>
 </head>
 <body>
@@ -1655,7 +1660,7 @@ function animateTo(target,dur=520,v=0){
 function settle(isOpen){
   if(PC.matches)isOpen=true;   // en escritorio la ficha nunca se pliega
   const was=expanded;expanded=isOpen;home.classList.toggle("open",isOpen);
-  if(mode==="pelis"&&was!==isOpen)renderList();
+
   if(!isOpen){list.scrollTop=0;closeDayPop();$("#qtext").blur();if(was)renderBrief(true)}
 }
 const expand=()=>animateTo(0),collapse=()=>animateTo(maxTy);
@@ -2045,7 +2050,7 @@ function renderFeat(){
   const f=$("#pvFeat");if(!f)return;const top=featList();
   if(!top.length){f.innerHTML=`<div class="pvhero vacio"><p class="kick">Mejor valoradas</p><p class="featempty">Añade pelis y series abajo<br>y aquí verás las tres con mejor nota.</p></div>`;return}
   f.innerHTML=`<div class="pvcar"><div class="pista">${top.map((x,i)=>`<div class="pvhero" data-pvo="${x.id}" role="button" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="">`:""}<div class="sombra"></div>
-    <div class="info"><span class="kick">Mejor valoradas · ${i+1} de ${top.length}</span><b>${esc(x.t)}</b><span class="meta">${[pvTipo(x),x.y].filter(Boolean).join(" · ")}${x.r?`<i class="nota">★ ${pvNota(x)}</i>`:""}</span></div></div>`).join("")}</div>
+    <div class="info"><b>${esc(x.t)}</b><span class="meta">${[pvTipo(x),x.y].filter(Boolean).join(" · ")}${x.r?`<i class="nota">★ ${pvNota(x)}</i>`:""}</span></div></div>`).join("")}</div>
     ${top.length>1?`<div class="puntos">${top.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}</div>`;
   const pista=f.querySelector(".pista");
   pista.addEventListener("scroll",()=>{const k=Math.round(pista.scrollLeft/Math.max(1,pista.clientWidth));f.querySelectorAll(".puntos i").forEach((d,i)=>d.classList.toggle("on",i===k))},{passive:true});
@@ -2139,11 +2144,7 @@ function pvHomeHTML(){
   const cols=pvCols(),all=pvList().slice().reverse();
   const shelf=cols.length?`<div class="pvsec"><b>Mis colecciones</b><span>${cols.length}</span></div><div class="pvshelf cols">${cols.map((c,i)=>`<button class="pvcol${i===0?" dest":""}" data-col="${esc(c.n)}">${pvAbanico(c.its)}<span class="nm">${esc(c.n)}</span><small>${c.pend.length?`${c.pend.length} por ver`:"todo visto"}${c.its.length-c.pend.length&&c.pend.length?` · ${c.its.length-c.pend.length} vistas`:""}</small></button>`).join("")}</div>`
     :`<div class="pvsec"><b>Mis colecciones</b></div><p class="pvhint">Toca un póster y pulsa «+ Nueva colección» para agrupar tus pelis a tu manera (para ver con alguien, domingos de lluvia…).</p>`;
-  if(!expanded){
-    const pend=db.lists.filter(x=>x.p&&!x.w).reverse();
-    if(!db.lists.some(x=>x.p))return `<p class="pvempty">Desliza hacia arriba para añadir<br>pelis y series</p>`;
-    return shelf+`<div class="pvsec"><b>Por ver</b><span>${pend.length}</span></div><div class="pvshelf">${pend.slice(0,12).map(x=>pvPost(x)).join("")}</div>`;
-  }
+  if(!db.lists.some(x=>x.p))return `<p class="pvempty">Escribe abajo una peli o serie<br>y su póster aparecerá solo</p>`;
   const tabs=`<div class="pvtabs hv">${[["todo","Todo"],["movie","Pelis"],["tv","Series"],["seen","Vistas"]].map(([k,t])=>`<button data-pv="${k}" class="${pvTab===k?"on":""}">${t}</button>`).join("")}</div>`;
   const tit={todo:"Por ver",movie:"Pelis por ver",tv:"Series por ver",seen:"Vistas"}[pvTab];
   return tabs+(pvTab==="todo"?shelf:"")+`<div class="pvsec"><b>${tit}</b><span>${all.length}</span></div>`
