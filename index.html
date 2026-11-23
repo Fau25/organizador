@@ -1369,7 +1369,9 @@ function layout(){
   if(!tweening)apply(expanded?0:maxTy);
 }
 function setBg(t){document.documentElement.style.setProperty("--pagebg",t)}
+let SPARKS,TSET;
 function apply(y){
+  if(!SPARKS){SPARKS=$("#sparks");TSET=$(".tset")}
   if(PC.matches){   // sin hoja deslizante: todo a la vista
     ty=0;sheet.style.transform="";dark.style.opacity=1;dark.style.filter="";dark.style.transform="";$("#sparks").style.opacity=1;$(".tset").style.opacity="1";$(".tset").style.pointerEvents="";
     lightbg.style.opacity=1;xhead.style.opacity=1;xhead.style.filter="";xhead.style.transform="";addbar.style.opacity=1;addbar.style.transform="";
@@ -1378,11 +1380,11 @@ function apply(y){
     return}
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
-  dark.style.opacity=clamp(1-p*1.3);dark.style.filter=p>.02?`blur(${p*7}px)`:"";dark.style.transform=`translateY(${-p*26}px) scale(${1-p*.03})`;
-  $("#sparks").style.opacity=1-p;$(".tset").style.opacity=clamp(1-p*2)*clamp(1-topE*2.5);$(".tset").style.pointerEvents=p>.5||topE>.5?"none":"";
+  dark.style.opacity=clamp(1-p*1.3);dark.style.transform=`translate3d(0,${-p*26}px,0) scale(${1-p*.03})`;   // sin blur animado: en iPhone repintaba toda la capa en cada fotograma
+  SPARKS.style.opacity=1-p;TSET.style.opacity=clamp(1-p*2)*clamp(1-topE*2.5);TSET.style.pointerEvents=p>.5||topE>.5?"none":"";
   lightbg.style.opacity=p;
   const q=clamp((p-.42)/.58);
-  xhead.style.opacity=q;xhead.style.filter=q<.99?`blur(${(1-q)*8}px)`:"";xhead.style.transform=`translateY(${(1-q)*16}px)`;
+  xhead.style.opacity=q;xhead.style.transform=`translate3d(0,${(1-q)*16}px,0)`;
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
   const dk=p<.5||mode==="pelis";if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f2efe9";setBg(dk?"#0c0c0c":"#f2efe9")}
 }
@@ -1606,7 +1608,7 @@ let evSel=iso(today),evMode="day",evQuery="";
 const BARS=["#2f8f9d","#c9a227","#e0645b","#7a6ff0","#3fa36b"];
 const barOf=id=>BARS[[...String(id)].reduce((a,c)=>a+c.charCodeAt(0),0)%BARS.length];
 const mondayOf=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
-const WK_BEFORE=8,WK_AFTER=60;
+const WK_BEFORE=6,WK_AFTER=30;
 function buildWeeks(){
   const start=mondayOf(today);start.setDate(start.getDate()-WK_BEFORE*7);
   const has=new Set(db.events.map(e=>e.d)),bmd=new Set(db.bdays.map(b=>md(b.d))),t=iso(today);let h="";
@@ -1621,6 +1623,7 @@ function buildWeeks(){
 function weekIndexOf(k){return Math.round((mondayOf(parse(k))-mondayOf(today))/(7*864e5))+WK_BEFORE}
 function scrollToWeek(k,smooth){const w=$("#weeks");w.scrollTo({left:weekIndexOf(k)*w.clientWidth,behavior:smooth?"smooth":"auto"});updMonth()}
 function updMonth(){
+  if(mOpen)return;   // con el mes desplegado, el título lo pone el mes
   const w=$("#weeks"),i=Math.round(w.scrollLeft/Math.max(1,w.clientWidth));
   const th=mondayOf(today);th.setDate(th.getDate()+(i-WK_BEFORE)*7+3);   // el jueves decide el mes de la semana
   $("#calMonTxt").textContent=MESES[th.getMonth()]+(th.getFullYear()!==today.getFullYear()?` '${String(th.getFullYear()).slice(2)}`:"");
@@ -1712,7 +1715,11 @@ function renderEventsBody(anim){
   const ah=$("#addHere");if(ah)ah.onclick=()=>openDateSheet("evento","",evSel,true);
 }
 function renderEvents(){buildWeeks();renderEventsBody()}
-function buildWeeksKeep(){const w=$("#weeks"),x=w.scrollLeft;buildWeeks();w.scrollLeft=x;if(mOpen)buildMonth()}
+let weeksSig="";
+function buildWeeksKeep(){   // solo se rehace si cambian fechas con cosas, el día elegido o el de hoy
+  const sig=iso(today)+"|"+evSel+"|"+db.events.map(e=>e.d).join()+"|"+db.bdays.map(b=>b.d).join();
+  if(sig===weeksSig)return;weeksSig=sig;
+  const w=$("#weeks"),x=w.scrollLeft;buildWeeks();w.scrollLeft=x;if(mOpen)buildMonth()}
 function evAdd(){const i=$("#evText");openDateSheet("evento",i.value.trim(),evSel,true);i.value="";i.blur()}
 $("#evbar").addEventListener("submit",e=>{e.preventDefault();evAdd()});
 $("#evAdd").addEventListener("click",e=>{e.preventDefault();evAdd()});
@@ -2254,7 +2261,8 @@ $("#sSync").onclick=()=>sync(true);
 
 /* ---------------- arranque ---------------- */
 render();renderBrief(true);
-requestAnimationFrame(()=>{try{buildWeeks();scrollToWeek(evSel,false)}catch(e){}setTop(0,false);layout();apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
+requestAnimationFrame(()=>{try{buildWeeks();scrollToWeek(evSel,false);setMonthOpen(true)}catch(e){}setTop(0,false);layout();   // el mes sale siempre desplegado
+  apply(maxTy+home.clientHeight*.6);animateTo(maxTy,900)});
 addEventListener("resize",()=>{cancelAnimationFrame(tween);setTop(topE,false);layout()});
 try{{const ro=new ResizeObserver(()=>{if(!drag)layout()});ro.observe($("#brief"));ro.observe(dark.querySelector(".calh"))}}catch(e){}
 document.fonts&&document.fonts.ready.then(()=>{if(!drag)layout()});
@@ -2270,7 +2278,7 @@ if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch
 setSync("ok");sync(true);
 /* al dejar la app, la ficha vuelve a su sitio: al volver siempre se ve la portada plegada */
 function resetHome(){
-  if(typeof mOpen!=="undefined"&&mOpen&&document.hidden)setMonthOpen(false);
+  if(!mOpen&&document.hidden)try{setMonthOpen(true)}catch(e){}   // al volver a la app, el mes otra vez desplegado
   if(pickingDate&&!document.hidden)return;   // el selector de fecha de iOS abierto no debe plegar la ficha
   drag=null;cancelAnimationFrame(tween);tweening=false;
   const l=$("#list");l.style.transform="";l.style.opacity="";
