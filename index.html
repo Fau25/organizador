@@ -1080,6 +1080,19 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
   .pvx{left:50%;width:min(560px,100%);transform:translate(-50%,24px);border-radius:0;box-shadow:0 0 0 100vmax rgba(0,0,0,.6)}.pvx.on{transform:translateX(-50%)}
   .pvnm .box{max-width:520px;margin:0 auto;border-radius:30px;margin-bottom:24px}}
 @media (min-width:1024px){#home.mpv .sheet{background:#0E0E10!important}#home.mpv .list{padding:4px 0 140px!important}}
+
+/* v91: destacadas en carrusel (las 3 mejor valoradas), sin botones */
+#pvFeat .pvcar{position:absolute;inset:0}
+#pvFeat .pista{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+#pvFeat .pista::-webkit-scrollbar{display:none}
+#pvFeat .pista .pvhero{position:relative;inset:auto;flex:none;width:100%;height:100%;scroll-snap-align:center;scroll-snap-stop:always;overflow:hidden}
+#pvFeat .pvhero .info{bottom:34px}
+#pvFeat .pvhero b{margin:4px 0 6px}
+#pvFeat .pvhero .meta{display:flex;align-items:center;gap:10px;font-size:13.5px;color:rgba(255,255,255,.8)}
+#pvFeat .pvhero .meta .nota{margin:0;font-style:normal;height:26px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center}
+#pvFeat .puntos{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:6px;pointer-events:none}
+#pvFeat .puntos i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.4);transition:width .25s,background .25s}
+#pvFeat .puntos i.on{width:18px;background:#fff}
 </style>
 </head>
 <body>
@@ -1651,7 +1664,7 @@ let drag=null,suppress=false;
 /* Gesto: se decide en el PRIMER movimiento si arrastramos la hoja o dejamos que la lista haga scroll,
    para que el móvil no empiece su propio desplazamiento y "se quede" con el gesto. */
 function dStart(y,target,x,touch){
-  if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset,.calh,.evsearch"))return;
+  if(curPage||target.closest("input,.daypop,.addbar,.dsheet,.tset,.calh,.evsearch,.pvcar"))return;
   if(touch&&y>home.clientHeight-44)return;   // franja de la rayita de inicio: ese gesto es del iPhone (salir de la app), no de la ficha
   cancelAnimationFrame(tween);tweening=false;
   drag={y0:y,x0:x||0,ty0:ty,last:y,lt:performance.now(),v:0,state:"pending",fromList:!!target.closest("#list")};
@@ -2029,13 +2042,15 @@ function featList(){
   return db.lists.filter(x=>x.p&&!x.w&&x.img).sort((a,b)=>((b.r||0)-(a.r||0))||((+b.y||0)-(+a.y||0))).slice(0,3);
 }
 function renderFeat(){
-  const f=$("#pvFeat");if(!f)return;const x=pvSiguiente();
-  if(!x){f.innerHTML=`<div class="pvhero vacio"><p class="kick">Pelis y series</p><p class="featempty">Añade pelis y series abajo<br>y aquí verás la siguiente para ver.</p></div>`;return}
-  const cols=pvCols(),c=(x.c||[]).find(n=>cols[0]&&n===cols[0].n);
-  f.innerHTML=`<div class="pvhero" data-pvo="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="">`:""}<div class="sombra"></div>
-    <div class="info"><span class="kick">Siguiente${c?` · ${esc(c)}`:" para ver"}</span><b>${esc(x.t)}</b>
-    <div class="bts"><button class="vista" data-seen="${x.id}">${IC.task}Vista</button><button class="det" data-pvo="${x.id}">Detalles</button>${x.r?`<span class="nota">★ ${String(x.r).replace(".",",")}</span>`:""}</div></div></div>`;
-}const pvRateBusy=new Set();let pvRateOn=0;
+  const f=$("#pvFeat");if(!f)return;const top=featList();
+  if(!top.length){f.innerHTML=`<div class="pvhero vacio"><p class="kick">Mejor valoradas</p><p class="featempty">Añade pelis y series abajo<br>y aquí verás las tres con mejor nota.</p></div>`;return}
+  f.innerHTML=`<div class="pvcar"><div class="pista">${top.map((x,i)=>`<div class="pvhero" data-pvo="${x.id}" role="button" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="">`:""}<div class="sombra"></div>
+    <div class="info"><span class="kick">Mejor valoradas · ${i+1} de ${top.length}</span><b>${esc(x.t)}</b><span class="meta">${[pvTipo(x),x.y].filter(Boolean).join(" · ")}${x.r?`<i class="nota">★ ${pvNota(x)}</i>`:""}</span></div></div>`).join("")}</div>
+    ${top.length>1?`<div class="puntos">${top.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}</div>`;
+  const pista=f.querySelector(".pista");
+  pista.addEventListener("scroll",()=>{const k=Math.round(pista.scrollLeft/Math.max(1,pista.clientWidth));f.querySelectorAll(".puntos i").forEach((d,i)=>d.classList.toggle("on",i===k))},{passive:true});
+}
+const pvRateBusy=new Set();let pvRateOn=0;
 async function pvRatings(){
   if(!linked())return;
   for(const x of db.lists.filter(x=>x.p&&x.imdb&&!x.r&&!pvRateBusy.has(x.id))){
