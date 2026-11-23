@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="description" content="Mi Día: tareas, listas, eventos, pelis y compras en una sola app personal.">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0c0c0c">
+<meta name="theme-color" content="#E9E9EE">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Mi Día">
@@ -13,9 +13,14 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="favicon-32.png">
 <title>Mi Día</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="fuentes/sans-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fuentes/serif-400.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:'DM Sans';font-weight:400;font-display:swap;src:url(fuentes/sans-400.woff2) format('woff2')}
+@font-face{font-family:'DM Sans';font-weight:500;font-display:swap;src:url(fuentes/sans-500.woff2) format('woff2')}
+@font-face{font-family:'DM Sans';font-weight:600;font-display:swap;src:url(fuentes/sans-600.woff2) format('woff2')}
+@font-face{font-family:'DM Sans';font-weight:700;font-display:swap;src:url(fuentes/sans-700.woff2) format('woff2')}
+@font-face{font-family:'DM Serif Display';font-weight:400;font-display:swap;src:url(fuentes/serif-400.woff2) format('woff2')}
 :root{
   --dark:#0c0c0c; --paper:#f2efe9; --ink:#111; --gray:#8a8a8a; --mute:#77726a; --dots:#dcd6cb;
   --red:#ff3b30;
@@ -839,6 +844,135 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
   #sparks{right:calc(100% - var(--izq))}
   #pills .pill{cursor:pointer}
 }
+
+/* ======================= v89 · ESTILO «NIEBLA» (el mismo que el panel Mis apps) =======================
+   Solo cambia el aspecto: fondo gris difuminado, hojas blancas, blanco y negro, títulos en DM Serif Display,
+   texto en DM Sans e iconos 3D en gris. Pelis y series sigue oscura (sala de cine). */
+:root{--paper:#FFFFFF;--ink:#1A1A1F;--gray:#9A9BA5;--mute:#7A7B85;--dots:#ECECF0;--niebla:#E9E9EE;
+  --serif:"DM Serif Display",Georgia,serif;
+  --fondo:radial-gradient(60% 45% at 10% 12%,#F6F4F1 0%,transparent 70%),radial-gradient(55% 50% at 90% 28%,#DCDDE6 0%,transparent 70%),
+    radial-gradient(55% 45% at 25% 78%,#D9E1EA 0%,transparent 70%),radial-gradient(45% 40% at 92% 92%,#F1EEEC 0%,transparent 70%),#E9E9EE}
+html,body{font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif!important;font-feature-settings:normal}
+html,body{background:var(--pagebg,#E9E9EE)!important}
+#home{background:var(--fondo)!important}
+#sparks{display:none!important}
+
+/* portada */
+.brief{font-family:var(--serif);font-weight:400!important;color:var(--gray)!important;letter-spacing:-.3px!important;line-height:1.18!important}
+.brief b{color:var(--ink)!important;font-weight:400!important}
+.brief .ic{border-color:var(--ink)!important;color:var(--ink)!important;border-radius:7px}
+.brief .av{background:var(--ink)!important;font-family:"DM Sans",sans-serif}
+.tset{background:#fff!important;color:var(--ink)!important;box-shadow:0 8px 22px rgba(40,42,60,.08)}
+.tset .sync{border-color:#fff!important}
+.pill.ic{background:rgba(255,255,255,.82)!important;border:0!important;box-shadow:0 8px 22px rgba(40,42,60,.08)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.pill.ic.on{background:var(--ink)!important;box-shadow:0 8px 22px rgba(20,20,30,.22)!important}
+.pill.ic .em3{width:34px;height:34px;display:block;pointer-events:none}
+.pills:has(.pill.ic){gap:12px!important}
+
+/* hoja de tareas y listas */
+.lightbg{background:var(--fondo)!important}
+.sheet{background:rgba(255,255,255,.94)!important;box-shadow:0 -10px 40px rgba(40,42,60,.08)!important}
+.grab{position:relative}
+.grab::after{content:"";position:absolute;left:50%;top:8px;width:38px;height:4px;margin-left:-19px;border-radius:9px;background:#DCDCE3}
+.xnum{font-family:var(--serif);font-weight:400!important;letter-spacing:-1px!important;color:var(--ink)}
+.xnum i{background:var(--ink)!important}
+.xday{font-weight:500!important;color:var(--mute)!important}.xday b{color:var(--ink)!important;font-weight:500!important}
+.row::after{border-bottom:1px solid var(--dots)!important}
+.row .t{font-weight:500!important;letter-spacing:-.2px!important;color:var(--ink)}
+.row .m{color:var(--mute)!important;font-weight:500!important}
+.row .m.late{color:#B42318!important;opacity:1!important}
+.row .ck{border-color:#C9CAD3!important}
+.row:has(.m.late) .ck{border-color:#E0A39C!important}
+.row.checking .ck{background:var(--ink)!important;border-color:var(--ink)!important}
+.row .ico{color:#A9AAB3!important}
+.empty{color:var(--mute)!important}
+.lhd{color:var(--mute)!important}
+.addbar{background:rgba(255,255,255,.9)!important;box-shadow:0 10px 30px rgba(40,42,60,.10)!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.addbar input::placeholder{color:#9A9BA5!important}
+.qday{background:#EEEEF2!important;box-shadow:none!important}
+.addbtn{background:var(--ink)!important;color:#fff!important}
+.daypop{border-radius:26px!important;box-shadow:0 20px 50px rgba(40,42,60,.14)!important}
+.daypop button,.daypop label.other{background:#F2F2F5!important}
+.daypop button.on,.daypop label.other.on{background:var(--ink)!important;color:#fff!important}
+.ftype{background:#EEEEF2!important}
+
+/* calendario (portada y Eventos): tarjeta en degradado gris → negro */
+.calh{background:linear-gradient(150deg,#8B8B94 0%,#45464E 45%,#1E1E23 100%)!important;box-shadow:0 16px 40px rgba(30,30,40,.18)}
+.calh::after{opacity:.12!important}
+.mon{font-family:var(--serif);font-weight:400!important;letter-spacing:-.4px!important}
+.md .dt i.b,.dd.has::after{background:#fff}
+.md.on .dt i.b{background:#1A1A1F!important}
+
+/* páginas: Eventos, Cumpleaños, Ajustes y Compras sobre el fondo difuminado */
+.page[data-p=eventos],.page[data-p=cumple],.page[data-p=ajustes],.page[data-p=regalos]{background:var(--fondo)!important;color:var(--ink)!important}
+.evsheet{background:transparent!important}
+.evgrab{background:#D3D3DA!important}
+.evbar{background:rgba(255,255,255,.9)!important}
+.evc{background:rgba(255,255,255,.92)!important;box-shadow:0 6px 18px rgba(40,42,60,.05)}
+.evck{border-color:#C9CAD3!important}
+.evc.checking .evck{background:var(--ink)!important;border-color:var(--ink)!important}
+.sech{font-family:var(--serif)!important;font-weight:400!important;letter-spacing:-.3px!important;color:var(--ink)!important}
+.evday{color:var(--mute)!important}
+.evl span,.evr small,.evempty{color:var(--mute)!important}
+.evempty{background:rgba(255,255,255,.6)!important}
+.ptitle,.gft,.pvt{font-family:var(--serif);font-weight:400!important;letter-spacing:-.6px!important}
+.back{border:0!important;background:#fff;box-shadow:0 6px 18px rgba(40,42,60,.08)}
+.scard{border-radius:28px!important;box-shadow:0 10px 28px rgba(40,42,60,.06)}
+.scard h3{color:var(--mute)!important}
+.f input,.f textarea{background:#F5F5F8!important;border-color:#ECECF0!important}
+.f input:focus,.f textarea:focus{border-color:var(--ink)!important;background:#fff!important}
+.btn{background:var(--ink)}.btn.ghost{background:#fff;border-color:#E2E2E8}
+.pbar{background:rgba(255,255,255,.9)!important;border:0!important;box-shadow:0 10px 30px rgba(40,42,60,.10)}
+.page[data-p=cumple] .pbar .addbtn,.page[data-p=eventos] .pbar .addbtn{background:var(--ink)!important;color:#fff!important}
+.rchk{border-color:#C9CAD3!important}
+.prow{border-bottom-color:#ECECF0!important}
+.hero{background:rgba(255,255,255,.7)!important}
+
+/* Compras */
+.gfsub,.gfsech h3 span{color:var(--mute)!important}
+.gfsech h3,.gftog h3{font-family:var(--serif);font-weight:400!important;letter-spacing:-.3px!important}
+.gfsec{background:rgba(255,255,255,.6)!important}
+.gfsec.open{background:transparent!important}
+.gfrow.gflist{box-shadow:0 8px 24px rgba(40,42,60,.06)}
+.gflist .gf.gfl+.gf.gfl{border-top-color:#ECECF0!important}
+.gflist .gfl .im{background:#F3F3F6!important}
+.gflist .gfl .gfok{border-color:#C9CAD3!important}
+.gfplus,.selbtn,.pbtn,.gfcat,.gf .lk,.gf .row2 button,.gfpaste .px,#gfPrev,.shurl{background:#EEEEF2!important}
+.gfadd{background:rgba(255,255,255,.78)!important;border:1px solid rgba(255,255,255,.7)!important;box-shadow:0 10px 30px rgba(40,42,60,.10)!important}
+.gfopen{color:#9A9BA5!important}
+.gfthumbs img,.gfthumbs span{border-color:#fff!important}
+.gftabs button.on::before{background:var(--ink)!important}
+.gflist .gfl small.gffor,.gf .gffor{color:#6B6C76!important}
+
+/* hojas inferiores (nueva fecha, editar, compartir) */
+.dsheet{border-radius:32px 32px 0 0}
+.dsheet h4{font-family:var(--serif);font-weight:400!important;letter-spacing:-.3px!important;font-size:27px!important}
+.sheet-bg{background:rgba(60,62,75,.28)!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.dgrab{background:#DCDCE3!important}
+.save{background:var(--ink)!important}
+.toast{border-radius:999px}
+
+/* Pelis en la portada: tarjeta oscura sobre la niebla */
+.pvfeat{background:linear-gradient(150deg,#3A3B42 0%,#141416 70%)!important;box-shadow:0 16px 40px rgba(20,20,30,.22)}
+
+
+/* Pelis dentro de la portada: hoja clara como el resto (la página completa de Pelis sigue oscura) */
+#home.mpv .lightbg{background:var(--fondo)!important}
+#home.mpv .xnum{color:var(--ink)!important}
+#home.mpv .pvhh{color:var(--ink)!important}#home.mpv .pvhh span,#home.mpv .pvmore,#home.mpv .pvempty{color:var(--mute)!important}
+#home.mpv .addbar{background:rgba(255,255,255,.9)!important;border:0!important}
+#home.mpv .addbar input{color:var(--ink)!important}#home.mpv .addbar input::placeholder{color:#9A9BA5!important}
+#home.mpv .addbtn{background:var(--ink)!important;color:#fff!important}
+#home.mpv .pvtabs button{color:var(--mute)}#home.mpv .pvtabs button.on{color:var(--ink)}
+@media (min-width:700px){
+  .pill.ic .em3{width:40px;height:40px}
+  .xnum{letter-spacing:-1.5px!important}
+}
+@media (min-width:1024px){
+  .lightbg{background:transparent!important}
+  .sheet{background:rgba(255,255,255,.92)!important;border-radius:36px 0 0 36px!important;box-shadow:-10px 0 40px rgba(40,42,60,.06)!important}
+  .xhead{z-index:2}
+}
 </style>
 </head>
 <body>
@@ -866,11 +1000,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <div id="briefWrap"><p class="brief" id="brief"></p></div>
     <div class="pvfeat" id="pvFeat"><p class="kick">⭐ Mejor valoradas</p><div class="featrow" id="featRow"></div></div>
     <div class="pills" id="pills">
-      <button class="pill ic" data-pill="tareas" aria-label="Tareas"><span class="em" aria-hidden="true">✅</span></button>
-      <button class="pill ic" data-pill="listas" aria-label="Listas"><span class="em" aria-hidden="true">🛍️</span><span class="n" id="nLi"></span></button>
-      <button class="pill ic" data-pill="eventos" aria-label="Eventos"><span class="em" aria-hidden="true">🗓️</span><span class="n" id="nEv"></span></button>
-      <button class="pill ic" data-pill="pelis" aria-label="Pelis y series"><span class="em" aria-hidden="true">🍿</span></button>
-      <button class="pill ic" data-pill="regalos" aria-label="Compras"><span class="em" aria-hidden="true">🎁</span></button>
+      <button class="pill ic" data-pill="tareas" aria-label="Tareas"><img class="em3" src="iconos/tareas.svg" alt="" width="64" height="64"></button>
+      <button class="pill ic" data-pill="listas" aria-label="Listas"><img class="em3" src="iconos/listas.svg" alt="" width="64" height="64"><span class="n" id="nLi"></span></button>
+      <button class="pill ic" data-pill="eventos" aria-label="Eventos"><img class="em3" src="iconos/eventos.svg" alt="" width="64" height="64"><span class="n" id="nEv"></span></button>
+      <button class="pill ic" data-pill="pelis" aria-label="Pelis y series"><img class="em3" src="iconos/pelis.svg" alt="" width="64" height="64"></button>
+      <button class="pill ic" data-pill="regalos" aria-label="Compras"><img class="em3" src="iconos/regalos.svg" alt="" width="64" height="64"></button>
     </div>
   </div>
   <button class="tset" data-page="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="sync" id="syncInd" hidden><i></i><span></span></span></button>
@@ -1376,7 +1510,7 @@ function apply(y){
     ty=0;sheet.style.transform="";dark.style.opacity=1;dark.style.filter="";dark.style.transform="";$("#sparks").style.opacity=1;$(".tset").style.opacity="1";$(".tset").style.pointerEvents="";
     lightbg.style.opacity=1;xhead.style.opacity=1;xhead.style.filter="";xhead.style.transform="";addbar.style.opacity=1;addbar.style.transform="";
     if(!expanded){expanded=true;home.classList.add("open")}
-    if(themeDark!==true&&!curPage){themeDark=true;$('meta[name="theme-color"]').content="#0c0c0c";setBg("#0c0c0c")}
+    if(themeDark!=="#E9E9EE"&&!curPage){themeDark="#E9E9EE";$('meta[name="theme-color"]').content="#E9E9EE";setBg("#E9E9EE")}
     return}
   ty=y;sheet.style.transform=`translate3d(0,${y}px,0)`;
   const p=clamp(1-y/maxTy);
@@ -1386,7 +1520,7 @@ function apply(y){
   const q=clamp((p-.42)/.58);
   xhead.style.opacity=q;xhead.style.transform=`translate3d(0,${(1-q)*16}px,0)`;
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
-  const dk=p<.5||mode==="pelis";if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk?"#0c0c0c":"#f2efe9";setBg(dk?"#0c0c0c":"#f2efe9")}
+  const dk="#E9E9EE";if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk;setBg(dk)}   // estilo niebla: claro salvo Pelis desplegada
 }
 let tweening=false;
 function animateTo(target,dur=520,v=0){
@@ -1570,7 +1704,7 @@ function openPage(p,dir){
   if(p==="pelis"){setPvTab("todo");$("#pvGrid").parentNode.scrollTop=0}else if(p==="regalos"){setGfTab("todo");$("#gfGrid").parentNode.scrollTop=0}else if(p!=="ajustes")renderPage(p);else fillSettings();
   if(p==="eventos")requestAnimationFrame(()=>scrollToWeek(evSel,false));
   $(PAGE[p]).classList.add("on");home.classList.add("away");
-  {const c=p==="eventos"?"#14161b":p==="cumple"?"#e4f36f":p==="pelis"?"#000000":p==="regalos"?"#f2efe9":"#f2f2f4";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
+  {const c=p==="pelis"?"#000000":"#E9E9EE";$('meta[name="theme-color"]').content=c;setBg(c,p==="eventos"?"#f2efe9":c)}themeDark=null;
   try{history.pushState({p},"")}catch(e){}
 }
 function closePage(silent){
