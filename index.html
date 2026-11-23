@@ -952,18 +952,6 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
 .save{background:var(--ink)!important}
 .toast{border-radius:999px}
 
-/* Pelis en la portada: tarjeta oscura sobre la niebla */
-.pvfeat{background:linear-gradient(150deg,#3A3B42 0%,#141416 70%)!important;box-shadow:0 16px 40px rgba(20,20,30,.22)}
-
-
-/* Pelis dentro de la portada: hoja clara como el resto (la página completa de Pelis sigue oscura) */
-#home.mpv .lightbg{background:var(--fondo)!important}
-#home.mpv .xnum{color:var(--ink)!important}
-#home.mpv .pvhh{color:var(--ink)!important}#home.mpv .pvhh span,#home.mpv .pvmore,#home.mpv .pvempty{color:var(--mute)!important}
-#home.mpv .addbar{background:rgba(255,255,255,.9)!important;border:0!important}
-#home.mpv .addbar input{color:var(--ink)!important}#home.mpv .addbar input::placeholder{color:#9A9BA5!important}
-#home.mpv .addbtn{background:var(--ink)!important;color:#fff!important}
-#home.mpv .pvtabs button{color:var(--mute)}#home.mpv .pvtabs button.on{color:var(--ink)}
 @media (min-width:700px){
   .pill.ic .em3{width:40px;height:40px}
   .xnum{letter-spacing:-1.5px!important}
@@ -973,6 +961,125 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
   .sheet{background:rgba(255,255,255,.92)!important;border-radius:36px 0 0 36px!important;box-shadow:-10px 0 40px rgba(40,42,60,.06)!important}
   .xhead{z-index:2}
 }
+
+/* ======================= v90 · PELIS: CARTELERA CON COLECCIONES (oscura) ======================= */
+#home.mpv{background:#0A0A0B!important}
+#home.mpv .lightbg{background:#0A0A0B!important}
+#home.mpv .sheet{background:#0E0E10!important;box-shadow:0 -1px 0 rgba(255,255,255,.06)!important}
+#home.mpv .grab::after{background:#3A3B42}
+#home.mpv .xnum{color:#fff!important}#home.mpv .xnum i{background:#fff!important}
+#home.mpv .tset{background:#1C1C1F!important;color:#fff!important;box-shadow:none}
+#home.mpv .pill.ic{background:rgba(255,255,255,.08)!important;box-shadow:none!important}
+#home.mpv .pill.ic.on{background:#fff!important}
+#home.mpv .addbar{background:rgba(34,34,38,.72)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 10px 30px rgba(0,0,0,.4)!important}
+#home.mpv .addbar input{color:#fff!important}#home.mpv .addbar input::placeholder{color:#7C7D86!important}
+#home.mpv .addbtn{background:#fff!important;color:#111!important}
+#home.mpv .list{padding:4px 0 calc(var(--safe-b) + 130px)!important}
+#home.mpv .pvempty{color:#8E8E96!important;text-align:center;padding:30px 20px}
+#home.mpv .pvtabs.hv{display:flex;gap:6px;padding:2px 16px 6px!important}
+#home.mpv .pvtabs.hv button{height:36px;padding:0 15px;border-radius:999px;background:rgba(255,255,255,.08)!important;color:#CFD0D6!important;font-size:14px;font-weight:600}
+#home.mpv .pvtabs.hv button.on{background:#fff!important;color:#111!important}
+#home.mpv .pvtabs.hv button::before,#home.mpv .pvtabs.hv button::after{display:none!important}
+.pvsec{display:flex;justify-content:space-between;align-items:baseline;padding:16px 20px 10px;color:#fff}
+.pvsec b{font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:-.3px}.pvsec span{font-size:13px;color:#8E8E96}
+.pvhint{margin:0 16px;padding:16px 18px;border-radius:22px;background:#18181B;color:#A9AAB2;font-size:14px;line-height:1.45}
+.pvshelf{display:flex;gap:10px;overflow-x:auto;padding:0 16px 4px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pvshelf::-webkit-scrollbar{display:none}
+.pvshelf>*{scroll-snap-align:start}
+.pvp{position:relative;flex:none;width:104px;aspect-ratio:2/3;border:0;padding:0;border-radius:16px;overflow:hidden;background:#1C1C1F;color:#fff;cursor:pointer;text-align:left}
+.pvp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pvp .sin{position:absolute;inset:8px;display:flex;align-items:flex-end;font-family:var(--serif);font-size:15px;line-height:1.1}
+.pvp .nt{position:absolute;top:6px;left:6px;height:22px;padding:0 7px;border-radius:999px;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center}
+.pvp .vi{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center}
+.pvp .vi svg{width:13px;height:13px}
+.pvp .tt{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 8px;font-family:var(--serif);font-size:14px;line-height:1.1;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));opacity:0}
+.pvp:has(.sin) .tt{display:none}
+.pvgrid3 .pvp .tt{opacity:1}
+.pvgrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 12px}
+.pvgrid3 .pvp{width:auto}
+.pvcol{flex:none;width:172px;border:1px solid rgba(255,255,255,.07);border-radius:24px;background:#18181B;color:#fff;padding:14px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;text-align:left}
+.pvcol.dest{background:linear-gradient(140deg,#3A3B42,#17171A 70%)}
+.pvcol .nm{align-self:stretch;font-family:var(--serif);font-size:18px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvcol small{align-self:stretch;margin-top:-6px;font-size:12px;color:#8E8E96}
+.abn{position:relative;display:block;width:104px;height:92px;flex:none}
+.abn img{position:absolute;top:6px;width:54px;height:80px;object-fit:cover;border-radius:11px}
+.abn .i1{left:0;transform:rotate(-9deg);opacity:.85}.abn .i2{right:0;transform:rotate(8deg);opacity:.85}
+.abn .i3{left:25px;top:0;box-shadow:0 12px 24px rgba(0,0,0,.55)}
+.abn.vacio{border-radius:14px;background:#26262A}
+.abn.xl{width:190px;height:162px}.abn.xl img{width:98px;height:146px;border-radius:16px}.abn.xl .i3{left:46px}
+/* la destacada de arriba */
+#pvFeat{background:#141416!important;padding:0!important;box-shadow:none!important}
+.pvhero{position:absolute;inset:0;cursor:pointer;color:#fff}
+.pvhero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%}
+.pvhero .sombra{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.82))}
+.pvhero .info{position:absolute;left:20px;right:20px;bottom:18px}
+.pvhero .kick{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;opacity:.85}
+.pvhero b{display:block;font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.02;margin:4px 0 12px;letter-spacing:-.4px}
+.pvhero .bts{display:flex;gap:8px;align-items:center}
+.pvhero .bts button{height:38px;padding:0 16px;border-radius:999px;border:0;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.pvhero .bts svg{width:14px;height:14px}
+.pvhero .vista{background:#fff;color:#111}.pvhero .det{background:rgba(255,255,255,.18);color:#fff;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.pvhero .nota{margin-left:auto;height:28px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.45);font-size:12.5px;font-weight:700;display:flex;align-items:center}
+.pvhero.vacio{display:flex;flex-direction:column;justify-content:center;padding:24px;background:radial-gradient(80% 60% at 20% 10%,#2A2B31,transparent),#141416}
+.pvhero.vacio .kick{margin:0 0 8px;color:#8E8E96}
+/* pantallas completas: ficha y colección */
+.pvx{position:fixed;inset:0;z-index:60;background:#0E0E10;color:#fff;overflow-y:auto;overscroll-behavior:contain;opacity:0;transform:translateY(24px);transition:opacity .25s,transform .28s var(--ease,ease)}
+.pvx.on{opacity:1;transform:none}
+.pvx .fondo{position:absolute;left:0;right:0;top:0;height:62%;overflow:hidden}
+.pvx .fondo img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.pvx .fondo.bl{height:70%}.pvx .fondo.bl img{filter:blur(40px) saturate(1.3);transform:scale(1.3);opacity:.6}
+.pvx .degr{position:absolute;left:0;right:0;top:0;height:64%;background:linear-gradient(180deg,rgba(14,14,16,0) 35%,#0E0E10 100%)}
+#pvCol .degr{height:72%}
+.pvx .arr{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-t) + 10px) 18px 0}
+.pvx .arr span{display:flex;gap:8px}
+.pvx .cir{width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;text-decoration:none}
+.pvx .cir svg{width:20px;height:20px}
+.pvx .cir.g{width:54px;height:54px;flex:none;background:rgba(255,255,255,.12)}
+#pvFicha .cuerpo{position:relative;z-index:1;min-height:calc(100% - var(--safe-t) - 52px);display:flex;flex-direction:column;justify-content:flex-end;gap:14px;padding:46vh 22px calc(var(--safe-b) + 26px)}
+.pvx h2{margin:0;font-family:var(--serif);font-weight:400;font-size:40px;line-height:1.02;letter-spacing:-.6px}
+.pvx .chips{display:flex;gap:8px;flex-wrap:wrap}
+.pvx .chips span,.pvx .chips button{height:36px;padding:0 14px;border-radius:999px;border:0;background:rgba(255,255,255,.1);color:#E4E4E8;font-size:13.5px;font-weight:600;display:flex;align-items:center}
+.pvx .chips button.on{background:#fff;color:#111}
+.pvx .nota{display:flex;align-items:center;gap:8px}
+.pvx .nota b{font-family:var(--serif);font-weight:400;font-size:36px}.pvx .nota small{font-size:12px;color:#8E8E96}
+.pvx .nota i{width:1px;height:28px;background:#333;margin:0 8px}.pvx .nota span{font-size:13px;color:#A9AAB2}
+.pvx .encol small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.3px;color:#8E8E96;margin-bottom:8px}
+.pvx .acc{display:flex;gap:8px;align-items:center}
+.pvx .grande{flex:1;height:54px;border-radius:999px;border:0;background:#fff;color:#111;font-size:15.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.pvx .grande svg{width:16px;height:16px}.pvx .grande:disabled{opacity:.4}
+.pvx .med{height:54px;padding:0 20px;border-radius:999px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:15px;font-weight:600}
+.pvx .otra{align-self:center;border:0;background:none;color:#8E8E96;font-size:13.5px;padding:6px}
+#pvCol .cab{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 22px 0}
+#pvCol .cab small{color:#8E8E96;font-size:13px}
+#pvCol .cab .acc{align-self:stretch;margin-top:12px}
+#pvCol .lista{position:relative;z-index:1;margin:14px 14px calc(var(--safe-b) + 24px);padding:2px 10px;border-radius:24px;background:#18181B;border:1px solid rgba(255,255,255,.07)}
+#pvCol .fila{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07);background:#18181B;transition:transform .18s}
+#pvCol .fila:last-child{border-bottom:0}
+#pvCol .fila.arr{transition:none;position:relative;z-index:3;box-shadow:0 16px 30px rgba(0,0,0,.5);border-radius:14px}
+#pvCol .fila.vista .tx b{color:#8E8E96;text-decoration:line-through}
+#pvCol .asa{width:30px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:#55565E;touch-action:none;cursor:grab}
+#pvCol .asa svg{width:16px;height:16px}
+#pvCol .ab{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;color:#fff;text-align:left;padding:0}
+#pvCol .ab img,#pvCol .ab>span:first-child{width:42px;height:62px;border-radius:9px;object-fit:cover;background:#26262A;flex:none}
+#pvCol .tx{min-width:0}#pvCol .tx b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pvCol .tx small{font-size:12px;color:#8E8E96}
+#pvCol .ck{width:32px;height:32px;flex:none;margin-right:4px;border-radius:50%;border:2px solid #3A3B42;background:none;color:transparent;display:flex;align-items:center;justify-content:center}
+#pvCol .ck svg{width:14px;height:14px}#pvCol .ck.on{background:#fff;border-color:#fff;color:#111}
+/* hoja para nombrar colecciones */
+.pvnm{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;opacity:0;transition:opacity .2s}
+.pvnm.on{opacity:1}
+.pvnm .box{flex:1;margin:0;background:#18181B;color:#fff;border-radius:30px 30px 0 0;padding:22px 20px calc(var(--safe-b) + 20px);display:flex;flex-direction:column;gap:12px;transform:translateY(30px);transition:transform .25s}
+.pvnm.on .box{transform:none}
+.pvnm b{font-family:var(--serif);font-weight:400;font-size:26px}
+.pvnm input{height:50px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:#0E0E10;color:#fff;padding:0 16px;font-size:16px;font-family:inherit}
+.pvnm .sug{display:flex;flex-wrap:wrap;gap:8px}.pvnm .sug small{width:100%;font-size:12.5px;color:#8E8E96}
+.pvnm .sug button{height:36px;padding:0 14px;border-radius:999px;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:13.5px;font-weight:600}
+.pvnm .bt{display:flex;gap:8px;align-items:center}.pvnm .bt span{flex:1}
+.pvnm .bt button{height:46px;padding:0 18px;border-radius:999px;border:0;font-size:14.5px;font-weight:700}
+.pvnm .no{background:rgba(255,255,255,.1);color:#fff}.pvnm .si{background:#fff;color:#111}.pvnm .del{background:none;color:#ff7b7b;padding:0 4px!important}
+@media (min-width:700px){.pvgrid3{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 var(--side)}.pvshelf{padding:0 var(--side) 4px}.pvsec{padding-left:var(--side);padding-right:var(--side)}
+  .pvx{left:50%;width:min(560px,100%);transform:translate(-50%,24px);border-radius:0;box-shadow:0 0 0 100vmax rgba(0,0,0,.6)}.pvx.on{transform:translateX(-50%)}
+  .pvnm .box{max-width:520px;margin:0 auto;border-radius:30px;margin-bottom:24px}}
+@media (min-width:1024px){#home.mpv .sheet{background:#0E0E10!important}#home.mpv .list{padding:4px 0 140px!important}}
 </style>
 </head>
 <body>
@@ -1075,6 +1182,13 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
   </div>
 </section>
 <div class="pvsheet" id="pvSheet"><div class="box" id="pvBox"></div></div>
+<!-- v90: Pelis · ficha, colección y hoja para nombrar colecciones -->
+<section class="pvx" id="pvFicha" role="dialog" aria-modal="true" aria-label="Ficha" hidden></section>
+<section class="pvx" id="pvCol" role="dialog" aria-modal="true" aria-label="Colección" hidden></section>
+<div class="pvnm" id="pvNm" hidden><form class="box" id="pvNmForm" autocomplete="off"><b id="pvNmT">Nueva colección</b>
+  <input id="pvNmIn" maxlength="40" placeholder="Por ejemplo: Para ver con Ana" aria-label="Nombre de la colección">
+  <div class="sug" id="pvNmSug"></div>
+  <div class="bt"><button type="button" class="del" id="pvNmDel" hidden>Borrar colección</button><span></span><button type="button" class="no" id="pvNmNo">Cancelar</button><button type="submit" class="si">Guardar</button></div></form></div>
 
 <!-- AJUSTES -->
 <section class="page" data-p="ajustes" id="pAjustes">
@@ -1417,14 +1531,7 @@ const irow=(icon,title,meta="")=>`<div class="row"><span class="ico">${icon}</sp
 function renderList(){
   let h="";
   if(mode==="eventos"){buildWeeksKeep();renderEventsBody();return}
-  if(mode==="pelis"){
-    const all=pvList().slice().reverse(),shown=expanded?all:all.slice(0,4);
-    h=(expanded?`<div class="pvtabs hv">${[["todo","Por ver"],["movie","Pelis"],["tv","Series"],["seen","Vistas"]].map(([k,t])=>`<button data-pv="${k}" class="${pvTab===k?"on":""}">${t}</button>`).join("")}</div>`:"")
-      +(!expanded&&all.length?`<div class="pvhh"><b>Por ver</b><span>${all.length} en la lista</span></div>`:"")+`<div class="pvhgrid">${shown.map(pvCard).join("")}</div>`
-      +(!all.length?`<p class="pvempty">${expanded?(pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo 🍿"):"Desliza hacia arriba para añadir<br>pelis y series 🍿"}</p>`:"")
-      +(!expanded&&all.length>4?`<p class="pvmore">+${all.length-4} más · desliza hacia arriba</p>`:"");
-    $("#list").innerHTML=h;pvLookupAll();return;
-  }else if(mode==="listas"){
+  if(mode==="pelis"){$("#list").innerHTML=pvHomeHTML();pvLookupAll();return}else if(mode==="listas"){
     const its=db.lists.filter(x=>!x.p&&!x.g);
     for(const [k,em,name,col] of LCAT){const g=its.filter(x=>lcatOf(x)===k);if(g.length)h+=`<div class="lhd"><span>${em}</span>${name} <i>${g.length}</i></div>`+g.map(x=>row("l",x.id,x.t).replace(/--bar:[^"]*/,"--bar:"+col)).join("")}
     if(!h)h=`<p class="empty">Cosas sin fecha: la compra, ideas, pendientes…</p>`;
@@ -1520,7 +1627,7 @@ function apply(y){
   const q=clamp((p-.42)/.58);
   xhead.style.opacity=q;xhead.style.transform=`translate3d(0,${(1-q)*16}px,0)`;
   const a=clamp((p-.6)/.4);addbar.style.opacity=a;addbar.style.transform=`translateY(${(1-a)*24}px)`;
-  const dk="#E9E9EE";if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk;setBg(dk)}   // estilo niebla: claro salvo Pelis desplegada
+  const dk=mode==="pelis"?"#0A0A0B":"#E9E9EE";if(dk!==themeDark&&!curPage){themeDark=dk;$('meta[name="theme-color"]').content=dk;setBg(dk)}   // estilo niebla: claro salvo Pelis desplegada
 }
 let tweening=false;
 function animateTo(target,dur=520,v=0){
@@ -1922,12 +2029,13 @@ function featList(){
   return db.lists.filter(x=>x.p&&!x.w&&x.img).sort((a,b)=>((b.r||0)-(a.r||0))||((+b.y||0)-(+a.y||0))).slice(0,3);
 }
 function renderFeat(){
-  const row=$("#featRow");if(!row)return;const f=featList(),any=f.some(x=>x.r);
-  $("#pvFeat .kick").textContent=any?"⭐ Mejor valoradas":"🍿 Tus pelis y series";
-  row.innerHTML=f.map((x,i)=>`<div class="fc"><img src="${esc(pvImg(x.img))}" alt="" loading="lazy"><span class="rank">${i+1}</span><div class="info"><b>${esc(x.t)}</b><small>${x.r?`<i>★ ${x.r}</i> `:""}${x.k?(isTv(x)?"Serie":"Peli"):(x.y||"")}</small></div></div>`).join("")
-    ||`<p class="featempty">Añade pelis y series y aquí verás<br>las mejor valoradas de tu lista.</p>`;
-}
-const pvRateBusy=new Set();let pvRateOn=0;
+  const f=$("#pvFeat");if(!f)return;const x=pvSiguiente();
+  if(!x){f.innerHTML=`<div class="pvhero vacio"><p class="kick">Pelis y series</p><p class="featempty">Añade pelis y series abajo<br>y aquí verás la siguiente para ver.</p></div>`;return}
+  const cols=pvCols(),c=(x.c||[]).find(n=>cols[0]&&n===cols[0].n);
+  f.innerHTML=`<div class="pvhero" data-pvo="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="">`:""}<div class="sombra"></div>
+    <div class="info"><span class="kick">Siguiente${c?` · ${esc(c)}`:" para ver"}</span><b>${esc(x.t)}</b>
+    <div class="bts"><button class="vista" data-seen="${x.id}">${IC.task}Vista</button><button class="det" data-pvo="${x.id}">Detalles</button>${x.r?`<span class="nota">★ ${String(x.r).replace(".",",")}</span>`:""}</div></div></div>`;
+}const pvRateBusy=new Set();let pvRateOn=0;
 async function pvRatings(){
   if(!linked())return;
   for(const x of db.lists.filter(x=>x.p&&x.imdb&&!x.r&&!pvRateBusy.has(x.id))){
@@ -1986,6 +2094,145 @@ $("#pvEye").onclick=()=>setPvView(pvView==="cards"?"grid":"cards");
 $("#pvGrid").addEventListener("scroll",()=>{cancelAnimationFrame(pvSyncBg.r);pvSyncBg.r=requestAnimationFrame(pvSyncBg)},{passive:true});
 setPvView(pvView);
 function pvDel(x){finalizeDone();const i=db.lists.indexOf(x);if(i<0)return;db.lists.splice(i,1);db.tomb[x.id]=nowU();lastDone={name:"lists",it:x,i,timer:setTimeout(finalizeDone,4500)};render();renderPelis();toast("Eliminada",true)}
+
+/* ============ v90 · Pelis: cartelera con colecciones (oscura) ============
+   Cada peli guarda sus colecciones en x.c (lista de nombres) y su orden dentro de cada una en x.co ({nombre: n}).
+   Así se sincroniza con el resto sin tocar el script de Google. */
+const pvNota=x=>x.r?String(x.r).replace(".",","):"";
+const pvTipo=x=>x.k?(isTv(x)?"Serie":"Peli"):"";
+function pvCols(){
+  const m=new Map();
+  for(const x of db.lists)if(x.p&&Array.isArray(x.c))for(const n of x.c){if(!m.has(n))m.set(n,{n,its:[],u:0});const c=m.get(n);c.its.push(x);c.u=Math.max(c.u,x.u||0)}
+  const out=[...m.values()];
+  for(const c of out){c.its=pvOrden(c.its,c.n);c.pend=c.its.filter(x=>!x.w)}
+  return out.sort((a,b)=>(b.pend.length-a.pend.length)||(b.u-a.u));
+}
+function pvOrden(its,n){const pos=x=>x.co&&x.co[n]!=null?x.co[n]:1e6+(x.u||0)/1e7;return its.slice().sort((a,b)=>pos(a)-pos(b))}
+function pvSiguiente(){
+  const cols=pvCols();
+  for(const c of cols){const x=c.pend.find(y=>y.img);if(x)return x}
+  return db.lists.filter(x=>x.p&&!x.w&&x.img).sort((a,b)=>((b.r||0)-(a.r||0)))[0]||null;
+}
+const pvPost=(x,cls="")=>`<button class="pvp ${cls}" data-pvo="${x.id}" aria-label="${esc(x.t)}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="" loading="lazy">`:`<span class="sin">${esc(x.t)}</span>`}${x.r?`<i class="nt">★ ${pvNota(x)}</i>`:""}${x.w?`<i class="vi">${IC.task}</i>`:""}<span class="tt">${esc(x.t)}</span></button>`;
+function pvAbanico(its,cls=""){
+  const ims=its.filter(x=>x.img).slice(0,3);while(ims.length&&ims.length<3)ims.push(ims[ims.length-1]);
+  if(!ims.length)return `<span class="abn ${cls} vacio"></span>`;
+  const [a,b,c]=[ims[1],ims[2],ims[0]];
+  return `<span class="abn ${cls}"><img class="i1" src="${esc(pvImg(a.img))}" alt=""><img class="i2" src="${esc(pvImg(b.img))}" alt=""><img class="i3" src="${esc(pvImg(c.img))}" alt=""></span>`;
+}
+function pvHomeHTML(){
+  const cols=pvCols(),all=pvList().slice().reverse();
+  const shelf=cols.length?`<div class="pvsec"><b>Mis colecciones</b><span>${cols.length}</span></div><div class="pvshelf cols">${cols.map((c,i)=>`<button class="pvcol${i===0?" dest":""}" data-col="${esc(c.n)}">${pvAbanico(c.its)}<span class="nm">${esc(c.n)}</span><small>${c.pend.length?`${c.pend.length} por ver`:"todo visto"}${c.its.length-c.pend.length&&c.pend.length?` · ${c.its.length-c.pend.length} vistas`:""}</small></button>`).join("")}</div>`
+    :`<div class="pvsec"><b>Mis colecciones</b></div><p class="pvhint">Toca un póster y pulsa «+ Nueva colección» para agrupar tus pelis a tu manera (para ver con alguien, domingos de lluvia…).</p>`;
+  if(!expanded){
+    const pend=db.lists.filter(x=>x.p&&!x.w).reverse();
+    if(!db.lists.some(x=>x.p))return `<p class="pvempty">Desliza hacia arriba para añadir<br>pelis y series</p>`;
+    return shelf+`<div class="pvsec"><b>Por ver</b><span>${pend.length}</span></div><div class="pvshelf">${pend.slice(0,12).map(x=>pvPost(x)).join("")}</div>`;
+  }
+  const tabs=`<div class="pvtabs hv">${[["todo","Todo"],["movie","Pelis"],["tv","Series"],["seen","Vistas"]].map(([k,t])=>`<button data-pv="${k}" class="${pvTab===k?"on":""}">${t}</button>`).join("")}</div>`;
+  const tit={todo:"Por ver",movie:"Pelis por ver",tv:"Series por ver",seen:"Vistas"}[pvTab];
+  return tabs+(pvTab==="todo"?shelf:"")+`<div class="pvsec"><b>${tit}</b><span>${all.length}</span></div>`
+    +(all.length?`<div class="pvgrid3">${all.map(x=>pvPost(x)).join("")}</div>`:`<p class="pvempty">${pvTab==="seen"?"Aún no has marcado nada como visto.":"Escribe abajo una peli o serie<br>y su póster aparecerá solo"}</p>`);
+}
+/* --- pantallas a pantalla completa (ficha y colección) --- */
+const pvPila=[];
+function pvMostrar(el){el.hidden=false;el.style.zIndex=String(60+pvPila.length+(pvPila.includes(el)?0:1));requestAnimationFrame(()=>el.classList.add("on"));if(!pvPila.includes(el))pvPila.push(el);try{history.pushState({pvx:el.id},"")}catch(e){}}
+function pvCerrar(el,sinHist){if(!el||el.hidden)return;el.classList.remove("on");setTimeout(()=>{if(!el.classList.contains("on"))el.hidden=true},280);const i=pvPila.indexOf(el);if(i>=0)pvPila.splice(i,1);if(!sinHist&&history.state&&history.state.pvx===el.id)history.back()}
+addEventListener("popstate",()=>{const el=pvPila[pvPila.length-1];if(el)pvCerrar(el,true)});
+addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("#pvNm").hidden){pvNmCerrar();return}const el=pvPila[pvPila.length-1];if(el)pvCerrar(el)});
+let pvFichaId=null;
+function pvFichaOpen(id){
+  const x=db.lists.find(y=>y.id===id);if(!x)return;pvFichaId=id;
+  const cols=pvCols().map(c=>c.n),mias=x.c||[];
+  const meta=[pvTipo(x),x.y].filter(Boolean);
+  $("#pvFicha").innerHTML=`<div class="fondo">${x.img?`<img src="${esc(pvImg(x.img))}" alt="">`:""}</div><div class="degr"></div>
+  <div class="arr"><button class="cir" data-x="cerrar" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>${x.imdb?`<a class="cir" href="https://www.imdb.com/title/${esc(x.imdb)}/" target="_blank" rel="noopener" aria-label="Ver en IMDb">IMDb</a>`:""}</div>
+  <div class="cuerpo"><h2>${esc(x.t)}</h2>
+   ${meta.length?`<div class="chips">${meta.map(m=>`<span>${esc(m)}</span>`).join("")}</div>`:""}
+   ${x.r?`<div class="nota"><b>${pvNota(x)}</b><small>IMDb</small>${x.w?`<i></i><span>Ya la has visto</span>`:""}</div>`:(x.w?`<div class="nota"><span>Ya la has visto</span></div>`:"")}
+   <div class="encol"><small>EN TUS COLECCIONES</small><div class="chips">${[...new Set([...mias,...cols])].map(n=>`<button class="${mias.includes(n)?"on":""}" data-tog="${esc(n)}">${esc(n)}</button>`).join("")}<button data-x="nueva">+ Nueva colección</button></div></div>
+   <div class="acc"><button class="grande" data-x="vista">${IC.task}${x.w?"Volver a «Por ver»":"Marcar como vista"}</button><button class="cir g" data-x="borrar" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>
+   <button class="otra" data-x="otra">¿No es esta? Buscar otra</button></div>`;
+  pvMostrar($("#pvFicha"));
+}
+$("#pvFicha").addEventListener("click",e=>{
+  const x=db.lists.find(y=>y.id===pvFichaId);if(!x)return;
+  const t=e.target.closest("[data-tog]");if(t){const n=t.dataset.tog;x.c=x.c||[];if(x.c.includes(n)){x.c=x.c.filter(y=>y!==n);if(x.co)delete x.co[n]}else x.c.push(n);if(!x.c.length)delete x.c;x.u=nowU();render();t.classList.toggle("on");pvColRefrescar();return}
+  const b=e.target.closest("[data-x]");if(!b)return;
+  switch(b.dataset.x){
+    case "cerrar":pvCerrar($("#pvFicha"));break;
+    case "vista":if(x.w)delete x.w;else x.w=1;x.u=nowU();render();pvColRefrescar();pvCerrar($("#pvFicha"));toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");break;
+    case "borrar":pvCerrar($("#pvFicha"));pvDel(x);pvColRefrescar();break;
+    case "otra":pvCerrar($("#pvFicha"));pvLookup(x,true);break;
+    case "nueva":pvNmAbrir(null,x);break;
+  }
+});
+let pvColN=null;
+function pvColOpen(n){pvColN=n;pvColPintar();pvMostrar($("#pvCol"))}
+function pvColRefrescar(){if(pvColN&&!$("#pvCol").hidden){if(pvCols().some(c=>c.n===pvColN))pvColPintar();else pvCerrar($("#pvCol"))}}
+function pvColPintar(){
+  const c=pvCols().find(y=>y.n===pvColN);if(!c)return;const f=c.its.find(x=>x.img);
+  $("#pvCol").innerHTML=`<div class="fondo bl">${f?`<img src="${esc(pvImg(f.img))}" alt="">`:""}</div><div class="degr"></div>
+  <div class="arr"><button class="cir" data-x="cerrar" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button><span><button class="cir" data-x="compartir" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></button><button class="cir" data-x="opc" aria-label="Cambiar nombre o borrar">···</button></span></div>
+  <div class="cab">${pvAbanico(c.its,"xl")}<h2>${esc(c.n)}</h2><small>${c.pend.length} por ver${c.its.length-c.pend.length?` · ${c.its.length-c.pend.length} vistas`:""}${c.its.length>1?" · ordénalas arrastrando":""}</small>
+   <div class="acc"><button class="grande" data-x="sig" ${c.pend.length?"":"disabled"}><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg>Ver la siguiente</button><button class="med" data-x="azar" ${c.pend.length?"":"disabled"}>Al azar</button></div></div>
+  <div class="lista" id="pvColLista">${c.its.map(x=>`<div class="fila${x.w?" vista":""}" data-id="${x.id}"><span class="asa" aria-label="Arrastrar para ordenar"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>
+   <button class="ab" data-pvo="${x.id}">${x.img?`<img src="${esc(pvImg(x.img))}" alt="">`:"<span></span>"}<span class="tx"><b>${esc(x.t)}</b><small>${[pvTipo(x),x.r?"★ "+pvNota(x):""].filter(Boolean).join(" · ")}</small></span></button>
+   <button class="ck${x.w?" on":""}" data-ck="${x.id}" aria-label="${x.w?"Volver a por ver":"Marcar como vista"}">${IC.task}</button></div>`).join("")}</div>`;
+}
+$("#pvCol").addEventListener("click",e=>{
+  const c=pvCols().find(y=>y.n===pvColN);
+  const o=e.target.closest("[data-pvo]");if(o){pvFichaOpen(o.dataset.pvo);return}
+  const k=e.target.closest("[data-ck]");if(k){const x=db.lists.find(y=>y.id===k.dataset.ck);if(!x)return;if(x.w)delete x.w;else x.w=1;x.u=nowU();render();pvColPintar();toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");return}
+  const b=e.target.closest("[data-x]");if(!b||!c)return;
+  switch(b.dataset.x){
+    case "cerrar":pvCerrar($("#pvCol"));break;
+    case "sig":if(c.pend[0])pvFichaOpen(c.pend[0].id);break;
+    case "azar":if(c.pend.length)pvFichaOpen(c.pend[Math.floor(Math.random()*c.pend.length)].id);break;
+    case "opc":pvNmAbrir(c.n);break;
+    case "compartir":shareList("p",c.n,c.its.filter(x=>!x.w).map(x=>[x.t,x.img?pvImg(x.img):"",x.imdb?`https://www.imdb.com/title/${x.imdb}/`:"",[x.y,pvTipo(x)].filter(Boolean).join(" · ")]));break;
+  }
+});
+/* ordenar arrastrando por el asa */
+(()=>{let d=null;const L=()=>$("#pvColLista");
+  $("#pvCol").addEventListener("pointerdown",e=>{const a=e.target.closest(".asa");if(!a)return;const f=a.closest(".fila");e.preventDefault();
+    const filas=[...L().children],h=f.offsetHeight;d={f,y0:e.clientY,i0:filas.indexOf(f),h,filas,i:filas.indexOf(f)};f.classList.add("arr");a.setPointerCapture(e.pointerId)});
+  $("#pvCol").addEventListener("pointermove",e=>{if(!d)return;const dy=e.clientY-d.y0;d.f.style.transform=`translateY(${dy}px)`;
+    const ni=Math.max(0,Math.min(d.filas.length-1,d.i0+Math.round(dy/d.h)));d.i=ni;
+    d.filas.forEach((r,k)=>{if(r===d.f)return;const s=(d.i0<k&&k<=ni)?-d.h:(ni<=k&&k<d.i0)?d.h:0;r.style.transform=s?`translateY(${s}px)`:""})});
+  const fin=()=>{if(!d)return;const {f,filas,i0,i}=d;d=null;filas.forEach(r=>{r.style.transform="";r.classList.remove("arr")});
+    if(i!==i0){const ids=filas.map(r=>r.dataset.id);const [m]=ids.splice(i0,1);ids.splice(i,0,m);
+      ids.forEach((id,k)=>{const x=db.lists.find(y=>y.id===id);if(x){x.co={...(x.co||{}),[pvColN]:k};x.u=nowU()}});render();pvColPintar()}};
+  $("#pvCol").addEventListener("pointerup",fin);$("#pvCol").addEventListener("pointercancel",fin);
+})();
+/* hoja para crear, renombrar o borrar una colección */
+let pvNmCtx=null;
+function pvNmAbrir(nombre,peli){
+  pvNmCtx={nombre,peli};$("#pvNmT").textContent=nombre?"Colección":"Nueva colección";
+  $("#pvNmIn").value=nombre||"";$("#pvNmDel").hidden=!nombre;
+  const otras=nombre?[]:pvCols().map(c=>c.n).filter(n=>!(peli&&peli.c||[]).includes(n));
+  $("#pvNmSug").innerHTML=otras.length?`<small>O añádela a una que ya tienes:</small>${otras.map(n=>`<button type="button" data-sug="${esc(n)}">${esc(n)}</button>`).join("")}`:"";
+  $("#pvNm").hidden=false;requestAnimationFrame(()=>{$("#pvNm").classList.add("on");$("#pvNmIn").focus()});
+}
+function pvNmCerrar(){$("#pvNm").classList.remove("on");$("#pvNmIn").blur();setTimeout(()=>{if(!$("#pvNm").classList.contains("on"))$("#pvNm").hidden=true},250)}
+function pvNmAplicar(v){
+  const {nombre,peli}=pvNmCtx||{};v=(v||"").trim().replace(/\s+/g," ");if(!v){$("#pvNmIn").focus();return}
+  if(nombre){if(v!==nombre){for(const x of db.lists)if(x.p&&x.c&&x.c.includes(nombre)){x.c=[...new Set(x.c.map(n=>n===nombre?v:n))];if(x.co&&x.co[nombre]!=null){x.co[v]=x.co[nombre];delete x.co[nombre]}x.u=nowU()}pvColN=v}
+    render();pvColPintar();pvNmCerrar();return}
+  if(peli){const x=db.lists.find(y=>y.id===peli.id);if(x){x.c=[...new Set([...(x.c||[]),v])];x.u=nowU();render()}pvNmCerrar();pvFichaOpen(peli.id);toast(`Añadida a «${v}»`)}
+}
+$("#pvNmForm").addEventListener("submit",e=>{e.preventDefault();pvNmAplicar($("#pvNmIn").value)});
+$("#pvNmSug").addEventListener("click",e=>{const b=e.target.closest("[data-sug]");if(b)pvNmAplicar(b.dataset.sug)});
+$("#pvNmNo").onclick=pvNmCerrar;
+$("#pvNm").addEventListener("click",e=>{if(e.target.id==="pvNm")pvNmCerrar()});
+$("#pvNmDel").onclick=()=>{const n=pvNmCtx&&pvNmCtx.nombre;if(!n)return;
+  for(const x of db.lists)if(x.p&&x.c&&x.c.includes(n)){x.c=x.c.filter(y=>y!==n);if(!x.c.length)delete x.c;if(x.co)delete x.co[n];x.u=nowU()}
+  render();pvNmCerrar();pvCerrar($("#pvCol"));toast(`Colección «${n}» borrada (las pelis siguen en tu lista)`)};
+/* la destacada de arriba */
+$("#pvFeat").addEventListener("click",e=>{
+  const sb=e.target.closest("[data-seen]");if(sb){e.stopPropagation();const x=db.lists.find(y=>y.id===sb.dataset.seen);if(!x)return;x.w=1;x.u=nowU();render();toast("Marcada como vista ✓");return}
+  const o=e.target.closest("[data-pvo]");if(o)pvFichaOpen(o.dataset.pvo);
+});
 
 /* volver de Pelis deslizando hacia la derecha */
 (()=>{const pg=$("#pPelis");let st=null;
@@ -2249,6 +2496,8 @@ function saveEdit(){
 }
 $("#list").addEventListener("click",e=>{
   if(mode==="pelis"){const tb=e.target.closest("[data-pv]");if(tb){pvTab=tb.dataset.pv;renderList();return}
+    const cb=e.target.closest("[data-col]");if(cb){pvColOpen(cb.dataset.col);return}
+    const pb=e.target.closest("[data-pvo]");if(pb){pvFichaOpen(pb.dataset.pvo);return}
     const xb=e.target.closest("[data-del]");if(xb){const x=db.lists.find(y=>y.id===xb.dataset.del);if(x)pvDel(x);return}
     const sb=e.target.closest("[data-seen]");if(sb){const x=db.lists.find(y=>y.id===sb.dataset.seen);if(!x)return;if(x.w)delete x.w;else x.w=1;x.u=nowU();render();toast(x.w?"Marcada como vista ✓":"De vuelta a «Por ver»");return}}
   if(e.target.closest("button"))return;const r=e.target.closest("[data-ed]");if(!r||r.classList.contains("checking"))return;
