@@ -1149,6 +1149,13 @@ html,body{background:var(--pagebg,#E9E9EE)!important}
 .gfx .grande.hecho{background:rgba(255,255,255,.9);color:var(--mute);display:flex;align-items:center;justify-content:center}
 .gfx .cir.g{width:54px;height:54px;background:#fff}
 @media (min-width:700px){.gfesc{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;padding:10px var(--pad,24px) 0}.gfmenu{width:min(560px,calc(100% - 48px));margin:12px auto 4px}}
+
+/* v94: sin botón de estado en las tarjetas; abajo, para quién es; el título puede ocupar dos líneas */
+.gfc .tx b{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+.gfc .tx small{display:block;margin-top:3px;font-size:12.5px;font-weight:700;color:var(--ink)}
+.gfc .quien{margin-top:auto;height:34px;border-radius:999px;background:#F1F1F4;color:var(--ink);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gfc .quien svg{width:14px;height:14px;flex:none}
+.gfc .quien.vacio{color:var(--mute);font-weight:600}
 </style>
 </head>
 <body>
@@ -2366,11 +2373,11 @@ function renderRegalos(){
   $("#gfMenu").innerHTML=GFMENU.map(([k,t])=>`<button role="tab" aria-selected="${gfTab===k}" class="${gfTab===k?"on":""}" data-gfm="${k}">${t}<i>${cnt(k)}</i></button>`).join("");
   const its=all.filter(x=>gfTab==="todo"||(x.c||"capricho")===gfTab).map((x,i)=>[x,i]).sort((a,b)=>(gfEst(a[0])-gfEst(b[0]))||(b[1]-a[1])).map(a=>a[0]);
   g.innerHTML=its.length?`<div class="gfesc">${its.map(x=>{const e=gfEst(x),n=gfSig(x);
-    const sub=(x.c||"capricho")!=="capricho"&&x.pq?`Para ${esc(x.pq)}`:/^https?:\/\//i.test(x.url||"")?esc((x.url.match(/\/\/(?:www\.)?([^/]+)/)||[,""])[1]):"";
+    const quien=(x.c||"capricho")==="capricho"?"Para mí":x.pq?x.pq:"Sin asignar";
     return `<article class="gfc e${e}${gfBusy.has(x.id)||(!x.img&&gfLocalImg[x.id])?" loading":""}${SEL.gf.has(x.id)?" picked":""}" data-gid="${x.id}" aria-label="${esc(x.t)}">
       <div class="im">${gfImgHTML(x)}<span class="est">${GFST[e]}</span></div>
-      <div class="tx"><b>${esc(x.t)}</b><div class="ln"><span>${sub}</span>${x.pr?`<b>${gfEur(x.pr)}</b>`:""}</div></div>
-      ${n!=null?`<button class="sig" data-gfsig="${x.id}">${GFST[n]}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`:`<span class="fin">${GFST[e]} ✓</span>`}
+      <div class="tx"><b>${esc(x.t)}</b>${x.pr?`<small>${gfEur(x.pr)}</small>`:""}</div>
+      <span class="quien${x.pq||(x.c||"capricho")==="capricho"?"":" vacio"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0"/></svg>${esc(quien)}</span>
     </article>`}).join("")}</div>`
     :`<p class="gfempty">${gfTab==="todo"?"Escribe abajo lo que quieres<br>y la foto aparecerá sola":"Nada en «"+GFMENU.find(m=>m[0]===gfTab)[1]+"» todavía"}</p>`;
   for(const x of db.lists.filter(x=>x.g&&!x.img&&!x.nf))gfLookup(x);
