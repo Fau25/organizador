@@ -226,6 +226,24 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text!important;user-
 .dd.today:not(.on){box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55)}
 .dd.has::after{content:"";position:absolute;bottom:4px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor;opacity:.85}
 .dd.on{background:#fff;color:#111;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+/* v87 · mes completo dentro de la tarjeta (tocar «Nov ⌄») */
+.mon svg{transition:transform .3s var(--spring,cubic-bezier(.32,.72,0,1))}
+.calh.mopen .mon svg{transform:rotate(180deg)}
+.calh.mopen .calic{display:none}.calh.mopen .weeks{display:none}
+.mnav{margin-left:auto;display:flex;gap:6px;position:relative;z-index:1}
+.mnav button{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;color:#fff}.mnav button:active{background:rgba(255,255,255,.2)}
+.mnav svg{width:22px;height:22px}
+.mgrid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px;padding:0 12px;margin-top:10px;animation:min .35s cubic-bezier(.32,.72,0,1)}
+@keyframes min{from{opacity:0;transform:translateY(-6px)}}
+.md{position:relative;justify-self:center;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:16.5px;font-weight:500;color:#fff;font-variant-numeric:tabular-nums;transition:background .2s,transform .15s}
+.md:active{transform:scale(.9)}
+.md.out{color:rgba(255,255,255,.38)}
+.md.today:not(.on){box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6)}
+.md.on{background:#fff;color:#111;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.md .dt{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);display:flex;gap:2.5px}
+.md .dt i{width:4.5px;height:4.5px;border-radius:50%;background:#fff}.md .dt i.b{background:#ffd08a}
+.md.on .dt i{background:#111}.md.on .dt i.b{background:#e08a00}
+@media (min-width:700px){.md{width:48px;height:48px;font-size:18px}}
 /* hoja inferior */
 .evsheet{flex:1;min-height:0;display:flex;flex-direction:column;background:#f2efe9;margin-top:10px;border-radius:30px 30px 0 0}
 .evgrab{flex:none;width:38px;height:4px;border-radius:9px;background:#d6d1c8;margin:9px auto 4px}
@@ -831,7 +849,11 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     <header class="calh">
     <div class="calbar">
       <button class="cback" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button class="mon" id="calMon" aria-label="Ir a hoy"><span id="calMonTxt">Oct</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
+      <button class="mon" id="calMon" aria-label="Ver el mes completo" aria-expanded="false"><span id="calMonTxt">Oct</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 10 5 5 5-5"/></svg></button>
+      <div class="mnav" id="mNav" hidden>
+        <button id="mPrev" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button id="mNext" aria-label="Mes siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg></button>
+      </div>
       <div class="calic">
         <button id="calAll" aria-label="Ver todos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="7" rx="3.5"/><rect x="4" y="13" width="16" height="7" rx="3.5"/></svg></button>
         <button id="calSearch" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>
@@ -839,6 +861,7 @@ html,body{background:var(--pagebg,#0c0c0c)!important}
     </div>
     <div class="wkl"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
     <div class="weeks" id="weeks"></div>
+    <div class="mgrid" id="mgrid" hidden></div>
   </header>
     <div id="briefWrap"><p class="brief" id="brief"></p></div>
     <div class="pvfeat" id="pvFeat"><p class="kick">⭐ Mejor valoradas</p><div class="featrow" id="featRow"></div></div>
@@ -1605,7 +1628,40 @@ function updMonth(){
 let monT;$("#weeks").addEventListener("scroll",()=>{clearTimeout(monT);monT=setTimeout(updMonth,60)},{passive:true});
 $("#weeks").addEventListener("click",e=>{const b=e.target.closest("[data-cal]");if(!b)return;
   evSel=b.dataset.cal;evMode="day";$$("#weeks .dd.on").forEach(x=>x.classList.remove("on"));b.classList.add("on");renderEventsBody(true);renderXhead()});
-$("#calMon").onclick=()=>{evSel=iso(today);evMode="day";buildWeeks();scrollToWeek(evSel,true);renderEventsBody(true);renderXhead()};
+// mes completo: «Nov ⌄» abre/cierra el mes dentro de la tarjeta; puntos blancos = eventos, dorados = cumpleaños
+var mOpen=false,mView=null;
+function buildMonth(){
+  const first=new Date(mView.getFullYear(),mView.getMonth(),1),start=mondayOf(first);
+  const nDays=new Date(mView.getFullYear(),mView.getMonth()+1,0).getDate(),rows=Math.ceil(((first.getDay()+6)%7+nDays)/7);
+  const from=iso(start),end=new Date(start);end.setDate(end.getDate()+rows*7-1);const to=iso(end),t=iso(today);
+  const per={};for(const e of evItems(from,to))(per[e.d]=per[e.d]||[]).push(e.kind);
+  let h="";
+  for(let i=0;i<rows*7;i++){const d=new Date(start);d.setDate(d.getDate()+i);const k=iso(d),ks=per[k]||[];
+    const dots=ks.slice(0,3).map(x=>`<i class="${x}"></i>`).join("");
+    const lbl=`${d.getDate()} ${MESESL[d.getMonth()]}${ks.length?`, ${ks.length} ${ks.length===1?"cosa":"cosas"}`:""}`;
+    h+=`<button class="md${d.getMonth()!==mView.getMonth()?" out":""}${k===evSel?" on":""}${k===t?" today":""}" data-mcal="${k}" aria-label="${lbl}">${d.getDate()}${dots?`<span class="dt">${dots}</span>`:""}</button>`}
+  $("#mgrid").innerHTML=h;
+  $("#calMonTxt").textContent=MESESL[mView.getMonth()]+(mView.getFullYear()!==today.getFullYear()?" "+mView.getFullYear():"");
+}
+function setMonthOpen(on){
+  mOpen=on;const ch=dark.querySelector(".calh");
+  if(on){const s=parse(evSel||iso(today));mView=new Date(s.getFullYear(),s.getMonth(),1);buildMonth()}
+  ch.classList.toggle("mopen",on);$("#mgrid").hidden=!on;$("#mNav").hidden=!on;$("#calMon").setAttribute("aria-expanded",String(on));
+  if(!on){buildWeeks();scrollToWeek(evSel,false)}
+  cancelAnimationFrame(tween);tweening=false;layout();   // la ficha se recoloca bajo la tarjeta, más alta o más baja
+}
+function moveMonth(n){mView=new Date(mView.getFullYear(),mView.getMonth()+n,1);buildMonth();layout()}
+$("#calMon").onclick=()=>setMonthOpen(!mOpen);
+$("#mPrev").onclick=()=>moveMonth(-1);$("#mNext").onclick=()=>moveMonth(1);
+$("#mgrid").addEventListener("click",e=>{const b=e.target.closest("[data-mcal]");if(!b)return;
+  evSel=b.dataset.mcal;evMode="day";$("#calAll").classList.remove("on");
+  const d=parse(evSel);if(d.getMonth()!==mView.getMonth()){mView=new Date(d.getFullYear(),d.getMonth(),1);buildMonth();layout()}
+  else{$$("#mgrid .md.on").forEach(x=>x.classList.remove("on"));b.classList.add("on")}
+  renderEventsBody(true);renderXhead()});
+{let sx=null,sy=0;const g=$("#mgrid");   // deslizar a los lados cambia de mes
+  g.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  g.addEventListener("touchend",e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)moveMonth(dx<0?1:-1)},{passive:true});}
 $("#calAll").onclick=()=>{evMode=evMode==="all"?"day":"all";$("#calAll").classList.toggle("on",evMode==="all");renderEventsBody(true)};
 $("#calSearch").onclick=()=>{const s=$("#evSearch");s.hidden=!s.hidden;if(!s.hidden){expand();setTimeout(()=>$("#evQ").focus(),350)}else{evQuery="";$("#evQ").value="";renderEventsBody(true)}};
 $("#evQx").onclick=()=>{$("#evSearch").hidden=true;evQuery="";$("#evQ").value="";renderEventsBody(true)};
@@ -1656,7 +1712,7 @@ function renderEventsBody(anim){
   const ah=$("#addHere");if(ah)ah.onclick=()=>openDateSheet("evento","",evSel,true);
 }
 function renderEvents(){buildWeeks();renderEventsBody()}
-function buildWeeksKeep(){const w=$("#weeks"),x=w.scrollLeft;buildWeeks();w.scrollLeft=x}
+function buildWeeksKeep(){const w=$("#weeks"),x=w.scrollLeft;buildWeeks();w.scrollLeft=x;if(mOpen)buildMonth()}
 function evAdd(){const i=$("#evText");openDateSheet("evento",i.value.trim(),evSel,true);i.value="";i.blur()}
 $("#evbar").addEventListener("submit",e=>{e.preventDefault();evAdd()});
 $("#evAdd").addEventListener("click",e=>{e.preventDefault();evAdd()});
@@ -2214,6 +2270,7 @@ if(!db.name){setTimeout(()=>{let n=null;try{n=prompt("¿Cómo te llamas?")}catch
 setSync("ok");sync(true);
 /* al dejar la app, la ficha vuelve a su sitio: al volver siempre se ve la portada plegada */
 function resetHome(){
+  if(typeof mOpen!=="undefined"&&mOpen&&document.hidden)setMonthOpen(false);
   if(pickingDate&&!document.hidden)return;   // el selector de fecha de iOS abierto no debe plegar la ficha
   drag=null;cancelAnimationFrame(tween);tweening=false;
   const l=$("#list");l.style.transform="";l.style.opacity="";
