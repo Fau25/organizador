@@ -1297,6 +1297,8 @@ html,body{background:var(--pagebg,#F3EEF1)!important}
 .gfx .pr{font-weight:600;font-size:24px;letter-spacing:-.03em}
 .gfc .tx b{font-weight:600}
 .row .t{font-weight:500!important}
+/* v97: la foto del saludo nunca baja de 44 px (zona de toque) */
+.av{min-width:44px;min-height:44px}
 </style>
 </head>
 <body>
@@ -1689,8 +1691,8 @@ const plural=(n,a,b)=>`${N(n)} ${n===1?a:b}`;
 function briefText(){
   const t=iso(today),now=new Date(),hr=now.getHours(),nowM=hr*60+now.getMinutes();
   const sal=hr<13?"Buenos días":hr<20?"Buenas tardes":"Buenas noches";
-  const face=db.photo?`<img src="${db.photo}" alt="">`:esc((db.name||"?")[0].toUpperCase());
-  const who=`, <button class="av" data-photo aria-label="Cambiar foto">${face}</button>${db.name?`<b>${esc(db.name)}</b>`:""}`;
+  const face=db.photo?`<img src="${db.photo}" alt="">`:db.name?esc(db.name[0].toUpperCase()):`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.5 3.8-5 7-5s5.8 1.5 7 5"/></svg>`;
+  const who=`, <button class="av" data-photo aria-label="${db.photo?"Cambiar foto":"Poner foto"}">${face}</button>${db.name?`<b>${esc(db.name)}</b>`:""}`;
   const tom=hr>=16;  // de 00:00 a 15:59 resume HOY; de 16:00 a 23:59 resume MAÑANA
   const m=new Date(today);if(tom)m.setDate(m.getDate()+1);const k=iso(m);
   const tasks=db.tasks.filter(x=>x.d===k),evs=db.events.filter(e=>e.d===k),bds=db.bdays.filter(b=>nextBday(b.d).days===(tom?1:0));
